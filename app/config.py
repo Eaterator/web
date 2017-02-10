@@ -6,10 +6,11 @@ PASSWORD = ''
 HOST = ''
 PORT = ''
 DATABASE = ''
-SQLALCHEMY_DATA_URL = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
+SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
     USERNAME, PASSWORD, HOST, PORT, DATABASE
 )
 SQLALCHEMY_ECHO = False
+SQLALCHEMY_MIGRATE_REPO = 'migrations'
 
 ##########################################
 #           Flask Configuration          #

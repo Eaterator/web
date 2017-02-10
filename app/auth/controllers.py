@@ -7,6 +7,7 @@ from flask import url_for, redirect, jsonify, Blueprint, abort, request, render_
 from flask_jwt_extended import create_access_token
 from rauth import OAuth2Service
 from app.auth.models import User
+from app.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 
 PASSWORD_CONSTRAINTS = [
     lambda x: len(x) >= 7,
@@ -22,13 +23,16 @@ auth_blueprint = Blueprint('auth', __name__,
 @auth_blueprint.route("/", methods=["POST"])
 def auth_authenticate():
     # TODO parse form data
-    form = None
     try:
-        bearer = PasswordUtilities(form.username, form.password)
+        payload = request.get_json()
+    except:
+        raise InvalidAPIRequest("No data submitted", status_code=BAD_REQUEST_CODE)
+    try:
+        bearer = PasswordUtilities.authenticate(payload.username, payload.password)
         # TODO return proper header
         return jsonify({'access_token': bearer})
     except PasswordMismatchError:
-        abort(403)
+        raise InvalidAPIRequest("Username and/or password is incorrect", status_code=UNAUTHORIZED_CODE)
 
 
 @auth_blueprint.route("/register", methods=["GET", "POST"])
@@ -36,15 +40,18 @@ def auth_register_user():
     if request.method == "GET":
         return render_template('register.html')
     # TODO parse form here
-    form = None
-    password = form.data.pop('password')
     try:
-        new_user = User(**form.data, password=PasswordUtilities.generate_password(password))
+        payload = request.get_json()
+        password = payload.pop('password')
+    except:
+        raise InvalidAPIRequest("JSON request not in proper format", status_code=BAD_REQUEST_CODE)
+    try:
+        new_user = User(**payload, password=PasswordUtilities.generate_password(password))
         db.session.add(new_user)
         db.commit()
         return render_template('home')  # TODO add/return JWT
     except ImproperPasswordError:
-        abort(400)
+        raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
 
 
 @auth_blueprint.route('/callback/<provider>')

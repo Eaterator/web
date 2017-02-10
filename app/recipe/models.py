@@ -6,6 +6,7 @@ class Source(RequiredFields):
     __tablename__ = 'recipe_sources'
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
+    base_url = db.Column(db.String(30), unique=True)
     recipes = db.relationship('Recipe')
 
 

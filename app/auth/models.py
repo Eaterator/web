@@ -13,6 +13,7 @@ class User(RequiredFields):
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
+    role = db.Column(db.Integer, db.ForeignKey('auth_roles.pk'))
 
 
 class Role(RequiredFields):
@@ -20,4 +21,5 @@ class Role(RequiredFields):
 
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(15), unique=True)
-    is_staff = db.Column(db.Bool)
+    type = db.Column(db.String(15))
+    is_admin = db.Column(db.Bool)
