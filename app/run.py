@@ -1,6 +1,9 @@
-import config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
+
+from app import config
+
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
     from gevent.monkey import patch_all
@@ -10,11 +13,15 @@ if config.USE_GEVENT:
     from psycogreen.gevent import patch_psycopg
     patch_psycopg()
 
+# Initialize app and DB
 app = Flask(__name__)
 app.config.from_pyfile(config.CONFIG_FILE)
 db = SQLAlchemy(app)
 if config.USE_GEVENT:
     db.engine.pool._use_threadlocal = True
+
+# Initialize JWT handler
+jwt = JWTManager(app)
 
 if __name__ == '__main__':
     if config.DEBUG and config.USE_GEVENT:
