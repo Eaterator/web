@@ -19,6 +19,7 @@ CONFIG_FILE = 'config.py'
 #            Gevent Settings             #
 USE_GEVENT = True  # Set to True if windows environment to avoid gevent use
 GEVENT_PORT = 5000
+GEVENT_GREENLET_NUMBER = 100
 
 ###########################################
 #            Bcrypt Settings              #
@@ -38,6 +39,12 @@ OAUTH_CREDENTIALS = {
 #             JWT Settings                #
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
 JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=31)
+
+##########################################
+#             SSL Settings               #
+USE_SSL = True
+SSL_KEY_FILE = '/path/to/key.pem'
+SSL_CERT_FILE = '/path/to/cert.crt'
 
 ##########################################
 #  DEBUGGING / DEV environment settings  #
