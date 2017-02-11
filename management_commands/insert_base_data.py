@@ -1,6 +1,6 @@
-from app.auth.models import Role
-from app.recipe.models import Source
-from app.run import db
+from application.auth.models import Role
+from application.recipe.models import Source
+from application.app import db
 
 
 def insert_role_data():

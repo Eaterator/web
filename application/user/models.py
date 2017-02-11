@@ -1,5 +1,5 @@
-from app.run import db
-from app.base_models import RequiredFields
+from application.app import db
+from application.base_models import RequiredFields
 
 
 class UserSearchData(RequiredFields):

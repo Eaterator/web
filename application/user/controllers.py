@@ -1,14 +1,14 @@
+import os
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import FavouriteRecipe, UserSearchData
-from app.recipe.models import Recipe
-from app.run import db
-from app.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
+from application.recipe.models import Recipe
+from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 
 
 user_blueprint = Blueprint('user_data', __name__,
-                           template_folder='templates/user',
-                           url_prefix='user')
+                           template_folder=os.path.join('templates', 'user'),
+                           url_prefix='/user')
 
 
 @jwt_required
@@ -43,8 +43,7 @@ def user_favourite_recipe(recipe_id):
         filter_by(FavouriteRecipe.recipe == recipe_id)
     if not instance and recipe_id:
         new_favourite = FavouriteRecipe(recipe=recipe_id, user=get_jwt_identity())
-        db.session.add(new_favourite)
-        db.session.commit()
+        new_favourite.save()
     else:
         raise InvalidAPIRequest("", status_code=BAD_REQUEST_CODE)
     response = jsonify({})

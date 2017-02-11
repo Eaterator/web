@@ -1,7 +1,7 @@
 from unittest import TestCase, main as run_tests
 
-from app.run import app, db
-from app.auth.models import User, Role
+from application.app import app, db
+from application.auth.models import User, Role
 
 
 class TestAuth(TestCase):

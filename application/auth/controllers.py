@@ -1,13 +1,13 @@
 import bcrypt
-from app.config import SALT_HASH_PARAMETER
+import os
+from application import config
 from string import punctuation
-from app.run import app, db
 from abc import ABCMeta, abstractmethod
 from flask import url_for, redirect, jsonify, Blueprint, abort, request, render_template
 from flask_jwt_extended import create_access_token
 from rauth import OAuth2Service
-from app.auth.models import User
-from app.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
+from application.auth.models import User
+from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 
 PASSWORD_CONSTRAINTS = [
     lambda x: len(x) >= 7,
@@ -16,8 +16,8 @@ PASSWORD_CONSTRAINTS = [
 ]
 
 auth_blueprint = Blueprint('auth', __name__,
-                           template_folder='templates/auth',
-                           url_prefix='auth')
+                           template_folder=os.path.join('templates', 'auth'),
+                           url_prefix='/auth')
 
 
 @auth_blueprint.route("/", methods=["POST"])
@@ -101,7 +101,7 @@ class PasswordUtilities:
         for func in PASSWORD_CONSTRAINTS:
             if not func(password):
                 raise ImproperPasswordError('Password is not valid')
-        return bcrypt.hashpw(password, bcrypt.gensalt(SALT_HASH_PARAMETER))
+        return bcrypt.hashpw(password, bcrypt.gensalt(config.SALT_HASH_PARAMETER))
 
 
 # TODO look at OAuth for Facebook authentication, Miguel has a good tutorial
@@ -113,7 +113,7 @@ class OAuthSignIn:
 
     def __init__(self, provider_name):
         self.provider_name = provider_name
-        credentials = app.config['OAUTH_CREDENTIALS']['provider_name']
+        credentials = config.OAUTH_CREDENTIALS['provider_name']
         self.consumer_id = credentials['id']
         self.consumer_secret = credentials['secret']
 

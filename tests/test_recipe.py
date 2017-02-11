@@ -1,6 +1,6 @@
 from unittest import TestCase, main as run_tests
 
-from app.run import app, db
+from application.app import app, db
 
 
 class TestUsers(TestCase):

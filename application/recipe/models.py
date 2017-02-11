@@ -1,5 +1,5 @@
-from app.run import db
-from app.base_models import RequiredFields
+from application.app import db
+from application.base_models import RequiredFields
 
 
 class Source(RequiredFields):
@@ -7,24 +7,25 @@ class Source(RequiredFields):
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
     base_url = db.Column(db.String(30), unique=True)
-    recipes = db.relationship('Recipe')
+    recipes = db.relationship('recipe_recipe', backref='recipe_source',
+                              lazy='dynamic')
 
 
 class Recipe(RequiredFields):
     __tablename__ = 'recipe_recipe'
     pk = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String, unqiue=True)
+    url = db.Column(db.String, unique=True)
     title = db.Column(db.String)
     average_rating = db.Column(db.Float)
     lowest_rating = db.Column(db.Float)
     highest_rating = db.Column(db.Float)
     count_rating = db.Column(db.Integer)
     raw_data = db.Column(db.Text)
-    source = db.Column(db.Integer, db.ForeignKey('Source'))
-    reviews = db.relationship('RecipeReviews', backref='Recipe',
+    source = db.Column(db.Integer, db.ForeignKey('recipe_sources.pk'))
+    reviews = db.relationship('RecipeReviews', backref='recipe_recipe',
                               lazy='dynamic')
-    ingredients = db.relationship('recipeingredients', backref='Recipe',
-                                  lazy='joined')
+    recipe_ingredients = db.relationship('recipe_inredientrecipe', backref='recipe_recipe',
+                                         lazy='dynamic')
 
 
 class Reviews(RequiredFields):
@@ -32,13 +33,13 @@ class Reviews(RequiredFields):
     pk = db.Column(db.Integer, primary_key=True)
     review_text = db.Column(db.String)
     review_rating = db.Column(db.Float)
-    recipe = db.Column(db.Integer, db.ForeignKey('Recipe'))
+    recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
 
 
 class Ingredient(RequiredFields):
     __tablename__ = 'recipe_ingredient'
     pk = db.Column(db.Integer, primary_key=True)
-    name = db.Column()
+    name = db.Column(db.String(25), unique=True)
 
 
 class IngredientModifier(RequiredFields):
@@ -50,8 +51,9 @@ class IngredientModifier(RequiredFields):
 class IngredientRecipe(RequiredFields):
     __tablename = 'recipe_ingredientrecipe'
     pk = db.Column(db.Integer, primary_key=True)
-    ingredient = db.Column(db.Integer, db.ForeignKey('ingredient'))
-    recipe = db.Column(db.Integer, db.ForeignKey('recipe'))
+    ingredient = db.Column(db.Integer, db.ForeignKey('recipe_ingredient.pk'))
+    recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
     ingredient_amount = db.Column(db.Float)
-    ingredient_modifier = db.Column(db.Integer, db.ForeignKey('ingredientmodifier'),
+    ingredient_modifier = db.Column(db.Integer,
+                                    db.ForeignKey('recipe_ingredientmodifier.pk'),
                                     nullable=True)
