@@ -2,10 +2,10 @@
 Web application to support the eaterator app. Web application front end for AngularJS, as
 well as HTML/CSS for webapge are included. App is separated into four main sections.
 
-*General website (`application/controller.py`)
-*Auth for social and standard autorize, and issuance of JWT (`application/auth/*`)
-*Recipe for recipes and ingredients (`application/recipe/*`)
-*User for user data like search history and favourite recipes (`application/user/*`)
+**General website (`application/controller.py`)
+**Auth for social and standard authorization, and issuance of JWT (`application/auth/\*`)
+**Recipe for recipes and ingredients (`application/recipe/\*`)
+**User for user data like search history and favourite recipes (`application/user/\*`)
 
 #Setup and Requirements
 Python version is `3.5.2` in a virtual environment. The requirements.txt have all
