@@ -6,9 +6,6 @@ PASSWORD = ''
 HOST = ''
 PORT = ''
 DATABASE = ''
-SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
-    USERNAME, PASSWORD, HOST, PORT, DATABASE
-)
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = 'migrations'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -48,3 +45,6 @@ DEBUG = True
 USE_DEV = True
 if USE_DEV:
     from application.config_dev import *
+SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
+    USERNAME, PASSWORD, HOST, PORT, DATABASE
+)
