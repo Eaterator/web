@@ -23,7 +23,7 @@ def insert_role_data():
     ]
     for role in roles:
         new_role = Role(**role)
-        db.session.add(new_fole)
+        db.session.add(new_role)
     db.session.commit()
 
 
