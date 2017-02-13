@@ -1,6 +1,8 @@
 from datetime import timedelta
+import os
 #########################################
 #        Database URI Settings          #
+DATABASE_ENGINE = 'postgresql'
 USERNAME = ''
 PASSWORD = ''
 HOST = ''
@@ -52,7 +54,16 @@ DEBUG = True
 USE_DEV = True
 if USE_DEV:
     from application.config_dev import *
-
-SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
-    USERNAME, PASSWORD, HOST, PORT, DATABASE
-)
+if DATABASE_ENGINE == 'postgresql':
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(
+        USERNAME, PASSWORD, HOST, PORT, DATABASE
+    )
+else:
+    database_temp_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'database')
+    if not os.path.exists(database_temp_dir):
+        os.mkdir(database_temp_dir)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_temp_dir,
+                                                          'localdb.sqlite')
+    print(database_temp_dir)

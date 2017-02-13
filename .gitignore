@@ -1,6 +1,6 @@
 # Project files
 config_dev.py
-
+application/database
 # PyCharm files
 .idea/
 
