@@ -33,8 +33,8 @@ a PostgreSQL instance. Note that not having a config_dev.py will throw an `Impor
 ##Windows Notes
 When using windows, change the database engine in the `config_dev.py` to:
 
-   DATABASE_ENGINE = 'sqlite'
-   USE_GEVENT = False
+    DATABASE_ENGINE = 'sqlite'
+    USE_GEVENT = False
 
 and the Flask development server will run with an SQLite database in `~/application/database/temp.sqlite`. 
 
