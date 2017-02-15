@@ -16,6 +16,8 @@ Some commands to interact with the dev server:
     python manage.py init_db  # creates database/models
     python manage.py migrate  # migrates database using alembic (untested at the moment)
     python manage.py runserver  # starts the flask dev server
+    python manage.py insert_base_data  # untested function to populate base data for the application
+    python manage.py insert_update_recipe_data  # developing at the moment -> to process raw recipes in DB
     python run.py  # starts either the gevent web server or application server depending on config
 
 To work properly, a config_dev.py has to be made in the root folder that specifies a connection to
@@ -28,9 +30,13 @@ a PostgreSQL instance. Note that not having a config_dev.py will throw an `Impor
     DATABASE = 'database'
     USE_GEVENT = False  # for windows as gevent isn't compatible
 
-#Windows Notes
-Installing gevent will throw an error so may need to be removed from `requirements.txt`. Also, `psycopg2`
-may need to be built from source. Will update this after a windows install.
+##Windows Notes
+When using windows, change the database engine in the `config_dev.py` to:
+
+   DATABASE_ENGINE = 'sqlite'
+   USE_GEVENT = False
+
+and the Flask development server will run with an SQLite database in `~/application/database/temp.sqlite`. 
 
 #Pipeline Notes
 Fill in after creating a working pipeline from raw scraped data to database format.
