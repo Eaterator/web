@@ -36,7 +36,7 @@ When using windows, change the database engine in the `config_dev.py` to:
     DATABASE_ENGINE = 'sqlite'
     USE_GEVENT = False
 
-and the Flask development server will run with an SQLite database in `~/application/database/temp.sqlite`. 
+and the Flask development server will run with an SQLite database in `~/application/database/'localdb.sqlite'`. 
 
 #Pipeline Notes
 Fill in after creating a working pipeline from raw scraped data to database format.
