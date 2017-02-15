@@ -66,4 +66,3 @@ else:
         os.mkdir(database_temp_dir)
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(database_temp_dir,
                                                           'localdb.sqlite')
-    print(database_temp_dir)
