@@ -3,11 +3,12 @@ import os
 from application import config
 from string import punctuation
 from abc import ABCMeta, abstractmethod
-from flask import url_for, redirect, jsonify, Blueprint, abort, request, render_template
+from flask import url_for, redirect, jsonify, Blueprint, request, render_template
 from flask_jwt_extended import create_access_token
 from rauth import OAuth2Service
 from application.auth.models import User
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
+from application.app import db
 
 PASSWORD_CONSTRAINTS = [
     lambda x: len(x) >= 7,
@@ -39,7 +40,6 @@ def auth_authenticate():
 def auth_register_user():
     if request.method == "GET":
         return render_template('register.html')
-    # TODO parse form here
     try:
         payload = request.get_json()
         password = payload.pop('password')
@@ -56,16 +56,13 @@ def auth_register_user():
 
 @auth_blueprint.route('/callback/<provider>')
 def oauth_callback(provider):
-    if not provider or provider not in OAuthSignIn.providers:
-        redirect(url_for('/home'))
     try:
         oauth = OAuthSignIn.get_provider(provider)
     except KeyError:
-        redirect(url_for('/home'))
-        return
+        raise InvalidAPIRequest("Could not authenticate wiht the given provider", status_code=BAD_REQUEST_CODE)
     social_id, username, email = oauth.callback()
     if not social_id:
-        abort(403)
+        raise InvalidAPIRequest('OAuth authentication error', status_code=UNAUTHORIZED_CODE)
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
         user = User(social_id=social_id, username=username, email=email)
