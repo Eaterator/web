@@ -1,5 +1,6 @@
 aiohttp==1.2.0
 alembic==0.8.10
+appdirs==1.4.0
 async-timeout==1.1.0
 bcrypt==3.1.2
 beautifulsoup4==4.5.3
@@ -22,15 +23,18 @@ MarkupSafe==0.23
 multidict==2.1.4
 nltk==3.2.2
 numpy==1.12.0
+packaging==16.8
 psycogreen==1.0
 psycopg2==2.6.2
 pycparser==2.17
 PyJWT==1.4.2
+pyparsing==2.1.10
 python-editor==1.0.3
 rauth==0.7.3
 requests==2.13.0
 simplekv==0.10.0
 six==1.10.0
 SQLAlchemy==1.1.5
+uWSGI==2.0.14
 Werkzeug==0.11.15
 yarl==0.8.1

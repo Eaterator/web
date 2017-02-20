@@ -18,10 +18,10 @@ SECRET_KEY = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'supers
 CONFIG_FILE = 'config.py'
 
 ##########################################
-#            Gevent Settings             #
+#         Gevent/uWSGI Settings          #
 USE_GEVENT = True  # Set to True if windows environment to avoid gevent use
 GEVENT_PORT = 80
-GEVENT_GREENLET_NUMBER = 100
+USE_UWSGI = True   # For production with uWSGI only, set to false in local dev in config_dev.py
 
 ###########################################
 #            Bcrypt Settings              #

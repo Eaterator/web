@@ -33,8 +33,8 @@ if __name__ == '__main__':
     elif config.DEBUG or not config.USE_GEVENT:
         print("Running flask development server")
         app.run(debug=True)
-    else:  # production
+    elif config.USE_WSGI and config.USE_GEVENT:  # production
         print("Running server with uWSGI, gevent number: {0}".format(config.GEVENT_GREENLET_NUMBER))
-        app.run(gevent=config.GEVENT_GREENLET_NUMBER)
+        app.run()
         # examples at: https://github.com/zeekay/flask-uwsgi-websocket
         # uwsgi --master --http :8080 --http-websockets --gevent 100 --wsgi echo:app --processes 2 --threads 1
