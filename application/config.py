@@ -44,7 +44,7 @@ JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=31)
 
 ##########################################
 #             SSL Settings               #
-USE_SSL = False
+USE_SSL = True
 SSL_KEY_FILE = os.environ['SSL_KEY_FILE'] if 'SSL_KEY_FILE' in os.environ else ''     # '/path/to/key.pem'
 SSL_CERT_FILE = os.environ['SSL_CERT_FILE'] if 'SSL_CERT_FILE' in os.environ else ''  # /path/to/cert.crt'
 
