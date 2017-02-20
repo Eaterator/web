@@ -1,0 +1,65 @@
+#bootstrap-overrides nav {
+	background: #9DC209 !important;
+    position: relative;
+    margin: 0;
+}
+#bootstrap-overrides nav .logo img {
+	width: 50px;
+    height: 50px;
+    margin-top: 5px;
+}
+#bootstrap-overrides nav .logo img:hover {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    transform: rotate(360deg);
+    transition: all 0.4s ease-out 0s;
+}
+#bootstrap-overrides #menu { 
+    float: right; 
+}
+#bootstrap-overrides #menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+#bootstrap-overrides #menu ul li {
+    position: relative;
+    float: left;
+}
+#bootstrap-overrides #menu ul li a {
+    display: block;
+    padding: 20px 22px;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-family: "Open Sans",sans-serif;
+    transition: all 0.2s ease-out 0s;
+	border-bottom: 2px solid transparent;
+}
+#bootstrap-overrides #menu li a:before {
+    display: block;
+    margin: 0;
+	color: #666;
+    text-transform: none;
+    font-weight: 300;
+    font-size: 11px;
+    font-family: open sans;
+    line-height: 0;
+}
+#bootstrap-overrides #menu li a:hover {
+	background-color: #2F0AC2;
+}
+#bootstrap-overrides #open-trigger {
+	display: none;
+}
+
+#bootstrap-overrides .carousel-inner img {
+    width: 100%;
+    height: 570px;
+}
+#bootstrap-overrides .carousel-control {
+	 background-image: none;
+}
