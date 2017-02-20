@@ -9,8 +9,10 @@ home_blueprint = Blueprint('home', __name__,
 
 # Route to show default pages of Eaterator ('/', 'home', 'contact', etc.)
 @home_blueprint.route('/', defaults={'page': 'home'})
+@home_blueprint.route('/<page>')
 def index(page):
     try:
+        print(page)
         return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:
         return render_template('404.html')
