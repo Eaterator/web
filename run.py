@@ -26,7 +26,7 @@ if __name__ == '__main__':
             sys.exit(1)
         elif not os.path.exists(config.SSL_KEY_FILE) or not os.path.exists(config.SSL_CERT_FILE):
             print('Exiting, SSL_CERT_FILE and/or SSL_KEY_FILE specified does not exist or could not be found')
-        server = WSGIServer(('', 443), app,
+        server = WSGIServer(('', 4343), app,
                             certfile=config.SSL_CERT_FILE, keyfile=config.SSL_KEY_FILE)
         print('Serving (gevent WSGI server) application on localhost:{0} with SSL support'.format(config.GEVENT_PORT))
         server.serve_forever()

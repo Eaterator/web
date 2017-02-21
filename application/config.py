@@ -16,7 +16,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 ##########################################
 #                Logging                 #
 LOG_DIR = os.environ['LOGGING_DIR'] if 'LOGGING_DIR' in os.environ else os.path.join(
-    os.path.dirname(os.path.abspath(__file__))
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'logging' 
 )
 LOG_LEVEL = logging.INFO
 
