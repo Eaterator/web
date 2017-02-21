@@ -8,7 +8,7 @@ from flask_jwt_extended import create_access_token
 from rauth import OAuth2Service
 from application.auth.models import User
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
-from application.app import db
+from application.app import db, app
 
 PASSWORD_CONSTRAINTS = [
     lambda x: len(x) >= 7,
@@ -59,15 +59,21 @@ def oauth_callback(provider):
     try:
         oauth = OAuthSignIn.get_provider(provider)
     except KeyError:
-        raise InvalidAPIRequest("Could not authenticate wiht the given provider", status_code=BAD_REQUEST_CODE)
+        app.logger.error("Failed authentication with <{0}>, not listed as a provider".format(provider))
+        raise InvalidAPIRequest("Could not authenticate with the given provider", status_code=BAD_REQUEST_CODE)
     social_id, username, email = oauth.callback()
+    app.logger.debug("Data: | {0} | {1} | {2}".format(social_id, username, email))
     if not social_id:
+        app.logger.error("OAuth did not return valid data. <{0}>".format(provider))
         raise InvalidAPIRequest('OAuth authentication error', status_code=UNAUTHORIZED_CODE)
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
-        user = User(social_id=social_id, username=username, email=email)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            user = User(social_id=social_id, username=username, email=email)
+            db.session.add(user)
+            db.session.commit()
+        except Exception as e:
+            app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
     bearer = create_access_token(identity=user.pk)
     return jsonify({'access_token': bearer})
 
@@ -149,4 +155,23 @@ class FacebookSignIn(OAuthSignIn):
             scope='email',
             response_type='code',
             redirect_uri=self.get_callback_url())
+        )
+
+    def callback(self):
+        app.logger.debug("Running OAuth callback")
+        if 'code' not in request.args:
+            pass
+            app.logger.debug("No code in request")
+        oauth_session = self.service.get_auth_session(
+            data={
+                'code': request.args['code'],
+                'grant_type': 'authorization_code',
+                'redirect_uri': self.get_callback_url()
+            }
+        )
+        me = oauth_session.get('me').json()
+        return (
+            'facebook$' + me['id'],
+            me.get('email').split('@')[0],
+            me.get('email')
         )
