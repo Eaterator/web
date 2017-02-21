@@ -1,5 +1,6 @@
 from datetime import timedelta
 import os
+import logging
 #########################################
 #        Database URI Settings          #
 DATABASE_ENGINE = 'postgresql'
@@ -11,6 +12,13 @@ DATABASE = os.environ['DATABASE'] if 'DATABASE' in os.environ else ''
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = 'migrations'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+##########################################
+#                Logging                 #
+LOG_DIR = os.environ['LOGGING_DIR'] if 'LOGGING_DIR' in os.environ else os.path.join(
+    os.path.dirname(os.path.abspath(__file__))
+)
+LOG_LEVEL = logging.INFO
 
 ##########################################
 #           Flask Configuration          #
@@ -32,8 +40,8 @@ SALT_HASH_PARAMETER = 12
 # TODO register our application as a facebook application to get this data
 OAUTH_CREDENTIALS = {
     'facebook': {
-        'id': '470154729788964',
-        'secret': '010cc08bd4f51e34f3f3e684fbdea8a7'
+        'id': os.environ['FACEBOOK_APP_ID'] if 'FACEBOOK_APP_IP' in os.environ else '',
+        'secret': os.environ['FACEBOOK_APP_SECRET'] if 'FACEBOOK_APP_SECRET' in os.environ else '',
     }
 }
 
@@ -52,6 +60,9 @@ SSL_CERT_FILE = os.environ['SSL_CERT_FILE'] if 'SSL_CERT_FILE' in os.environ els
 #  DEBUGGING / DEV environment settings  #
 DEBUG = False
 from application.config_dev import *
+
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
 
 if DATABASE_ENGINE == 'postgresql':
     SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}'.format(

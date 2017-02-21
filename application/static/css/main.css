@@ -1,3 +1,8 @@
+#bootstrap-overrides .center{
+     float: none;
+     margin-left: auto;
+     margin-right: auto;
+}
 #bootstrap-overrides nav {
 	background: #9DC209 !important;
     position: relative;
@@ -35,7 +40,7 @@
     text-decoration: none;
     text-transform: uppercase;
     font-size: 12px;
-    font-family: "Open Sans",sans-serif;
+    font-family: "Open Sans", sans-serif;
     transition: all 0.2s ease-out 0s;
 	border-bottom: 2px solid transparent;
 }
@@ -50,7 +55,7 @@
     line-height: 0;
 }
 #bootstrap-overrides #menu li a:hover {
-	background-color: #2F0AC2;
+	background-color: #252f38;
 }
 #bootstrap-overrides #open-trigger {
 	display: none;
@@ -62,4 +67,237 @@
 }
 #bootstrap-overrides .carousel-control {
 	 background-image: none;
+}
+#bootstrap-overrides .carousel-inner .carousel-caption {
+	top: 70px;
+    font-family: "Open Sans", sans-serif;
+    font-size: 32px;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-shadow: 0px 4px 3px rgba(0,0,0,0.4),
+                 0px 8px 13px rgba(0,0,0,0.1),
+                 0px 18px 23px rgba(0,0,0,0.1);
+}
+#bootstrap-overrides .carousel-inner .carousel-caption h1{
+    font-size: 80px;
+}
+#bootstrap-overrides .carousel-inner .carousel-caption .btn-default{
+    background-color: #9DC209;
+    text-transform: uppercase;
+    font-family: "Open Sans", sans-serif;
+    color: #fff;
+    background-image: none;
+    border: none;
+}
+#bootstrap-overrides .carousel-inner .carousel-caption .btn-default:hover{
+    color: #252f38;
+}
+/*buzz-out button hover effect*/
+@-webkit-keyframes hvr-buzz-out {
+  10% {
+    -webkit-transform: translateX(3px) rotate(2deg);
+    transform: translateX(3px) rotate(2deg);
+  }
+  20% {
+    -webkit-transform: translateX(-3px) rotate(-2deg);
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  30% {
+    -webkit-transform: translateX(3px) rotate(2deg);
+    transform: translateX(3px) rotate(2deg);
+  }
+  40% {
+    -webkit-transform: translateX(-3px) rotate(-2deg);
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  50% {
+    -webkit-transform: translateX(2px) rotate(1deg);
+    transform: translateX(2px) rotate(1deg);
+  }
+  60% {
+    -webkit-transform: translateX(-2px) rotate(-1deg);
+    transform: translateX(-2px) rotate(-1deg);
+  }
+  70% {
+    -webkit-transform: translateX(2px) rotate(1deg);
+    transform: translateX(2px) rotate(1deg);
+  }
+  80% {
+    -webkit-transform: translateX(-2px) rotate(-1deg);
+    transform: translateX(-2px) rotate(-1deg);
+  }
+  90% {
+    -webkit-transform: translateX(1px) rotate(0);
+    transform: translateX(1px) rotate(0);
+  }
+  100% {
+    -webkit-transform: translateX(-1px) rotate(0);
+    transform: translateX(-1px) rotate(0);
+  }
+}
+@keyframes hvr-buzz-out {
+  10% {
+    -webkit-transform: translateX(3px) rotate(2deg);
+    transform: translateX(3px) rotate(2deg);
+  }
+  20% {
+    -webkit-transform: translateX(-3px) rotate(-2deg);
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  30% {
+    -webkit-transform: translateX(3px) rotate(2deg);
+    transform: translateX(3px) rotate(2deg);
+  }
+  40% {
+    -webkit-transform: translateX(-3px) rotate(-2deg);
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  50% {
+    -webkit-transform: translateX(2px) rotate(1deg);
+    transform: translateX(2px) rotate(1deg);
+  }
+  60% {
+    -webkit-transform: translateX(-2px) rotate(-1deg);
+    transform: translateX(-2px) rotate(-1deg);
+  }
+  70% {
+    -webkit-transform: translateX(2px) rotate(1deg);
+    transform: translateX(2px) rotate(1deg);
+  }
+  80% {
+    -webkit-transform: translateX(-2px) rotate(-1deg);
+    transform: translateX(-2px) rotate(-1deg);
+  }
+  90% {
+    -webkit-transform: translateX(1px) rotate(0);
+    transform: translateX(1px) rotate(0);
+  }
+  100% {
+    -webkit-transform: translateX(-1px) rotate(0);
+    transform: translateX(-1px) rotate(0);
+  }
+}
+.hvr-buzz-out {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px transparent;
+}
+.hvr-buzz-out:hover, .hvr-buzz-out:focus, .hvr-buzz-out:active {
+  -webkit-animation-name: hvr-buzz-out;
+  animation-name: hvr-buzz-out;
+  -webkit-animation-duration: 0.75s;
+  animation-duration: 0.75s;
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-animation-iteration-count: 1;
+  animation-iteration-count: 1;
+}
+/*end of btn hover*/
+#bootstrap-overrides .carousel-indicators li{
+    background-color: #5f5f5f;
+}
+#bootstrap-overrides .carousel-indicators li.active{
+    background-color: #252f38;
+}
+#bootstrap-overrides .carousel-control span {
+	background-color: #252f38;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+/*    padding: 10px;*/
+}
+#bootstrap-overrides .glyphicon-chevron-right:before {
+    position: relative;
+    top: 3px;
+}
+#bootstrap-overrides .glyphicon-chevron-left:before {
+    position: relative;
+    top: 3px;
+}
+/*main*/
+#bootstrap-overrides main{
+	padding-top: 50px;
+}
+#bootstrap-overrides main h2{
+	font-family: "Open Sans", sans-serif;
+    text-transform: uppercase;
+    font-size: 20px;
+}
+#bootstrap-overrides main .color-line{
+	background-color: #9DC209;
+    width: 70px;
+    height: 3px;
+    margin-top: -2px;
+}
+#bootstrap-overrides main hr{
+    margin-bottom: 0;
+}
+/*search form*/
+#bootstrap-overrides #custom-search-input{
+    padding: 3px;
+    border: solid 1px #E4E4E4;
+    border-radius: 6px;
+    background-color: #fff;
+    margin-top: 40px;
+    margin-bottom: 70px;
+}
+
+#bootstrap-overrides #custom-search-input input{
+    border: 0;
+    box-shadow: none;
+}
+
+#bootstrap-overrides #custom-search-input button{
+    margin: 2px 0 0 0;
+    background: none;
+    box-shadow: none;
+    border: 0;
+    color: #666666;
+    padding: 0 8px 0 10px;
+    border-left: solid 1px #ccc;
+}
+
+#bootstrap-overrides #custom-search-input button:hover{
+    border: 0;
+    box-shadow: none;
+    border-left: solid 1px #ccc;
+}
+
+#bootstrap-overrides #custom-search-input .glyphicon-search{
+    font-size: 23px;
+}
+/*footer*/
+#bootstrap-overrides footer {
+	background-color: #000;
+    padding: 30px 0;
+}
+#bootstrap-overrides footer p{
+    color: #e6e6e6;
+}
+#bootstrap-overrides footer .copyright{
+    color: #ccc;
+}
+#bootstrap-overrides h3{
+    color: #9DC209;
+    text-transform: uppercase;
+    font-family: "Open Sans", sans-serif;
+    font-size: 19px;
+}
+#bootstrap-overrides footer a span{
+	background-color: #9DC209;
+    color: #fff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    border: 1px solid #9DC209;
+}
+#bootstrap-overrides footer a span:hover{
+    background-color: #252f38;
+}
+#bootstrap-overrides footer .btn-lg {
+    padding-left: 0;
 }

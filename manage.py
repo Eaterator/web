@@ -2,8 +2,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
 from application.app import app, db
-from management_commands.insert_base_data import insert_role_data, insert_source_data
-from management_commands.insert_update_recipe_data import insert_scraper_data
+import management_commands
 
 migrate = Migrate(app, db)
 manager = Manager(app)
@@ -18,13 +17,18 @@ def init_db():
 
 @manager.command
 def insert_base_data():
-    insert_role_data()
-    insert_source_data()
+    management_commands.insert_role_data()
+    management_commands.insert_source_data()
 
 
 @manager.command
 def insert_recipe_data():
-    insert_scraper_data()
+    management_commands.insert_scraper_data()
+
+
+@manager.command
+def create_super_user_account():
+    management_commands.create_super_user()
 
 
 if __name__ == '__main__':
