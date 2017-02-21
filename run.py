@@ -37,8 +37,15 @@ if __name__ == '__main__':
     elif config.DEBUG or not config.USE_GEVENT:
         print("Running flask development server")
         app.run(debug=True)
-    elif config.USE_UWSGI and config.USE_GEVENT:  # productio
-        app.logger.info("Starting up app with uwsgi")
-        app.logger.info("Environment variables: {0}".format(str(os.environ)))
-        app.run()
-        # examples at: https://github.com/zeekay/flask-uwsgi-websocket
+elif config.USE_UWSGI and config.USE_GEVENT:  # production
+    from logging.handlers import RotatingFileHandler
+    handler = RotatingFileHandler(
+        os.path.join(config.LOG_DIR), 'app.log',
+        maxBytes=10*1024*1024,
+        backupCount=10
+    )
+    app.logger.setHandler(handler)
+    app.logger.info("Starting up app with uwsgi")
+    app.logger.info("Environment variables: {0}".format(str(os.environ)))
+    app.run()
+    # examples at: https://github.com/zeekay/flask-uwsgi-websocket
