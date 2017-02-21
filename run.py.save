@@ -1,7 +1,6 @@
 from application import config
 from application.app import app, db
-import sys, os
-
+import 
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
     from gevent.pywsgi import WSGIServer
@@ -33,7 +32,11 @@ if __name__ == '__main__':
     elif config.DEBUG or not config.USE_GEVENT:
         print("Running flask development server")
         app.run(debug=True)
-    elif config.USE_WSGI and config.USE_GEVENT:  # productio
+    elif config.USE_WSGI and config.USE_GEVENT:  # production
+        print('Running production app: ')
+        print('Environment: ' + str(os.environ))
+        with open('/home/ubuntu/eaterator/logging/app.log', 'a') as f:
+            f.write(str(os.environment))
         app.logger.info("Starting up app with uwsgi")
         app.logger.info("Environment variables: {0}".format(str(os.environ)))
         app.run()

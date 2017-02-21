@@ -18,7 +18,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 LOG_DIR = os.environ['LOGGING_DIR'] if 'LOGGING_DIR' in os.environ else os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'logging' 
 )
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 ##########################################
 #           Flask Configuration          #
@@ -40,7 +40,7 @@ SALT_HASH_PARAMETER = 12
 # TODO register our application as a facebook application to get this data
 OAUTH_CREDENTIALS = {
     'facebook': {
-        'id': os.environ['FACEBOOK_APP_ID'] if 'FACEBOOK_APP_IP' in os.environ else '',
+        'id': os.environ['FACEBOOK_APP_ID'] if 'FACEBOOK_APP_ID' in os.environ else '',
         'secret': os.environ['FACEBOOK_APP_SECRET'] if 'FACEBOOK_APP_SECRET' in os.environ else '',
     }
 }
