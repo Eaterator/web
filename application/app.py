@@ -36,16 +36,17 @@ for blueprint in blueprints:
 
 # Initialize logging
 logger = logging.getLogger('eaterator-app')
-formatter = logging.Formatter("%(asctime)s | %(pathname)s:%(lineno)d | %(funcName)s | %(levelname)s | %(message)s ")
 handler = RotatingFileHandler(
     os.path.join(config.LOG_DIR, 'app.log'),
     maxBytes=10*1024*1024,
     backupCount=1
 )
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(config.LOG_LEVEL)
-app.logger = logger
+if not config.DEBUG:
+    handler.setLevel(config.LOG_LEVEL)
+    formatter = logging.Formatter("%(asctime)s | %(pathname)s:%(lineno)d | %(funcName)s | %(levelname)s | %(message)s ")
+    handler.setFormatter(formatter)
+    handler.setLevel(config.LOG_LEVEL)
+    app.logger.addHandler(handler)
 
 
 @app.errorhandler

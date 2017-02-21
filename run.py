@@ -30,10 +30,14 @@ if __name__ == '__main__':
                             certfile=config.SSL_CERT_FILE, keyfile=config.SSL_KEY_FILE)
         print('Serving (gevent WSGI server) application on localhost:{0} with SSL support'.format(config.GEVENT_PORT))
         server.serve_forever()
+    elif config.USE_GEVENT and not config.DEBUG:
+        print("Running dev production server on port: {0}".format(config.GEVENT_PORT))
+        server = WSGIServer(('', config.GEVENT_PORT), app)
+        server.serve_forever()
     elif config.DEBUG or not config.USE_GEVENT:
         print("Running flask development server")
         app.run(debug=True)
-    elif config.USE_WSGI and config.USE_GEVENT:  # productio
+    elif config.USE_UWSGI and config.USE_GEVENT:  # productio
         app.logger.info("Starting up app with uwsgi")
         app.logger.info("Environment variables: {0}".format(str(os.environ)))
         app.run()

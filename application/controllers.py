@@ -11,8 +11,6 @@ home_blueprint = Blueprint('home', __name__,
 @home_blueprint.route('/', defaults={'page': 'home'})
 @home_blueprint.route('/<page>')
 def index(page):
-    with open('/home/ubuntu/eaterator/logging/app.log', 'a') as f:
-            f.write(str(os.environ))
     try:
         print(page)
         return render_template('{0}.html'.format(page.split('.')[0]))
