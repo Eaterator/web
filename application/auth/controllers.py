@@ -57,13 +57,8 @@ def auth_register_user():
 @auth_blueprint.route('/authorize/<provider>')
 def oauth_authorize(provider):
     app.logger.debug("Called /authorize/<{0}>".format(provider))
-    try:
-        oauth = OAuthSignIn.get_provider(provider)
-        return oauth.authorize()
-    except Exception as e:
-        app.log_exception.error("Failed /authorize/{0} route. Error: {1}".format(
-            provider, str(e)
-        ))
+    oauth = OAuthSignIn.get_provider(provider)
+    return oauth.authorize()
 
 
 @auth_blueprint.route('/callback/<provider>')
@@ -128,7 +123,7 @@ class OAuthSignIn:
 
     def __init__(self, provider_name):
         self.provider_name = provider_name
-        credentials = config.OAUTH_CREDENTIALS['provider_name']
+        credentials = config.OAUTH_CREDENTIALS[provider_name]
         self.consumer_id = credentials['id']
         self.consumer_secret = credentials['secret']
 
@@ -137,11 +132,11 @@ class OAuthSignIn:
         raise NotImplementedError()
 
     def get_callback_url(self):
-        return url_for('oauth_callback', provider=self.provider_name, _external=True)
+        return url_for('auth.oauth_callback', provider=self.provider_name, _external=True)
 
     @classmethod
     def get_provider(cls, provider_name):
-        if cls.providers in None:
+        if cls.providers is None:
             cls.providers = {}
             for provider_class in cls.__subclasses__():
                 provider = provider_class()
@@ -157,7 +152,7 @@ class FacebookSignIn(OAuthSignIn):
             name='facebook',
             client_id=self.consumer_id,
             client_secret=self.consumer_secret,
-            authorize_url='https://graph.facebook.com/oaut/authorize',
+            authorize_url='https://graph.facebook.com/oauth/authorize',
             access_token_url='https://graph.facebook.com/oauth/access_token',
             base_url='https://graph.facebook.com/',
         )
