@@ -54,6 +54,18 @@ def auth_register_user():
         raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
 
 
+@auth_blueprint.route('/authorize/<provider>')
+def oauth_authorize(provider):
+    app.logger.debug("Called /authorize/<{0}>".format(provider))
+    try:
+        oauth = OAuthSignIn.get_provider(provider)
+        return oauth.authorize()
+    except Exception as e:
+        app.log_exception.error("Failed /authorize/{0} route. Error: {1}".format(
+            provider, str(e)
+        ))
+
+
 @auth_blueprint.route('/callback/<provider>')
 def oauth_callback(provider):
     try:
