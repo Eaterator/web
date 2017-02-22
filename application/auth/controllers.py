@@ -179,6 +179,6 @@ class FacebookSignIn(OAuthSignIn):
         me = oauth_session.get('me').json()
         return (
             'facebook$' + me['id'],
-            me.get('email').split('@')[0],
+            me.get('email').split('@')[0] if me.get('email') else None,
             me.get('email')
         )
