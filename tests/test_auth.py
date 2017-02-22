@@ -2,19 +2,23 @@ from unittest import TestCase, main as run_tests
 
 from application.app import app, db
 from application.auth.models import User, Role
+from tests.base_test_case import BaseTempDBTestCase
 
 
-class TestAuth(TestCase):
+class TestAuthModels(BaseTempDBTestCase):
+    pass
 
-    def setUp(self):
-        app.config['TESTING'] = True
-        self.app = app.test_client()
-        # db.create_all() + change database URI from config to use separate DB
+
+class TestAuthRoutes(BaseTempDBTestCase):
 
     def test_auth(self):
         pass
 
     def test_auth_social(self):
+        """
+        How to test this with facebook OAuth setup
+        :return:
+        """
         pass
 
     def test_jwt_required(self):

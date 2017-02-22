@@ -1,6 +1,6 @@
 from application import config
 from application.app import app, db
-import sys, os
+import os
 
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
