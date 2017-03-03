@@ -54,6 +54,7 @@ class IngredientRecipe(RequiredFields):
     ingredient = db.Column(db.Integer, db.ForeignKey('recipe_ingredient.pk'))
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
     ingredient_amount = db.Column(db.Float)
+    amount_units = db.Column(db.String(25))
     ingredient_modifier = db.Column(db.Integer,
                                     db.ForeignKey('recipe_ingredientmodifier.pk'),
                                     nullable=True)

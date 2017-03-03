@@ -1,18 +1,39 @@
 from unittest import TestCase, main as run_tests
+from tests.base_test_case import BaseTempDBTestCase
+from application.auth.models import Role, User
+from application.user.models import UserSearchData, FavouriteRecipe
+from application.recipe.models import Recipe
 
-from application.app import app, db
 
-
-class TestUsers(TestCase):
+class TestUserModels(BaseTempDBTestCase):
 
     def setUp(self):
-        app.config["TESTING"] = True
-        self.app = app.test_client()
+        super().__init__()
+        self.test_role = None
+        self.test_user = None
 
-    def test_favourite_recipe(self):
+    def test_favourite_recipe_model(self):
         pass
 
-    def test_list_favourite_recipes(self):
+    def test_search_data_model(self):
+        pass
+
+
+class TestUserControllers(BaseTempDBTestCase):
+
+    def setUp(self):
+        super().__init__()
+        self.test_role = None
+        self.test_user = None
+        self.test_recipe = None
+
+    def test_record_user_search(self):
+        pass
+
+    def test_favourite_user_recipe(self):
+        pass
+
+    def list_user_recipes(self):
         pass
 
 

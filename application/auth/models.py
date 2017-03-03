@@ -21,6 +21,6 @@ class Role(RequiredFields):
 
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(15), unique=True)
-    type = db.Column(db.String(15))
+    type_ = db.Column(db.String(15))
     is_admin = db.Column(db.Boolean)
 
