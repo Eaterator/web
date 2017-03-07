@@ -242,5 +242,5 @@ class FacebookSignIn(OAuthSignIn):
         )
 
     def verify_token(self, token):
-        resp = urlopen("https://graph.facebook.com/me?access_token=")
+        resp = urlopen("https://graph.facebook.com/me?access_token={0}".format(token))
         return resp.status == 200
