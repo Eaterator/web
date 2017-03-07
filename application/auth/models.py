@@ -24,3 +24,6 @@ class Role(RequiredFields):
     type_ = db.Column(db.String(15))
     is_admin = db.Column(db.Boolean)
 
+
+
+

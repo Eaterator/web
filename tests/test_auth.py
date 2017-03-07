@@ -1,6 +1,7 @@
 from unittest import TestCase, main as run_tests
 from datetime import datetime
 from application.app import app, db
+import json
 from application.auth.models import User, Role
 from tests.base_test_case import BaseTempDBTestCase
 
@@ -58,7 +59,18 @@ class TestAuthRoutes(BaseTempDBTestCase):
         self.test_user = None
 
     def test_auth(self):
-        pass
+        resp = self.app.post('/auth/register',
+                             data=json.dumps(TEST_USER_PAYLOAD),
+                             content_type='application/json')
+        print(resp)
+        self.db.drop_all()
+        # self.assertTrue(resp.status_code == 200)
+
+    def test_duplicate_user(self):
+        resp = self.app.post('/auth/register',
+                             data=json.dumps(TEST_USER_PAYLOAD),
+                             content_type='application/json')
+        print(resp)
 
     def test_auth_social(self):
         """
@@ -82,6 +94,16 @@ class TestAuthRoutes(BaseTempDBTestCase):
     def test_user_is_staff(self):
         pass
 
+
+TEST_USER_PAYLOAD = dict(
+    username="testuser",
+    password="TestUser123!",
+    confirm="TestUSer123!",
+    email="test@user.com",
+    first_name="test",
+    last_name="user",
+    date_of_birth="1991-01-01"
+)
 
 if __name__ == '__main__':
     run_tests()

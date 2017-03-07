@@ -43,13 +43,19 @@ def auth_register_user():
     try:
         payload = request.get_json()
         password = payload.pop('password')
+        confirm = payload.pop('confirm')
     except:
         raise InvalidAPIRequest("JSON request not in proper format", status_code=BAD_REQUEST_CODE)
     try:
-        new_user = User(**payload, password=PasswordUtilities.generate_password(password))
+        new_user = User(
+            **payload,
+            password=PasswordUtilities.generate_password(password, confirm=confirm)
+        )
         db.session.add(new_user)
         db.commit()
-        return render_template('home')  # TODO add/return JWT
+        return jsonify({
+            "access_token": create_access_token(identity=new_user.pk)
+        })
     except ImproperPasswordError:
         raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
 
@@ -107,11 +113,14 @@ class PasswordUtilities:
             return PasswordMismatchError()
 
     @staticmethod
-    def generate_password(password):
+    def generate_password(password, confirm=None):
+
+        if confirm and confirm != password:
+            raise PasswordMismatchError("Passwords do not match, could not register user")
         for func in PASSWORD_CONSTRAINTS:
             if not func(password):
                 raise ImproperPasswordError('Password is not valid')
-        return bcrypt.hashpw(password, bcrypt.gensalt(config.SALT_HASH_PARAMETER))
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(config.SALT_HASH_PARAMETER))
 
 
 # TODO look at OAuth for Facebook authentication, Miguel has a good tutorial
