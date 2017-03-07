@@ -14,7 +14,6 @@ class StandardLoginForm(FlaskForm):
 
 
 class UserDictMixin:
-    data_fields = ['username', 'social_id', 'email', 'first_name', 'last_name', 'date_of_birth', 'password']
 
     @property
     def to_dict(self):
@@ -23,6 +22,8 @@ class UserDictMixin:
 
 
 class StandardRegistrationForm(FlaskForm, UserDictMixin):
+
+    data_fields = ['username', 'social_id', 'email', 'first_name', 'last_name', 'date_of_birth', 'password']
 
     class Meta:
         csrf = False
@@ -42,6 +43,8 @@ class StandardRegistrationForm(FlaskForm, UserDictMixin):
 
 
 class AppRegistrationForm(FlaskForm, UserDictMixin):
+
+    data_fields = ['social_id', 'email', 'first_name', 'last_name', 'date_of_birth']
 
     class Meta:
         csrf = False
