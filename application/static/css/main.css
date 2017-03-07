@@ -268,10 +268,19 @@
 #bootstrap-overrides #custom-search-input .glyphicon-search{
     font-size: 23px;
 }
+#bootstrap-overrides #push{
+	height: 200px;
+}
 /*footer*/
 #bootstrap-overrides footer {
 	background-color: #000;
-    padding: 30px 0;
+    padding: 30px 0 80px 0;
+    height: 200px;
+/*    position: absolute;*/
+/*    bottom: 0;*/
+    width: 100%;
+    
+
 }
 #bootstrap-overrides footer p{
     color: #e6e6e6;
@@ -300,4 +309,20 @@
 }
 #bootstrap-overrides footer .btn-lg {
     padding-left: 0;
+}
+#bootstrap-overrides .bootstrap-tagsinput{
+	background-color: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+#bootstrap-overrides main .label{
+	padding: 8px 20px;
+}
+#bootstrap-overrides main .label-info{
+	background-color: #252f38;
+}
+#bootstrap-overrides .bootstrap-tagsinput .tag{
+	font-size: 14px;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 300;
 }

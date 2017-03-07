@@ -10,8 +10,10 @@
     <link href="../static/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../static/bower_components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="../static/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/bootstrap-tagsinput.css">
     <link href="../static/css/normalize.css" rel="stylesheet">
     <link href="../static/css/main.css" rel="stylesheet">
+    
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -114,9 +116,9 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6 col-md-offset-3">
-                        <div id="custom-search-input" class="center">
+                        <div id="custom-search-input" class="center" >
                             <div class="input-group col-md-12">
-                                <input type="text" class="form-control input-lg" placeholder="ex. potato, chicken, peppermint" />
+                                <input type="text" class="form-control input-lg" placeholder="ex. potato, chicken, peppermint" data-role="tagsinput"/>
                                 <span class="input-group-btn">
                                     <button class="btn btn-info btn-lg" type="button">
                                         <i class="glyphicon glyphicon-search"></i>
@@ -127,9 +129,10 @@
                     </div>
 	            </div>
             </div>
+<!--            <div id="push"></div>-->
     </main><!-- end main-->
     
-    <footer class="navbar-fixed-bottom">
+    <footer class="footer">
         <div class="container">
            <div class="row">
                <div class="col-md-8" id="about-section"> 
@@ -171,6 +174,8 @@
     <script src="../static/js/controllers.js"></script>
     <script src="../static/js/directives.js"></script>
     <script src="../static/js/services.js"></script>
+    <script src="../static/js/bootstrap-tagsinput.min.js"></script>
+    <scrript src="../static/js/bootstrap-tagsinput-angular.min.js"></scrript>
     
 </body>
 </html>
