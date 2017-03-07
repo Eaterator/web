@@ -108,7 +108,7 @@ def app_oauth_login(provider):
     payload = MultiDict(request.get_json())
     app_form = AppRegistrationForm(payload)
     if app_form.validate():
-        if not oauth.verify_token(app_form.token.data):
+        if not oauth.verify_token(app_form.auth_token.data):
             raise InvalidAPIRequest("Unauthenticated user")
         user = User.query.filter(User.social_id == app_form.social_id.data).first()
         if not user:
