@@ -1,20 +1,26 @@
 import bcrypt
 import os
+from urllib.request import urlopen
 from application import config
 from string import punctuation
 from abc import ABCMeta, abstractmethod
 from flask import url_for, redirect, jsonify, Blueprint, request, render_template
 from flask_jwt_extended import create_access_token
 from rauth import OAuth2Service
-from application.auth.models import User
+from application.auth.models import User, Role
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
+from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
+    DuplicateUserEmailException
 from application.app import db, app
+from werkzeug.datastructures import MultiDict
 
 PASSWORD_CONSTRAINTS = [
     lambda x: len(x) >= 7,
     lambda x: any(char.isdigit() for char in x),
-    lambda x: any(char in punctuation for char in x)
+    lambda x: any(char in punctuation for char in x),
+    lambda x: any(str.isupper(char) for char in x)
 ]
+ACCESS_TOKEN_HEADER = "access_token"
 
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
@@ -23,41 +29,43 @@ auth_blueprint = Blueprint('auth', __name__,
 
 @auth_blueprint.route("/", methods=["POST"])
 def auth_authenticate():
-    # TODO parse form data
-    try:
-        payload = request.get_json()
-    except:
+    payload = MultiDict(request.get_json())
+    login_form = StandardLoginForm(payload)
+    if not login_form.validate():
         raise InvalidAPIRequest("No data submitted", status_code=BAD_REQUEST_CODE)
-    try:
-        bearer = PasswordUtilities.authenticate(payload.username, payload.password)
-        # TODO return proper header
-        return jsonify({'access_token': bearer})
-    except PasswordMismatchError:
+    user = User.query.filter(User.username == login_form.username.data).first()
+    if not user or not PasswordUtilities.authenticate(user, login_form.password.data):
         raise InvalidAPIRequest("Username and/or password is incorrect", status_code=UNAUTHORIZED_CODE)
+    return JWTUtilities.create_access_token_resp(user)
 
 
 @auth_blueprint.route("/register", methods=["GET", "POST"])
 def auth_register_user():
     if request.method == "GET":
         return render_template('register.html')
+    payload = MultiDict(request.get_json())
+    registration_form = StandardRegistrationForm(payload)
     try:
-        payload = request.get_json()
-        password = payload.pop('password')
-        confirm = payload.pop('confirm')
-    except:
-        raise InvalidAPIRequest("JSON request not in proper format", status_code=BAD_REQUEST_CODE)
-    try:
-        new_user = User(
-            **payload,
-            password=PasswordUtilities.generate_password(password, confirm=confirm)
-        )
-        db.session.add(new_user)
-        db.commit()
-        return jsonify({
-            "access_token": create_access_token(identity=new_user.pk)
-        })
-    except ImproperPasswordError:
-        raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
+        if registration_form.validate():
+            try:
+                password = PasswordUtilities.generate_password(
+                    registration_form.password.data, registration_form.confirm.data)
+                user_data = registration_form.to_dict
+                user_data["password"] = password
+                new_user = User(**user_data)
+                new_user.role = UserUtilities.regular_user_pk()
+                db.session.add(new_user)
+                db.session.commit()
+                return JWTUtilities.create_access_token_resp(new_user)
+            except ImproperPasswordError:
+                raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
+            except PasswordMismatchError:
+                raise InvalidAPIRequest("Password mismatch error, ensure they are the same",
+                                        status_code=BAD_REQUEST_CODE)
+        else:
+            raise InvalidAPIRequest("Bad request, please try again", status_code=BAD_REQUEST_CODE)
+    except DuplicateUserEmailException:
+        raise InvalidAPIRequest("Username taken")
 
 
 @auth_blueprint.route('/authorize/<provider>')
@@ -83,12 +91,32 @@ def oauth_callback(provider):
     if not user:
         try:
             user = User(social_id=social_id, username=username, email=email)
+            user.role = UserUtilities.regular_user_pk()
             db.session.add(user)
             db.session.commit()
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
-    bearer = create_access_token(identity=user.pk)
-    return jsonify({'access_token': bearer})
+    return JWTUtilities.create_access_token_resp(user)
+
+
+@auth_blueprint.route('/app/<provider>', methods=["POST"])
+def app_oauth_login(provider):
+    try:
+        oauth = OAuthSignIn.get_provider(provider)
+    except KeyError:
+        raise InvalidAPIRequest("Invalid request", status_code=400)
+    payload = MultiDict(request.get_json())
+    app_form = AppRegistrationForm(payload)
+    if app_form.validate():
+        if not oauth.verify_token(app_form.token.data):
+            raise InvalidAPIRequest("Unauthenticated user")
+        user = User.query.filter(User.social_id == app_form.social_id.data).first()
+        if not user:
+            user = User(**app_form.to_dict)
+            user.role = UserUtilities.regular_user_pk()
+            db.session.add(user)
+            db.session.commit()
+        return JWTUtilities.create_access_token_resp(user)
 
 
 class ImproperPasswordError(Exception):
@@ -100,27 +128,44 @@ class PasswordMismatchError(Exception):
 
 
 class JWTUtilities:
-    pass
+    @staticmethod
+    def create_access_token_resp(user):
+        return jsonify({
+            ACCESS_TOKEN_HEADER: create_access_token(identity=user.pk)
+        })
 
 
 class PasswordUtilities:
 
     @staticmethod
     def authenticate(user, password):
-        if bcrypt.hashpw(password, user.password) == user.password:
-            return create_access_token(identity=user.pk)
-        else:
-            return PasswordMismatchError()
+        password = password.encode('utf-8') if not isinstance(password, bytes) else password
+        return bcrypt.hashpw(password, user.password) == user.password
 
     @staticmethod
     def generate_password(password, confirm=None):
-
         if confirm and confirm != password:
             raise PasswordMismatchError("Passwords do not match, could not register user")
         for func in PASSWORD_CONSTRAINTS:
             if not func(password):
                 raise ImproperPasswordError('Password is not valid')
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(config.SALT_HASH_PARAMETER))
+        password = password.encode('utf-8') if not isinstance(password, bytes) else password
+        return bcrypt.hashpw(password, bcrypt.gensalt(config.SALT_HASH_PARAMETER))
+
+
+class UserUtilities:
+
+    @classmethod
+    def regular_user_pk(cls):
+        return Role.query.filter(Role.name == 'regular').first().pk
+
+    @classmethod
+    def business_user_pk(cls):
+        return Role.query.filter(Role.name == 'business').first().pk
+
+    @classmethod
+    def admin_user_pk(cls):
+        return Role.query.filter(Role.name == 'admin').first().pk
 
 
 # TODO look at OAuth for Facebook authentication, Miguel has a good tutorial
@@ -138,6 +183,10 @@ class OAuthSignIn:
 
     @abstractmethod
     def authorize(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def verify_token(self, token):
         raise NotImplementedError()
 
     def get_callback_url(self):
@@ -191,3 +240,7 @@ class FacebookSignIn(OAuthSignIn):
             me.get('email').split('@')[0] if me.get('email') else None,
             me.get('email')
         )
+
+    def verify_token(self, token):
+        resp = urlopen("https://graph.facebook.com/me?access_token=")
+        return resp.status == 200

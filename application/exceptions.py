@@ -12,7 +12,7 @@ class InvalidAPIRequest(Exception):
         self.message = message
         if status_code:
             self.status_code = status_code
-        self.payload = payload
+        self.payload = payload if isinstance(payload, dict) or isinstance(payload, str) else {}
 
     def to_dict(self):
         if isinstance(self.payload, str):

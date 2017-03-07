@@ -58,13 +58,25 @@ class TestAuthRoutes(BaseTempDBTestCase):
         self.test_admin_user = None
         self.test_user = None
 
-    def test_auth(self):
+    def test_authenticate(self):
+        """
+        Curl: curl -H "Content-Type: application/json" -X POST -d '{"username": "testuser", "password": "TestUser123!"}' http://localhost:5000/auth/
+        :return:
+        """
         resp = self.app.post('/auth/register',
                              data=json.dumps(TEST_USER_PAYLOAD),
                              content_type='application/json')
         print(resp)
         self.db.drop_all()
         # self.assertTrue(resp.status_code == 200)
+
+    def test_register(self):
+        """
+        Curl: curl -H "Content-Type: application/json" -X POST -d '{"first_name": "test", "last_name": "user", "date_of_birth": "1991-01-01", "confirm": "TestUsetestuser", "email": "test@user.com", "password": "TestUser123!"}' http://localhost:5000/auth/register
+        :return:
+        """
+        pass
+
 
     def test_duplicate_user(self):
         resp = self.app.post('/auth/register',

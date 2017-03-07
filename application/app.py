@@ -3,8 +3,7 @@ from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from application import config
-import logging
-from logging.handlers import RotatingFileHandler
+from application.exceptions import InvalidAPIRequest
 
 # Initialize application and DB
 app = Flask(__name__)
@@ -35,9 +34,10 @@ for blueprint in blueprints:
     app.register_blueprint(blueprint)
 
 
-@app.errorhandler
+@app.errorhandler(InvalidAPIRequest)
 def handle_api_error(error):
     if error.status_code != 404:
+        print(error.to_dict())
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
