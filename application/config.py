@@ -37,7 +37,6 @@ SALT_HASH_PARAMETER = 12
 
 ###########################################
 #        OAuth Credentials/Settings       #
-# TODO register our application as a facebook application to get this data
 OAUTH_CREDENTIALS = {
     'facebook': {
         'id': os.environ['FACEBOOK_APP_ID'] if 'FACEBOOK_APP_ID' in os.environ else '',

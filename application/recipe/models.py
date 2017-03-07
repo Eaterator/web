@@ -3,11 +3,11 @@ from application.base_models import RequiredFields
 
 
 class Source(RequiredFields):
-    __tablename__ = 'recipe_sources'
+    __tablename__ = 'recipe_source'
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
     base_url = db.Column(db.String(30), unique=True)
-    recipes = db.relationship('recipe_recipe', backref='recipe_source',
+    recipes = db.relationship('Recipe', backref='recipe_source',
                               lazy='dynamic')
 
 
@@ -21,15 +21,15 @@ class Recipe(RequiredFields):
     highest_rating = db.Column(db.Float)
     count_rating = db.Column(db.Integer)
     raw_data = db.Column(db.Text)
-    source = db.Column(db.Integer, db.ForeignKey('recipe_sources.pk'))
-    reviews = db.relationship('RecipeReviews', backref='recipe_recipe',
+    source = db.Column(db.Integer, db.ForeignKey('recipe_source.pk'))
+    reviews = db.relationship('Review', backref='recipe_recipe',
                               lazy='dynamic')
-    recipe_ingredients = db.relationship('recipe_inredientrecipe', backref='recipe_recipe',
+    recipe_ingredients = db.relationship('IngredientRecipe', backref='recipe_recipe',
                                          lazy='dynamic')
 
 
-class Reviews(RequiredFields):
-    __tablename__ = 'recipe_reviews'
+class Review(RequiredFields):
+    __tablename__ = 'recipe_review'
     pk = db.Column(db.Integer, primary_key=True)
     review_text = db.Column(db.String)
     review_rating = db.Column(db.Float)
@@ -39,7 +39,7 @@ class Reviews(RequiredFields):
 class Ingredient(RequiredFields):
     __tablename__ = 'recipe_ingredient'
     pk = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(25), unique=True)
+    name = db.Column(db.String(50), unique=True)
 
 
 class IngredientModifier(RequiredFields):

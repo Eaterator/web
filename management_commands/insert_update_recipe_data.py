@@ -1,14 +1,18 @@
 import json
 import warnings
+from urllib.parse import urlparse
+from sqlalchemy.exc import DataError
 try:
-    from scraper.tools.data_loader import DataLoader
-    from recipe_parser.recipe_parser.ingredient_parser import IngredientParser
-except ImportError:
+    from recipe_scraper.tools.data_loader import DataLoader
+    from recipe_parser.ingredient_parser import IngredientParser
+except ImportError as e:
     warnings.warn("Dependency packages not setup (scraper and parser). "
                   "Inserting data tools/commands data will not be possible")
 
-from application.recipe.models import Source, Recipe, IngredientRecipe, Ingredient, Reviews, IngredientModifier
+from application.recipe.models import Source, Recipe, IngredientRecipe, Ingredient, Review, IngredientModifier
 from application.app import db
+
+MAX_INGREDIENT_LENGTH = 50
 
 
 class IngredientParserPipeline:
@@ -33,47 +37,77 @@ class IngredientParserPipeline:
             for recipe_data in data_chunk:
                 try:
                     recipe = self._insert_if_new_recipe(recipe_data)
+                    if not recipe:
+                        continue
                     ingredients = []
                     parsed_ingredients = []
                     for ingredient in recipe_data['ingredients']:
                         parsed_ingredient = self.parser(ingredient)
-                        parsed_ingredients.append(parsed_ingredient)
-                        ingredients.append(
-                            self._insert_if_new_ingredient(parsed_ingredient)
-                        )
+                        # Case for malformed or odd ingredients # TODO may want to log these cases for review
+                        if (parsed_ingredient and
+                           parsed_ingredient.ingredient and
+                           parsed_ingredient.ingredient.primary):
+
+                            parsed_ingredients.append(parsed_ingredient)
+                            ingredients.append(
+                                self._insert_if_new_ingredient(parsed_ingredient)
+                            )
                     self._insert_ingredient_recipe(recipe, ingredients, parsed_ingredients)
                 except DuplicateRecipeException:
-                    # TODO use logger here!
+                    # TODO use logger here?
                     pass
 
     @staticmethod
     def _find_base_url(url):
-        pass
+        base_url = urlparse(url).netloc
+        if not base_url:
+            raise BaseUrlExtractionError("Could not extract base url from: {0}".format(url))
+        else:
+            return base_url.split(':')[0] if 'www' not in base_url \
+                else '.'.join(base_url.split('.')[1:]).split(':')[0]
 
     def _insert_if_new_recipe(self, data):
         """
         :param data: a JSON formatted recipe entry. See the hrecipe_scraper README.md for more information
         :return: returns a Recipe object which is created and committed in the DB before function return
         """
-        recipe = Recipe.query.filter_by(Recipe.url == data['url']).first()
+        recipe = Recipe.query.filter(Recipe.url == data['url']).first()
+        # TODO need to insert prep time and cook time into a recipe!
         if not recipe:
-            source = Source.query.filter_by(Source.base_url == self._find_base_url(data['url']))
-            recipe = Recipe(
+            source = Source.query.filter(Source.base_url == self._find_base_url(data['url'])).first()
+            if not source:
+                # TODO input logging information here instead of printing
+                print("Error with url: {0}".format(data['url']))
+                return
+            ratings_data = self._get_recipe_ratings(data)
+            ratings_data.update(dict(
                 url=data['url'],
                 title=data['title'],
-                source=source,
-                average_rating=data['reviews']['rating']['average'],
-                lowest_rating=data['reviews']['rating']['worst'],
-                highest_rating=data['reviews']['rating']['best'],
-                count_rating=data['reviews']['rating']['count'],
-                raw_data=json.dumps(data),
-            )
-            self._add_reviews(data, recipe)
+                # raw_data=json.dumps(data)
+            ))
+            recipe = Recipe(**ratings_data)
             db.session.add(recipe)
+            source.recipes.append(recipe)
+            self._add_reviews(data, recipe)
             db.session.commit()
             return recipe
         raise DuplicateRecipeException("Recipe already exists. Name: {0}. URL: {1}".format(
             data['title'], data['url']))
+
+    @staticmethod
+    def _get_recipe_ratings(data):
+        fields = ['average', 'worst', 'best', 'count']
+        ratings = ['average_rating', 'lowest_rating', 'highest_rating', 'count_rating']
+        ratings_data = {}
+        if 'reviews' in data and 'ratings' in data['reviews']:
+            for f, r in zip(fields, ratings):
+                try:
+                    ratings_data[r] = float(data['reviews']['ratings'][f]) if f in data['reviews']['ratings'] else None
+                except (ValueError, TypeError):
+                    ratings_data[r] = None
+        else:
+            ratings_data = {r: None for r in ratings}
+        return ratings_data
 
     @staticmethod
     def _add_reviews(data, recipe):
@@ -83,12 +117,11 @@ class IngredientParserPipeline:
         :param recipe: a Recipe object that exists in the DB.
         :return: None, modifies the Recipe object in the functions
         """
-        for review in data['reviews']:
-            for review_text in review['text']:
-                new_review = Reviews(
-                    review_text=review_text
-                )
-                recipe.reviews.append(new_review)
+        for review_text in data['reviews']['text']:
+            new_review = Review(
+                review_text=review_text
+            )
+            recipe.reviews.append(new_review)
 
     @staticmethod
     def _insert_if_new_ingredient(parsed_ingredient):
@@ -97,13 +130,17 @@ class IngredientParserPipeline:
         :param parsed_ingredient: A ParsedIngredient (from recipe_parser) containing the parsed recipe data
         :return: an Ingredient object that exists in the DB
         """
-        ingredient = Ingredient.query.filter_by(Ingredient.name == parsed_ingredient.ingredient.primary).first()
+        ingredient = Ingredient.query.filter(Ingredient.name == parsed_ingredient.ingredient.primary).first()
         if not ingredient:
-            ingredient = Ingredient(
-                name=parsed_ingredient.primary
-            )
-            db.session.add(ingredient)
-            db.session.commit()
+            try:
+                ingredient = Ingredient(
+                    name=parsed_ingredient.ingredient.primary
+                )
+                db.session.add(ingredient)
+                db.session.commit()
+            except DataError:
+                print("Error with ingredient: {0}".format(parsed_ingredient.ingredient.primary))
+                ingredient = None
         return ingredient
 
     @staticmethod
@@ -113,7 +150,7 @@ class IngredientParserPipeline:
         :param modifier: Text of the modifier to be added (i.e. boneless in boneless chicken breast)
         :return: returns an IngredientModifier object that is guaranteed to exist in the DB
         """
-        modifier = IngredientModifier.query.filter_by(IngredientModifier.name == modifier)
+        modifier = IngredientModifier.query.filter(IngredientModifier.name == modifier).first()
         if not modifier:
             modifier = IngredientModifier(
                 name=modifier
@@ -131,15 +168,20 @@ class IngredientParserPipeline:
         :return: None
         """
         for ingredient, parsed_ingredient in zip(ingredients, parsed_ingredients):
+            if not ingredient:
+                continue
             modifier = self._insert_if_new_ingredient_modifier(parsed_ingredient.ingredient.modifier)
+            amount = float(parsed_ingredient.amount.value) \
+                if parsed_ingredient.amount and parsed_ingredient.amount.value else None
+            unit = parsed_ingredient.amount.unit if parsed_ingredient.amount else None
             ingredient_recipe = IngredientRecipe(
-                recipe=recipe,
-                ingredient=ingredient,
-                ingredient_modifier=modifier,
-                ingredient_amount=parsed_ingredient.amount.value,
-                amount_units=parsed_ingredient.amount.unit,
+                ingredient_amount=amount,
+                amount_units=unit,
             )
             db.session.add(ingredient_recipe)
+            ingredient_recipe.ingredient = ingredient.pk
+            ingredient_recipe.ingredient_modifier = modifier.pk
+            ingredient_recipe.recipe = recipe.pk
         db.session.commit()
         return
 
@@ -148,7 +190,20 @@ class DuplicateRecipeException(Exception):
     pass
 
 
+class BaseUrlExtractionError(Exception):
+    pass
+
+
 def insert_scraper_data():
     pipeline = IngredientParserPipeline()
     pipeline.start_pipeline()
     return
+
+
+def clean_recipe_data():
+    IngredientRecipe.query.delete()
+    IngredientModifier.query.delete()
+    Ingredient.query.delete()
+    Review.query.delete()
+    Recipe.query.delete()
+    db.session.commit()

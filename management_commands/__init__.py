@@ -1,3 +1,3 @@
 from management_commands.create_super_user import create_super_user
 from management_commands.insert_base_data import insert_role_data, insert_source_data
-from management_commands.insert_update_recipe_data import insert_scraper_data
+from management_commands.insert_update_recipe_data import insert_scraper_data, clean_recipe_data
