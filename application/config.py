@@ -46,7 +46,7 @@ OAUTH_CREDENTIALS = {
 
 ###########################################
 #             JWT Settings                #
-JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
+JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)
 JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=31)
 
 ##########################################
