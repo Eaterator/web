@@ -2,7 +2,6 @@ import os
 from flask import Blueprint, render_template, send_from_directory
 from jinja2 import TemplateNotFound
 from application.exceptions import InvalidAPIRequest
-from application.app import app
 
 home_blueprint = Blueprint('home', __name__,
                            template_folder='templates')
@@ -12,7 +11,6 @@ home_blueprint = Blueprint('home', __name__,
 @home_blueprint.route('/', defaults={'page': 'home'})
 @home_blueprint.route('/<page>')
 def index(page):
-    app.logger.info("This is a test!!!")
     try:
         return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:
