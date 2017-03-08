@@ -33,9 +33,13 @@ def create_recipe_search_query(ingredients):
         join(Ingredient)
     dynamic_filters = []
     for ingredient in ingredients:
-        dynamic_filters.append(IngredientRecipe.ingredient.in_(
-            db.session.query(Ingredient.pk).filter(Ingredient.name.like(r'%{0}%'.format(ingredient)))
-        ))
+        dynamic_filters.append(
+            IngredientRecipe.ingredient.in_(
+                db.session.query(Ingredient.pk).filter(
+                    Ingredient.name.like(r'%{0}%'.format(ingredient))
+                )
+            )
+        )
     recipes = base_query.filter(or_(*dynamic_filters)).\
         group_by(Recipe.pk, Recipe.title).\
         having(func.count(func.distinct(IngredientRecipe.ingredient)) >= len(ingredients)).\
