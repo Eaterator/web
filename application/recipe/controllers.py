@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, or_
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
+from application.exceptions import InvalidAPIRequest
 from application.app import db
 from recipe_parser.ingredient_parser import IngredientParser
 
@@ -27,10 +28,26 @@ def search_recipe():
     return jsonify({'recipes': recipes})
 
 
+def register_user_search(user_pk, json_data):
+    new_user_search = UserSearchData(user=user_pk, search=json.dumps(json_data))
+    db.session.add(new_user_search)
+    db.session.commit()
+
+
 def create_recipe_search_query(ingredients):
-    base_query = db.session.query(Recipe.pk, Recipe.title).\
+    if len(ingredients) < 3:
+        raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=400)
+    return db.session.query(Recipe.pk, Recipe.title).\
         join(IngredientRecipe).\
-        join(Ingredient)
+        join(Ingredient).\
+        filter(or_(*apply_dynamic_filters(ingredients))).\
+        group_by(Recipe.pk, Recipe.title).\
+        having(func.count(func.distinct(IngredientRecipe.ingredient)) >= len(ingredients)).\
+        order_by(func.count(IngredientRecipe.pk)/(len(ingredients))).\
+        order_by(func.count(IngredientRecipe.ingredient)).limit(20).all()
+
+
+def apply_dynamic_filters(ingredients):
     dynamic_filters = []
     for ingredient in ingredients:
         dynamic_filters.append(
@@ -40,12 +57,7 @@ def create_recipe_search_query(ingredients):
                 )
             )
         )
-    recipes = base_query.filter(or_(*dynamic_filters)).\
-        group_by(Recipe.pk, Recipe.title).\
-        having(func.count(func.distinct(IngredientRecipe.ingredient)) >= len(ingredients)).\
-        order_by(func.count(IngredientRecipe.pk)).\
-        order_by(func.count(IngredientRecipe.ingredient)).limit(20).all()
-    return recipes
+    return dynamic_filters
 
 """
 v1 search query:
@@ -67,19 +79,20 @@ ingredients == ['onion', 'chicken', 'potato']
 
 SELECT recipe_recipe.pk AS recipe_recipe_pk, recipe_recipe.title AS recipe_recipe_title
 FROM recipe_recipe JOIN ingredient_recipe ON recipe_recipe.pk = ingredient_recipe.recipe JOIN recipe_ingredient ON recipe_ingredient.pk = ingredient_recipe.ingredient
-WHERE ingredient_recipe.ingredient IN (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
-FROM recipe_ingredient
-WHERE recipe_ingredient.name LIKE %(name_1)s) OR ingredient_recipe.ingredient IN (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
-FROM recipe_ingredient
-WHERE recipe_ingredient.name LIKE %(name_2)s) OR ingredient_recipe.ingredient IN (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
-FROM recipe_ingredient
-WHERE recipe_ingredient.name LIKE %(name_3)s) GROUP BY recipe_recipe.pk, recipe_recipe.title
-HAVING count(distinct(ingredient_recipe.ingredient)) >= %(count_1)s ORDER BY count(ingredient_recipe.ingredient)
- LIMIT %(param_1)s
+WHERE ingredient_recipe.ingredient IN
+        (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
+        FROM recipe_ingredient
+        WHERE recipe_ingredient.name LIKE %(name_1)s)
+    OR ingredient_recipe.ingredient IN
+        (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
+        FROM recipe_ingredient
+        WHERE recipe_ingredient.name LIKE %(name_2)s)
+    OR ingredient_recipe.ingredient IN
+        (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
+        FROM recipe_ingredient
+        WHERE recipe_ingredient.name LIKE %(name_3)s)
+GROUP BY recipe_recipe.pk, recipe_recipe.title
+HAVING count(distinct(ingredient_recipe.ingredient)) >= %(count_1)s
+ORDER BY count(ingredient_recipe.pk)/len(ingredients), count(ingredient_recipe.ingredient)
+LIMIT %(param_1)s
 """
-
-
-def register_user_search(user_pk, json_data):
-    new_user_search = UserSearchData(user=user_pk, search=json.dumps(json_data))
-    db.session.add(new_user_search)
-    db.session.commit()
