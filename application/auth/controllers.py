@@ -38,6 +38,8 @@ def auth_register_user():
     registration_form = StandardRegistrationForm(payload)
     try:
         if registration_form.validate():
+            if User.query.filter(User.username == registration_form.username.data).first():
+                raise InvalidAPIRequest("Duplicate username, please choose a unique username", status_code=403)
             try:
                 password = PasswordUtilities.generate_password(
                     registration_form.password.data, registration_form.confirm.data)

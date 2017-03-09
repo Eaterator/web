@@ -20,10 +20,11 @@ recipe_blueprint = Blueprint('recipe', __name__,
                              url_prefix='/recipe')
 
 
+@recipe_blueprint.route('/search')
 @recipe_blueprint.route('/search/<limit>')
 @jwt_required
-@JWTUtilities.user_role_required('regular')
-def search_recipe(limit):
+@JWTUtilities.user_role_required('consumer')
+def search_recipe(limit=None):
     limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
     limit = limit if limit <= REGULAR_MAX_SEARCH_SIZE else REGULAR_MAX_SEARCH_SIZE
     user_pk = get_jwt_identity()
@@ -34,10 +35,11 @@ def search_recipe(limit):
     return jsonify({'recipes': recipes})
 
 
-@recipe_blueprint.route('/business/search/<limit>')
+@recipe_blueprint.route('/search/business')
+@recipe_blueprint.route('/search/business/<limit>')
 @jwt_required
 @JWTUtilities.user_role_required('business')
-def business_search_recipe(limit):
+def business_search_recipe(limit=None):
     limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
     limit = limit if limit <= BUSINESS_MAX_SEARCH_SIZE else BUSINESS_MAX_SEARCH_SIZE
     user_pk = get_jwt_identity()
@@ -48,10 +50,11 @@ def business_search_recipe(limit):
     return jsonify({'recipes': recipes})
 
 
-@recipe_blueprint.route('/business/search/batch/<limit>')
+@recipe_blueprint.route('/search/business/batch')
+@recipe_blueprint.route('/search/business/batch/<limit>')
 @jwt_required
 @JWTUtilities.user_role_required('business')
-def business_batch_search(limit):
+def business_batch_search(limit=None):
     limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
     limit = limit if limit <= BUSINESS_MAX_SEARCH_SIZE else BUSINESS_MAX_SEARCH_SIZE
     user_pk = get_jwt_identity()

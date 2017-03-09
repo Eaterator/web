@@ -4,7 +4,7 @@ from functools import wraps
 from string import punctuation
 import bcrypt
 from application import config
-from application.exceptions import InvalidAPIRequest
+from application.exceptions import InvalidAPIRequest, UNAUTHORIZED_CODE
 
 PASSWORD_CONSTRAINTS = [
     lambda x: len(x) >= 7,
@@ -40,7 +40,7 @@ class JWTUtilities:
             def wrapper(*args, **kwargs):
                 claims = get_jwt_claims()
                 if not claims or claims[config.ROLE_CLAIM_FIELD] != role:
-                    raise InvalidAPIRequest("Route restricted for your account", status_code=403)
+                    raise InvalidAPIRequest("Route restricted for your account", status_code=UNAUTHORIZED_CODE)
                 return func(*args, **kwargs)
             return wrapper
         return decorator

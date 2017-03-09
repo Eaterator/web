@@ -7,12 +7,17 @@ from application.app import app, db
 class BaseTempDBTestCase(TestCase):
 
     def setUp(self):
-        app.config['TESTING'] = True
+        self.app = app
+        self.app.config['TESTING'] = True
         self.tmp_dir = TemporaryDirectory()
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(self.tmp_dir, 'tmp.db')
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(self.tmp_dir.name, 'tmp.db')
         self.app = app.test_client()
         self.db = db
+        self.db.session.close()
+        self.db.drop_all()
         self.db.create_all()
 
     def tearDown(self):
+        self.db.session.remove()
+        self.db.drop_all()
         del self.tmp_dir

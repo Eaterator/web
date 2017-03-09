@@ -9,7 +9,7 @@ from application.auth.auth_utilities import JWTUtilities
 # Initialize application and DB
 app = Flask(__name__)
 app.config.from_pyfile(config.CONFIG_FILE)
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, session_options={'expire_on_commit': False})
 
 # Initialize JWT handler
 jwt = JWTManager(app)
@@ -29,11 +29,13 @@ from application.controllers import home_blueprint
 from application.auth.controllers import auth_blueprint
 from application.recipe.controllers import recipe_blueprint
 from application.user.controllers import user_blueprint
+from application.admin.controllers import admin_blueprint
 blueprints = [
     home_blueprint,
     auth_blueprint,
     recipe_blueprint,
-    user_blueprint
+    user_blueprint,
+    admin_blueprint
 ]
 
 for blueprint in blueprints:

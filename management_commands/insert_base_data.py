@@ -1,4 +1,5 @@
 from application.auth.models import Role
+from application.auth.roles import ROLES
 from application.recipe.models import Source
 from application.app import db
 

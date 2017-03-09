@@ -10,14 +10,14 @@ from application.app import db
 from application.exceptions import InvalidAPIRequest
 
 admin_blueprint = Blueprint('admin', __name__,
-                            template_folder=os.path.join('templates', 'auth'),
+                            template_folder=os.path.join('templates', 'admin'),
                             url_prefix='/admin'
                             )
 
 
+@admin_blueprint.route("/", methods=["GET"])
 @jwt_required
 @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
-@admin_blueprint.route("/", methods=["GET"])
 def admin_dashboard():
     return render_template("index.html")
 
