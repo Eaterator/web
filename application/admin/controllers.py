@@ -22,9 +22,9 @@ def admin_dashboard():
     return render_template("index.html")
 
 
+@admin_blueprint.route("/statistics/search/<start_date>/<time_group_by>")
 @jwt_required
 @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
-@admin_blueprint.route("/statistics/search/<start_date>/<time_group_by>")
 def user_search_statistics(start_date, time_group_by):
     """
     Returns the total search requests made from the start date
@@ -32,8 +32,7 @@ def user_search_statistics(start_date, time_group_by):
     :param time_group_by: the time period to group by (daily or monthly)
     :return:
     """
-    # TODO parse date --> is json / load json better!?
-    start_date = start_date if start_date else (datetime.now() - timedelta(days=30)).date()
+    start_date, time_group_by = _parse_input_args(start_date, time_group_by)
     time_group_by = time_group_by if time_group_by else 'DAY'
     if time_group_by.upper() == 'DAY':
         aggregate_searches = db.session.query(
@@ -54,12 +53,17 @@ def user_search_statistics(start_date, time_group_by):
     return jsonify(aggregate_searches)
 
 
+@admin_blueprint.route("/statistics/search/unique-users/<start_date>/<time_group_by>")
 @jwt_required
 @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
-@admin_blueprint.route("/statistics/search/unique-users/<start_date>/<time_group_by>")
 def unique_search_users(start_date, time_group_by):
-    start_date = start_date if start_date else (datetime.now() - timedelta(days=30)).date()
-    time_group_by = time_group_by if time_group_by else 'DAY'
+    """
+        Returns the total search requests made from the start date by distinct users
+        :param start_date: the earliest date to calculate from
+        :param time_group_by: the time period to group by (daily or monthly)
+        :return:
+        """
+    start_date, time_group_by = _parse_input_args(start_date, time_group_by)
     if time_group_by.upper() == 'DAY':
         aggregate_searches = db.session.query(
             func.to_date(UserSearchData.created_at), func.count(func.distinct(UserSearchData.user.pk))).\
@@ -77,3 +81,10 @@ def unique_search_users(start_date, time_group_by):
         raise InvalidAPIRequest("Could not group by: {0}. not valid. Only DAY and MONTH supported".format(
             time_group_by))
     return jsonify(aggregate_searches)
+
+
+def _parse_input_args(start_date, time_group_by):
+    start_date = datetime.strptime(start_date, '%Y-%m-%d') \
+        if start_date else (datetime.now() - timedelta(days=30)).date()
+    time_group_by = time_group_by if time_group_by else 'DAY'
+    return start_date, time_group_by
