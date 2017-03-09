@@ -7,25 +7,62 @@ from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest
 from application.app import db
+from application.auth.auth_utilities import JWTUtilities
 from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
+DEFAULT_SEARCH_RESULT_SIZE = 20
+REGULAR_MAX_SEARCH_SIZE = 100
+BUSINESS_MAX_SEARCH_SIZE = 250
 
 recipe_blueprint = Blueprint('recipe', __name__,
                              template_folder=os.path.join('templates', 'recipe'),
                              url_prefix='/recipe')
 
 
-@recipe_blueprint.route('/search')
+@recipe_blueprint.route('/search/<limit>')
 @jwt_required
-def search_recipe():
+@JWTUtilities.user_role_required('regular')
+def search_recipe(limit):
+    limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
+    limit = limit if limit <= REGULAR_MAX_SEARCH_SIZE else REGULAR_MAX_SEARCH_SIZE
     user_pk = get_jwt_identity()
     payload = request.get_json()
     register_user_search(user_pk, payload)
-    ingredients = [pi.ingredient.primary if pi.ingredient and pi.ingredient.primary else None for pi in
-                   [PARSER(ingredient) for ingredient in payload["ingredients"]]]
-    recipes = create_recipe_search_query(ingredients)
+    ingredients = parse_ingredients(payload)
+    recipes = create_recipe_search_query(ingredients, limit=limit)
     return jsonify({'recipes': recipes})
+
+
+@recipe_blueprint.route('/business/search/<limit>')
+@jwt_required
+@JWTUtilities.user_role_required('business')
+def business_search_recipe(limit):
+    limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
+    limit = limit if limit <= BUSINESS_MAX_SEARCH_SIZE else BUSINESS_MAX_SEARCH_SIZE
+    user_pk = get_jwt_identity()
+    payload = request.get_json()
+    register_user_search(user_pk, payload)
+    ingredients = parse_ingredients(payload)
+    recipes = create_recipe_search_query(ingredients, limit=limit)
+    return jsonify({'recipes': recipes})
+
+
+@recipe_blueprint.route('/business/search/batch/<limit>')
+@jwt_required
+@JWTUtilities.user_role_required('business')
+def business_batch_search(limit):
+    limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
+    limit = limit if limit <= BUSINESS_MAX_SEARCH_SIZE else BUSINESS_MAX_SEARCH_SIZE
+    user_pk = get_jwt_identity()
+    payload = request.get_json()
+    recipes = {}
+    search_num = 1
+    for _, search in payload['searches'].items():
+        register_user_search(user_pk, search)
+        ingredients = parse_ingredients(search["ingredients"])
+        recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
+    return jsonify(recipes)
 
 
 def register_user_search(user_pk, json_data):
@@ -34,7 +71,12 @@ def register_user_search(user_pk, json_data):
     db.session.commit()
 
 
-def create_recipe_search_query(ingredients):
+def parse_ingredients(payload):
+    return [pi.ingredient.primary if pi.ingredient and pi.ingredient.primary else None for pi in
+            [PARSER(ingredient) for ingredient in payload["ingredients"]]]
+
+
+def create_recipe_search_query(ingredients, limit=20):
     if len(ingredients) < 3:
         raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=400)
     return db.session.query(Recipe.pk, Recipe.title).\
@@ -44,7 +86,7 @@ def create_recipe_search_query(ingredients):
         group_by(Recipe.pk, Recipe.title).\
         having(func.count(func.distinct(IngredientRecipe.ingredient)) >= len(ingredients)).\
         order_by(func.count(IngredientRecipe.pk)/(len(ingredients))).\
-        order_by(func.count(IngredientRecipe.ingredient)).limit(20).all()
+        order_by(func.count(IngredientRecipe.ingredient)).limit(limit).all()
 
 
 def apply_dynamic_filters(ingredients):
@@ -78,7 +120,9 @@ curl -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -X G
 ingredients == ['onion', 'chicken', 'potato']
 
 SELECT recipe_recipe.pk AS recipe_recipe_pk, recipe_recipe.title AS recipe_recipe_title
-FROM recipe_recipe JOIN ingredient_recipe ON recipe_recipe.pk = ingredient_recipe.recipe JOIN recipe_ingredient ON recipe_ingredient.pk = ingredient_recipe.ingredient
+FROM recipe_recipe
+JOIN ingredient_recipe ON recipe_recipe.pk = ingredient_recipe.recipe
+JOIN recipe_ingredient ON recipe_ingredient.pk = ingredient_recipe.ingredient
 WHERE ingredient_recipe.ingredient IN
         (SELECT recipe_ingredient.pk AS recipe_ingredient_pk
         FROM recipe_ingredient

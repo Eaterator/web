@@ -14,6 +14,7 @@ class User(RequiredFields):
     last_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
     role = db.Column(db.Integer, db.ForeignKey('auth_role.pk'))
+    Role = db.relationship("Role", backref="auth_user")
 
 
 class Role(RequiredFields):
@@ -23,6 +24,21 @@ class Role(RequiredFields):
     name = db.Column(db.String(15), unique=True)
     type_ = db.Column(db.String(15))
     is_admin = db.Column(db.Boolean)
+
+
+class UserUtilities:
+
+    @classmethod
+    def regular_user_pk(cls):
+        return Role.query.filter(Role.name == 'regular').first().pk
+
+    @classmethod
+    def business_user_pk(cls):
+        return Role.query.filter(Role.name == 'business').first().pk
+
+    @classmethod
+    def admin_user_pk(cls):
+        return Role.query.filter(Role.name == 'admin').first().pk
 
 
 

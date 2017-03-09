@@ -45,9 +45,15 @@ OAUTH_CREDENTIALS = {
 }
 
 ###########################################
-#             JWT Settings                #
+#            JWT/Auth Settings            #
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)
 JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=31)
+ROLE_CLAIM_FIELD = 'role'
+ADMIN_ROLE_TYPE = 'admin'
+BUSINESS_ROLE_TYPE = 'business'
+CONSUMER_ROLE_TYPE = 'regular'
+ROLES = [ADMIN_ROLE_TYPE, BUSINESS_ROLE_TYPE, CONSUMER_ROLE_TYPE]
+
 
 ##########################################
 #             SSL Settings               #

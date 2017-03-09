@@ -1,26 +1,17 @@
-import bcrypt
 import os
 from urllib.request import urlopen
-from application import config
-from string import punctuation
 from abc import ABCMeta, abstractmethod
-from flask import url_for, redirect, jsonify, Blueprint, request, render_template
-from flask_jwt_extended import create_access_token
+from werkzeug.datastructures import MultiDict
+from flask import url_for, redirect, Blueprint, request, render_template
 from rauth import OAuth2Service
-from application.auth.models import User, Role
+from application import config
+from application.auth.models import User, UserUtilities
+from application.auth.auth_utilities import JWTUtilities, PasswordUtilities, PasswordMismatchError,\
+    ImproperPasswordError
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
     DuplicateUserEmailException
 from application.app import db, app
-from werkzeug.datastructures import MultiDict
-
-PASSWORD_CONSTRAINTS = [
-    lambda x: len(x) >= 7,
-    lambda x: any(char.isdigit() for char in x),
-    lambda x: any(char in punctuation for char in x),
-    lambda x: any(str.isupper(char) for char in x)
-]
-ACCESS_TOKEN_HEADER = "access_token"
 
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
@@ -119,58 +110,7 @@ def app_oauth_login(provider):
         return JWTUtilities.create_access_token_resp(user)
 
 
-class ImproperPasswordError(Exception):
-    pass
-
-
-class PasswordMismatchError(Exception):
-    pass
-
-
-class JWTUtilities:
-    @staticmethod
-    def create_access_token_resp(user):
-        return jsonify({
-            ACCESS_TOKEN_HEADER: create_access_token(identity=user.pk)
-        })
-
-
-class PasswordUtilities:
-
-    @staticmethod
-    def authenticate(user, password):
-        password = password.encode('utf-8') if not isinstance(password, bytes) else password
-        return bcrypt.hashpw(password, user.password) == user.password
-
-    @staticmethod
-    def generate_password(password, confirm=None):
-        if confirm and confirm != password:
-            raise PasswordMismatchError("Passwords do not match, could not register user")
-        for func in PASSWORD_CONSTRAINTS:
-            if not func(password):
-                raise ImproperPasswordError('Password is not valid')
-        password = password.encode('utf-8') if not isinstance(password, bytes) else password
-        return bcrypt.hashpw(password, bcrypt.gensalt(config.SALT_HASH_PARAMETER))
-
-
-class UserUtilities:
-
-    @classmethod
-    def regular_user_pk(cls):
-        return Role.query.filter(Role.name == 'regular').first().pk
-
-    @classmethod
-    def business_user_pk(cls):
-        return Role.query.filter(Role.name == 'business').first().pk
-
-    @classmethod
-    def admin_user_pk(cls):
-        return Role.query.filter(Role.name == 'admin').first().pk
-
-
-# TODO look at OAuth for Facebook authentication, Miguel has a good tutorial
 # https://blog.miguelgrinberg.com/post/oauth-authentication-with-flask
-
 class OAuthSignIn:
     __metaclass__ = ABCMeta
     providers = None

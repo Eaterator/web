@@ -1,6 +1,5 @@
-from unittest import TestCase, main as run_tests
+from unittest import main as run_tests
 from datetime import datetime
-from application.app import app, db
 import json
 from application.auth.models import User, Role
 from tests.base_test_case import BaseTempDBTestCase
@@ -76,7 +75,6 @@ class TestAuthRoutes(BaseTempDBTestCase):
         :return:
         """
         pass
-
 
     def test_duplicate_user(self):
         resp = self.app.post('/auth/register',

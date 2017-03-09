@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from application import config
 from application.exceptions import InvalidAPIRequest
+from application.auth.auth_utilities import JWTUtilities
 
 # Initialize application and DB
 app = Flask(__name__)
@@ -12,6 +13,16 @@ db = SQLAlchemy(app)
 
 # Initialize JWT handler
 jwt = JWTManager(app)
+
+
+@jwt.user_claims_loader
+def add_use_claims(user):
+    return JWTUtilities.add_user_claims(user)
+
+
+@jwt.user_identity_loader
+def get_user_identity(user):
+    return JWTUtilities.get_user_identity(user)
 
 # Initializing Routes/Modules
 from application.controllers import home_blueprint
@@ -34,10 +45,10 @@ for blueprint in blueprints:
     app.register_blueprint(blueprint)
 
 
+# Initialize general API Error handler function
 @app.errorhandler(InvalidAPIRequest)
 def handle_api_error(error):
     if error.status_code != 404:
-        print(error.to_dict())
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
