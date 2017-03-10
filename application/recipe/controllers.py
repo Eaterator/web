@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, or_
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
-from application.exceptions import InvalidAPIRequest
+from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
 from application.app import db
 from application.auth.auth_utilities import JWTUtilities
 from recipe_parser.ingredient_parser import IngredientParser
@@ -27,10 +27,13 @@ recipe_blueprint = Blueprint('recipe', __name__,
 def search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
-    payload = request.get_json()
-    register_user_search(user_pk, payload)
-    ingredients = parse_ingredients(payload)
+    try:
+        payload = request.get_json()
+        ingredients = parse_ingredients(payload)
+    except KeyError:
+        raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     recipes = create_recipe_search_query(ingredients, limit=limit)
+    register_user_search(user_pk, payload)
     return jsonify({'recipes': recipes})
 
 
@@ -41,9 +44,12 @@ def search_recipe(limit=None):
 def business_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
-    payload = request.get_json()
+    try:
+        payload = request.get_json()
+        ingredients = parse_ingredients(payload)
+    except KeyError:
+        raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     register_user_search(user_pk, payload)
-    ingredients = parse_ingredients(payload)
     recipes = create_recipe_search_query(ingredients, limit=limit)
     return jsonify({'recipes': recipes})
 
@@ -60,7 +66,10 @@ def business_batch_search(limit=None):
     search_num = 1
     for _, search in payload['searches'].items():
         register_user_search(user_pk, search)
-        ingredients = parse_ingredients(search["ingredients"])
+        try:
+            ingredients = parse_ingredients(search["ingredients"])
+        except KeyError:
+            raise InvalidAPIRequest("Error parsing request", status_code=BAD_REQUEST_CODE)
         recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
     return jsonify(recipes)
 
@@ -78,7 +87,7 @@ def parse_ingredients(payload):
 
 def create_recipe_search_query(ingredients, limit=20):
     if len(ingredients) < 3:
-        raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=400)
+        raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
     return db.session.query(Recipe.pk, Recipe.title).\
         join(IngredientRecipe).\
         join(Ingredient).\

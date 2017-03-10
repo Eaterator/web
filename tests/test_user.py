@@ -68,6 +68,7 @@ class TestUserControllers(BaseTempDBTestCase):
         user = User.query.filter(User.username == self.test_user["username"]).first()
         user_searches = UserSearchData.query.filter(UserSearchData.user == user.pk).all()
         self.assertEqual(len(user_searches), 5)
+        # TODO test endpoint here as well
 
     def _post_favourite_recipe(self, recipe_id, token):
         return self.app.post('/user/favourite-recipe/{0}'.format(recipe_id),

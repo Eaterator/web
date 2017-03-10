@@ -8,6 +8,9 @@ from application.app import db
 
 DEFAULT_FAVOURITE_RECIPE_NUMBER = 25
 DEFAULT_FAVOURITE_RECIPE_ORDER = 'created_at'
+DEFAULT_USER_SEARCH_HISTORY_SIZE = 10
+MAXIMUM_USER_SEARCH_HISTORY_SIZE = 30
+
 
 user_blueprint = Blueprint('user_data', __name__,
                            template_folder=os.path.join('templates', 'user'),
@@ -23,15 +26,19 @@ def user_favourites():
     return jsonify(favourite_recipes)
 
 
-@user_blueprint.route('/recent_searches/<num_searches>', methods=["GET"])
+@user_blueprint.route('/recent-searches/<num_searches>', methods=["GET"])
 @jwt_required
 def user_searches(num_searches):
-    num_searches = num_searches if num_searches else 10
-    searches = UserSearchData.query.\
+    try:
+        num_searches = int(num_searches) if num_searches else DEFAULT_USER_SEARCH_HISTORY_SIZE
+    except (ValueError, TypeError):
+        num_searches = DEFAULT_USER_SEARCH_HISTORY_SIZE
+    num_searches = num_searches if num_searches <= MAXIMUM_USER_SEARCH_HISTORY_SIZE else 10
+    searches = db.session.query(UserSearchData.search).\
         filter(UserSearchData.user == get_jwt_identity()).\
         order_by(UserSearchData.created_at.desc()).\
         limit(num_searches)
-    response = jsonify(searches)
+    response = jsonify({"searches": searches})
     response.error_code = 200
     return response
 
@@ -52,7 +59,7 @@ def add_user_favourite_recipe(recipe_id):
             db.session.add(new_favourite)
             db.session.commit()
     else:
-        raise InvalidAPIRequest("", status_code=BAD_REQUEST_CODE)
+        raise InvalidAPIRequest("No recipe_id provided", status_code=BAD_REQUEST_CODE)
     response = jsonify({"message": "OK"})
     response.status_code = 200
     return response
