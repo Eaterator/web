@@ -14,8 +14,8 @@ user_blueprint = Blueprint('user_data', __name__,
                            url_prefix='/user')
 
 
-@jwt_required
 @user_blueprint.route('/favourite-recipes', methods=["GET"])
+@jwt_required
 def user_favourites():
     favourite_recipes = db.session.query(Recipe.pk, Recipe.title).filter(Recipe.pk.in_(
         db.session.query(FavouriteRecipe.pk).filter(FavouriteRecipe.user == get_jwt_identity())
@@ -23,8 +23,8 @@ def user_favourites():
     return jsonify(favourite_recipes)
 
 
-@jwt_required
 @user_blueprint.route('/recent_searches/<num_searches>', methods=["GET"])
+@jwt_required
 def user_searches(num_searches):
     num_searches = num_searches if num_searches else 10
     searches = UserSearchData.query.\
@@ -36,17 +36,23 @@ def user_searches(num_searches):
     return response
 
 
-@jwt_required
 @user_blueprint.route('/favourite-recipe/<recipe_id>', methods=["POST"])
+@jwt_required
 def add_user_favourite_recipe(recipe_id):
     if recipe_id:
+        try:
+            recipe_id = int(recipe_id)
+        except ValueError:
+            raise InvalidAPIRequest("Could not process given recipe id: {0}".format(recipe_id))
         instance = FavouriteRecipe.query.\
-            filter_by(FavouriteRecipe.user == get_jwt_identity()).\
-            filter_by(FavouriteRecipe.recipe == recipe_id)
+            filter(FavouriteRecipe.user == get_jwt_identity()).\
+            filter(FavouriteRecipe.recipe == recipe_id).first()
         if not instance:
             new_favourite = FavouriteRecipe(recipe=recipe_id, user=get_jwt_identity())
             db.session.add(new_favourite)
             db.session.commit()
     else:
         raise InvalidAPIRequest("", status_code=BAD_REQUEST_CODE)
-    return make_response("OK")
+    response = jsonify({"message": "OK"})
+    response.status_code = 200
+    return response
