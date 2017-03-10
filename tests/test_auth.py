@@ -2,11 +2,10 @@ from unittest import main as run_tests
 from datetime import datetime
 from copy import copy
 import json
-from tests.base_test_case import BaseTempDBTestCase
+from tests.base_test_case import BaseTempDBTestCase, TEST_ADMIN_USER, TEST_REGULAR_USER, TEST_BUSINESS_USER,\
+    TEST_REGISTER_USER_PAYLOAD
 from application.auth.models import User, Role
-from application.auth.roles import ROLES
-from application.auth.auth_utilities import PasswordUtilities, ACCESS_TOKEN_HEADER
-from application.app import db
+from application.auth.auth_utilities import PasswordUtilities
 
 
 class TestAuthModels(BaseTempDBTestCase):
@@ -59,28 +58,7 @@ class TestAuthRoutes(BaseTempDBTestCase):
 
     def setUp(self):
         super().setUp()
-        self.roles = {}
-        for role in ROLES:
-            self.roles[role["name"]] = Role(**role)
-            self.db.session.add(self.roles[role["name"]])
-        self.db.session.commit()
-
-    def create_user(self, user_payload, role):
-        user = User(**user_payload)
-        user.password = PasswordUtilities.generate_password(user.password)
-        user.role = role.pk
-        self.db.session.add(user)
-        self.db.session.commit()
-
-    def get_jwt_token(self, user):
-        resp = self.app.post('/auth/',
-                             data=json.dumps({
-                                 "username": user["username"],
-                                 "password": user["password"]
-                             }),
-                             content_type="application/json"
-                             )
-        return json.loads(resp.data.decode('utf-8')).get(ACCESS_TOKEN_HEADER), resp
+        self.create_roles()
 
     def test_register_user(self):
         """
@@ -160,41 +138,6 @@ class TestAuthRoutes(BaseTempDBTestCase):
                             headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 403)
 
-
-TEST_REGISTER_USER_PAYLOAD = dict(
-    username="testuser",
-    password="TestUser123!",
-    confirm="TestUser123!",
-    email="test@user.com",
-    first_name="test",
-    last_name="user",
-    date_of_birth=datetime(1991, 1, 1)
-)
-
-TEST_REGULAR_USER = dict(
-    username="testregularuser",
-    password="TestUser123!",
-    email="test@user.com",
-    first_name="test",
-    last_name="user",
-    date_of_birth=datetime(1991, 1, 1)
-)
-TEST_BUSINESS_USER = dict(
-    username="testbusinessuser",
-    password="TestUser123!",
-    email="test@user.com",
-    first_name="test",
-    last_name="user",
-    date_of_birth=datetime(1991, 1, 1)
-)
-TEST_ADMIN_USER = dict(
-    username="testadminuser",
-    password="TestUser123!",
-    email="test@user.com",
-    first_name="test",
-    last_name="user",
-    date_of_birth=datetime(1991, 1, 1)
-)
 
 if __name__ == '__main__':
     run_tests()

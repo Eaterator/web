@@ -9,8 +9,6 @@ class TestUserModels(BaseTempDBTestCase):
 
     def setUp(self):
         super().__init__()
-        self.test_role = None
-        self.test_user = None
 
     def test_favourite_recipe_model(self):
         pass
@@ -23,17 +21,17 @@ class TestUserControllers(BaseTempDBTestCase):
 
     def setUp(self):
         super().__init__()
-        self.test_role = None
-        self.test_user = None
-        self.test_recipe = None
 
-    def test_record_user_search(self):
+    def test_log_user_search(self):
         pass
 
     def test_favourite_user_recipe(self):
         pass
 
     def list_user_recipes(self):
+        pass
+
+    def test_list_user_search_history(self):
         pass
 
 

@@ -25,8 +25,7 @@ recipe_blueprint = Blueprint('recipe', __name__,
 @jwt_required
 @JWTUtilities.user_role_required('consumer')
 def search_recipe(limit=None):
-    limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
-    limit = limit if limit <= REGULAR_MAX_SEARCH_SIZE else REGULAR_MAX_SEARCH_SIZE
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
     payload = request.get_json()
     register_user_search(user_pk, payload)
@@ -40,8 +39,7 @@ def search_recipe(limit=None):
 @jwt_required
 @JWTUtilities.user_role_required('business')
 def business_search_recipe(limit=None):
-    limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
-    limit = limit if limit <= BUSINESS_MAX_SEARCH_SIZE else BUSINESS_MAX_SEARCH_SIZE
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
     payload = request.get_json()
     register_user_search(user_pk, payload)
@@ -55,8 +53,7 @@ def business_search_recipe(limit=None):
 @jwt_required
 @JWTUtilities.user_role_required('business')
 def business_batch_search(limit=None):
-    limit = limit if limit else DEFAULT_SEARCH_RESULT_SIZE
-    limit = limit if limit <= BUSINESS_MAX_SEARCH_SIZE else BUSINESS_MAX_SEARCH_SIZE
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
     payload = request.get_json()
     recipes = {}
@@ -104,6 +101,15 @@ def apply_dynamic_filters(ingredients):
         )
     return dynamic_filters
 
+
+def _parse_limit_parameter(limit, default, maximum):
+    try:
+        if limit:
+            limit = int(limit)
+            limit = limit if limit <= maximum else maximum
+    except (ValueError, TypeError):
+        limit = default
+    return limit
 """
 v1 search query:
 -- general idea is all similar ingredients are found matching the input, then we find all recipes that have at
