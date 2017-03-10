@@ -1,6 +1,6 @@
-from unittest import TestCase, main as run_tests
+from unittest import main as run_tests
 from tests.base_test_case import BaseTempDBTestCase
-from application.recipe.models import Recipe, Ingredient, IngredientModifier, IngredientRecipe
+from application.recipe.models import Recipe, Ingredient, IngredientRecipe
 import json
 
 

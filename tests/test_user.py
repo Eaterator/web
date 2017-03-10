@@ -1,7 +1,7 @@
-from unittest import TestCase, main as run_tests
+from unittest import main as run_tests
 import json
 from tests.base_test_case import BaseTempDBTestCase
-from application.auth.models import Role, User
+from application.auth.models import User
 from application.user.models import UserSearchData, FavouriteRecipe
 from application.recipe.models import Recipe
 
