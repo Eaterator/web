@@ -57,16 +57,153 @@
 #bootstrap-overrides #menu li a:hover {
 	background-color: #252f38;
 }
+
 #bootstrap-overrides #open-trigger {
 	display: none;
 }
+/*
+#bootstrap-overrides #menu li:last-of-type .login a, #bootstrap-overrides #menu li:last-of-type .login a:hover {
+    background-color: inherit;
+    text-transform: none;
+}
+#bootstrap-overrides #menu li:last-of-type a:hover ~ .login{
+    visibility: visible;
+    transition-delay: 0s;
+}
+*/
+
+/*
+#bootstrap-overrides .login input, textarea, select, label{
+	 font-family: inherit;
+     font-size: 12px;
+     -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+     box-sizing: border-box;
+}
+#bootstrap-overrides .login{
+     display: block;
+     visibility: hidden;
+     transition: all 0s ease 500s;
+     position: absolute;
+     right: 0;
+     margin: 20px auto;
+     padding: 18px 20px;
+     width: 260px;
+     background: #3f65b7;
+     background-clip: padding-box;
+     border: 1px solid #172b4e;
+     border-bottom-color: #142647;
+     border-radius: 5px;
+     background-image: -webkit-radial-gradient(cover, #437dd6, #3960a6);
+     background-image: -moz-radial-gradient(cover, #437dd6, #3960a6);
+     background-image: -o-radial-gradient(cover, #437dd6, #3960a6);
+     background-image: radial-gradient(cover, #437dd6, #3960a6);
+     -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), inset 0 0 1px 1px rgba(255, 255, 255, 0.1), 0 2px 10px rgba(0, 0, 0, 0.5);
+     box-shadow: inset 0 1px rgba(255, 255, 255, 0.3), inset 0 0 1px 1px rgba(255, 255, 255, 0.1), 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+#bootstrap-overrides .login > h1 {
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: normal;
+    color: white;
+    text-align: center;
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.4);
+}
+
+#bootstrap-overrides .login-input {
+    display: block;
+    width: 100%;
+    height: 37px;
+    margin-bottom: 20px;
+    padding: 0 9px;
+    color: white;
+    text-shadow: 0 1px black;
+    background: #2b3e5d;
+    border: 1px solid #15243b;
+    border-top-color: #0d1827;
+    border-radius: 4px;
+    background-image: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0));
+    background-image: -moz-linear-gradient(top, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0));
+    background-image: -o-linear-gradient(top, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0));
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.2) 20%, rgba(0, 0, 0, 0));
+    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.2);
+}
+
+#bootstrap-overrides .login-input:focus {
+    outline: 0;
+    background-color: #32486d;
+    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 4px 1px rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 4px 1px rgba(255, 255, 255, 0.6);
+}
+
+#bootstrap-overrides .lt-ie9 .login-input { line-height: 35px; }
+
+#bootstrap-overrides .login-submit {
+    text-transform: uppercase;
+    display: block;
+    width: 100%;
+    height: 37px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #294779;
+    text-align: center;
+    text-shadow: 0 1px rgba(255, 255, 255, 0.3);
+    background: #adcbfa;
+    background-clip: padding-box;
+    border: 1px solid #284473;
+    border-bottom-color: #223b66;
+    border-radius: 4px;
+    cursor: pointer;
+    background-image: -webkit-linear-gradient(top, #d0e1fe, #96b8ed);
+    background-image: -moz-linear-gradient(top, #d0e1fe, #96b8ed);
+    background-image: -o-linear-gradient(top, #d0e1fe, #96b8ed);
+    background-image: linear-gradient(to bottom, #d0e1fe, #96b8ed);
+    -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), inset 0 0 7px rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), inset 0 0 7px rgba(255, 255, 255, 0.4), 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+#bootstrap-overrides .login-submit:active {
+    background: #a4c2f3;
+    -webkit-box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.4), 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.4), 0 1px rgba(255, 255, 255, 0.1);
+}
+
+#bootstrap-overrides .login-help {
+    text-align: center;
+}
+
+.login-help > a {
+    font-size: 11px;
+    color: #d4deef;
+    text-decoration: none;
+    text-shadow: 0 -1px rgba(0, 0, 0, 0.4);
+}
+
+#bootstrap-overrides .login-help > a:hover {
+    text-decoration: underline;
+}
+
+::-moz-focus-inner {
+    padding: 0;
+    border: 0;
+}
+
+:-moz-placeholder { color: #bcc0c8 !important; }
+::-webkit-input-placeholder { color: #bcc0c8; }
+:-ms-input-placeholder { color: #bcc0c8 !important; }
+*/
+
 
 #bootstrap-overrides .carousel-inner img {
     width: 100%;
     height: 570px;
 }
 #bootstrap-overrides .carousel-control {
-	 background-image: none;
+    background-image: none;
 }
 #bootstrap-overrides .carousel-inner .carousel-caption {
 	top: 70px;
@@ -241,7 +378,7 @@
     border-radius: 6px;
     background-color: #fff;
     margin-top: 40px;
-    margin-bottom: 70px;
+    margin-bottom: 15px;
 }
 
 #bootstrap-overrides #custom-search-input input{
@@ -314,6 +451,9 @@
 	background-color: none !important;
     box-shadow: none !important;
     border: none !important;
+/*    overflow-y: scroll;*/
+/*    height: 30px;*/
+    width: 100%;
 }
 #bootstrap-overrides main .label{
 	padding: 8px 20px;
@@ -325,4 +465,15 @@
 	font-size: 14px;
     font-family: "Open Sans", sans-serif;
     font-weight: 300;
+    display: inline-block;
+    margin-bottom: 3px;
+}
+#bootstrap-overrides .sample-products-list{
+    margin-bottom: 100px;
+}
+#bootstrap-overrides .sample-products-list span{
+     border-bottom: 1px dashed #000;
+    cursor: pointer;
+    margin-right: 7px;
+    
 }
