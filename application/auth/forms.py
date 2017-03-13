@@ -23,23 +23,22 @@ class UserDictMixin:
 
 class StandardRegistrationForm(FlaskForm, UserDictMixin):
 
-    data_fields = ['username', 'social_id', 'email', 'first_name', 'last_name', 'date_of_birth', 'password']
+    data_fields = ['username', 'social_id', 'first_name', 'last_name', 'date_of_birth', 'password']
 
     class Meta:
         csrf = False
 
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Email', validators=[Email(), DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm = PasswordField("Confirm password", validators=[DataRequired()])
-    email = StringField('Email', validators=[Email()])
     date_of_birth = DateField("Birth date")
     first_name = StringField('First name')
     last_name = StringField('Last name')
     social_id = None
 
     def validate_unique_user(self, field):
-        if User.query.filter(User.email == field.data).first():
-            raise DuplicateUserEmailException("Email taken")
+        if User.query.filter(User.username == field.data).first():
+            raise DuplicateUserEmailUsernameException("Email taken")
 
 
 class AppRegistrationForm(FlaskForm, UserDictMixin):
@@ -57,5 +56,5 @@ class AppRegistrationForm(FlaskForm, UserDictMixin):
     date_of_birth = DateField("Birthday")
 
 
-class DuplicateUserEmailException(Exception):
+class DuplicateUserEmailUsernameException(Exception):
     pass

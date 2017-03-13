@@ -10,7 +10,7 @@ from application.auth.auth_utilities import JWTUtilities, PasswordUtilities, Pas
     ImproperPasswordError
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
-    DuplicateUserEmailException
+    DuplicateUserEmailUsernameException
 from application.app import db, app
 
 auth_blueprint = Blueprint('auth', __name__,
@@ -57,7 +57,7 @@ def auth_register_user():
                                         status_code=BAD_REQUEST_CODE)
         else:
             raise InvalidAPIRequest("Bad request, please try again", status_code=BAD_REQUEST_CODE)
-    except DuplicateUserEmailException:
+    except DuplicateUserEmailUsernameException:
         raise InvalidAPIRequest("Username taken")
 
 

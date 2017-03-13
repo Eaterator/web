@@ -6,10 +6,9 @@ class User(RequiredFields):
     __tablename__ = 'auth_user'
 
     pk = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, unique=True)
+    username = db.Column(db.String(64), unique=True)
     social_id = db.Column(db.String(64), nullable=True, unique=True)
     password = db.Column(db.Binary(64))
-    email = db.Column(db.String(64), nullable=True)
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)

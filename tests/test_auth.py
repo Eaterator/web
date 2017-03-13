@@ -76,7 +76,8 @@ class TestAuthRoutes(BaseTempDBTestCase):
 
     def test_authenticate(self):
         """
-        Curl: curl -H "Content-Type: application/json" -X POST -d '{"first_name": "test", "last_name": "user", "date_of_birth": "1991-01-01", "confirm": "TestUsetestuser", "email": "test@user.com", "password": "TestUser123!"}' http://localhost:5000/auth/register
+        Curl test:
+        curl -H "Content-Type: application/json" -X POST -d '{"first_name": "test", "last_name": "user", "date_of_birth": "1991-01-01", "confirm": "TestUser123!", "username": "test@user.com", "password": "TestUser123!"}' http://localhost:5000/auth/register
         :return:
         """
         self.create_user(TEST_REGULAR_USER, self.roles["regular"])
