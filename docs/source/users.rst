@@ -1,11 +1,6 @@
 ################
 Users Module API
 ################
-These API endpoints allow for user data to be persisted/queried. Right now, it keeps track of user searchs, and users' favourite recipes. All requests require a JWT token.
-
-.. code-block:: none
-
-	"Authorization" => "Bearer ccccccc.ccccccccccc.cccccccc"
 
 Get User Favourite Recipes
 --------------------------
@@ -28,7 +23,19 @@ Returns a list of a user's favourite recipes. Note that the request is just a li
 		]
 	}
 
-User Searches
+Add User Favourite
+------------------
+Registers a favourite recipe for a given user. Requires a JWT token.
+
+.. code-block:: none
+
+	Method = "POST"
+	Endpoint = '/user/favourite/<recipe_id:int>'
+	recipe_id = id for a recipe to favourite
+	Response = {"message": "OK"}
+	Error 400 = BAD REQUEST, no recipe_id provided, or it could not be parsed to int
+
+	User Searches
 -------------
 Returns a list of recent user searches ordered by date they were searched.
 
@@ -45,15 +52,3 @@ Returns a list of recent user searches ordered by date they were searched.
 		        ]
 	               }
 	Error 401 = UNAUTHORIZED (401), invalid, expired, or missing JWT token
-
-Add User Favourite
-------------------
-Registers a favourite recipe for a given user. Requires a JWT token.
-
-.. code-block:: none
-
-	Method = "POST"
-	Endpoint = '/user/favourite/<recipe_id:int>'
-	recipe_id = id for a recipe to favourite
-	Response = {"message": "OK"}
-	Error 400 = BAD REQUEST, no recipe_id provided, or it could not be parsed to int

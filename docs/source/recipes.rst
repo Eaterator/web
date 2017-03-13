@@ -3,16 +3,8 @@ Recipe Module API
 #################
 The recipes API focuses solely on searching the database for recipes for regular and business users.
 
-Required Authentication Headers
--------------------------------
-All requests need an authentication token as a header in the request in order to complete a search.
-
-.. code-block:: none
-
-	"Authorization" => "Bearer ccccccccc.ccccccccccccccccc.ccccccc"
-
-Search
-======
+Recipe Search
+=============
 
 Regular User Endpoints
 ----------------------
@@ -20,8 +12,6 @@ Regular User Endpoints
 Regular users can submit a list of ingredients to complete a search, which returns a list of recipes with their titles. I will eventually include a score/rating field as well. It will automatically log the user search into the appropriate table for use with the `user` module to query/collect user data.
 
 **N.B. minimum ingredient number is 3 (i.e. length(ingredients) >= 3)**
-
-**N.B that I will label response fields (i.e. "id": 4567, "title": "Recipe Title")**
 
 .. code-block:: none
 		
@@ -78,8 +68,8 @@ Envision to put this on the landing page so top ingredients are easy to click to
 .. code-block:: none
 		
     Method = 'GET'
-    Endpoint = '/top-ingredients/<limit>'
-    limit = integer for top ingredients
+    Endpoint = '/top-ingredients/<limit:int>'
+    limit = integer for number top ingredients to return
         default = 15
 	maximum = 30
     Response = {
@@ -105,9 +95,9 @@ Gives a list of related ingredients. URL will probably change an ingredient to a
 .. code-block:: none
 		
     Method = 'GET'
-    Endpoint = '/top-ingredients/<ingredient>/<limit>'
+    Endpoint = '/top-ingredients/<ingredient:string>/<limit:int>'
     ingredient = ingredient name to search for related ones
-    limit = integer for top ingredients
+    limit = integer for number related ingredients to return
         default = 15
 	maximum = 30
     Response = {
@@ -120,7 +110,6 @@ Gives a list of related ingredients. URL will probably change an ingredient to a
             "name": "parsley", 
             "pk": 3844
            }
-
 	]
     }
     Error 401 = Unauthorized, no JWT supplied, or invalid/expired token.

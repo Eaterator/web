@@ -15,6 +15,15 @@ Welcome to Eaterator Web's documentation!
    recipes
    admin
 
+Required Headers
+================
+API calls (except for authentication) require the following headers:
+
+.. code-block:: none
+
+	"Authorization" => "Bearer ccccccc.ccccccccccc.cccccccc"
+	"Content-Type"  => "application/json"
+
 Indices and tables
 ==================
 
