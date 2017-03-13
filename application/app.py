@@ -48,7 +48,7 @@ for blueprint in blueprints:
 
 
 # Initialize general API Error handler function
-@app.errorhandler(InvalidAPIRequest, Exception)
+@app.errorhandler(Exception)
 def handle_api_error(error):
     if isinstance(error, InvalidAPIRequest):
         if error.status_code != 404:
