@@ -8,6 +8,7 @@ from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
 from application.app import db
 from application.auth.auth_utilities import JWTUtilities
+from application.recipe.utilities import RecipeFormatter
 from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
@@ -34,7 +35,7 @@ def search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     recipes = create_recipe_search_query(ingredients, limit=limit)
     register_user_search(user_pk, payload)
-    return jsonify({'recipes': recipes})
+    return jsonify(RecipeFormatter.recipes_to_dict(recipes))
 
 
 @recipe_blueprint.route('/search/business')
@@ -51,7 +52,7 @@ def business_search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     register_user_search(user_pk, payload)
     recipes = create_recipe_search_query(ingredients, limit=limit)
-    return jsonify({'recipes': recipes})
+    return jsonify(RecipeFormatter.recipes_to_dict(recipes))
 
 
 @recipe_blueprint.route('/search/business/batch')
@@ -71,7 +72,11 @@ def business_batch_search(limit=None):
         except KeyError:
             raise InvalidAPIRequest("Error parsing request", status_code=BAD_REQUEST_CODE)
         recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
-    return jsonify(recipes)
+    return jsonify(
+        {"searches": [
+            RecipeFormatter.recipes_to_dict(recipe_lst) for recipe_lst in recipes
+        ]}
+    )
 
 
 def register_user_search(user_pk, json_data):
@@ -88,7 +93,7 @@ def parse_ingredients(payload):
 def create_recipe_search_query(ingredients, limit=20):
     if len(ingredients) < 3:
         raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
-    return db.session.query(Recipe.pk, Recipe.title).\
+    return db.session.query(Recipe).\
         join(IngredientRecipe).\
         join(Ingredient).\
         filter(or_(*apply_dynamic_filters(ingredients))).\

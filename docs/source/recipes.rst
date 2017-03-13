@@ -33,14 +33,14 @@ Regular users can submit a list of ingredients to complete a search, which retur
 	}
 	Response = {
 		"recipes" : [
-		    [
-                        6442, 
-                        "Turkey Saut\u00e9 with Fresh Cherry Sauce recipe | Epicurious.com"
-                    ], 
-                    [
-                        6904, 
-                        "Kirsch and Tart Cherry Souffles recipe | Epicurious.com"
-                    ]
+		    {
+                        "pk": 6442, 
+                        "title": "Turkey Saut\u00e9 with Fresh Cherry Sauce recipe | Epicurious.com"
+                    }, 
+                    {
+                        "pk": 6904, 
+                        "title": "Kirsch and Tart Cherry Souffles recipe | Epicurious.com"
+                    }
 
 		]
 	}

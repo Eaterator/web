@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import FavouriteRecipe, UserSearchData
 from application.recipe.models import Recipe
+from application.recipe.utilities import RecipeFormatter
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 from application.app import db
 
@@ -20,10 +21,10 @@ user_blueprint = Blueprint('user_data', __name__,
 @user_blueprint.route('/favourite-recipes', methods=["GET"])
 @jwt_required
 def user_favourites():
-    favourite_recipes = db.session.query(Recipe.pk, Recipe.title).filter(Recipe.pk.in_(
+    favourite_recipes = db.session.query(Recipe).filter(Recipe.pk.in_(
         db.session.query(FavouriteRecipe.pk).filter(FavouriteRecipe.user == get_jwt_identity())
     )).all()
-    return jsonify(favourite_recipes)
+    return jsonify(RecipeFormatter.recipes_to_dict(favourite_recipes))
 
 
 @user_blueprint.route('/recent-searches/<num_searches>', methods=["GET"])

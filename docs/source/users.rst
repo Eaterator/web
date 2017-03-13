@@ -16,14 +16,14 @@ Returns a list of a user's favourite recipes. Note that the request is just a li
 	Endpoint = '/user/favourite-recipes'
 	Response = {
 		"recipes" : [
-		    [
-                        6442, 
-                        "Turkey Saut\u00e9 with Fresh Cherry Sauce recipe | Epicurious.com"
-                    ], 
-                    [
-                        6904, 
-                        "Kirsch and Tart Cherry Souffles recipe | Epicurious.com"
-                    ]
+		    {
+                        "pk": 6442, 
+                        "title": "Turkey Saut\u00e9 with Fresh Cherry Sauce recipe | Epicurious.com"
+                    }, 
+                    {
+                        "pk": 6904, 
+                        "title": "Kirsch and Tart Cherry Souffles recipe | Epicurious.com"
+                    }
 
 		]
 	}
