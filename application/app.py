@@ -48,10 +48,13 @@ for blueprint in blueprints:
 
 
 # Initialize general API Error handler function
-@app.errorhandler(InvalidAPIRequest)
+@app.errorhandler(InvalidAPIRequest, Exception)
 def handle_api_error(error):
-    if error.status_code != 404:
-        response = jsonify(error.to_dict())
-        response.status_code = error.status_code
-        return response
-    return render_template('404.html')
+    if isinstance(error, InvalidAPIRequest):
+        if error.status_code != 404:
+            response = jsonify(error.to_dict())
+            response.status_code = error.status_code
+            return response
+        return render_template('404.html')
+    else:
+        app.logger.error("Unknown error. Stacktrace: {0}".format(str(error)))
