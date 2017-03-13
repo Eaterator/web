@@ -30,6 +30,11 @@ class TestRecipeControllers(BaseTempDBTestCase):
         self.create_recipe_ingredients()
 
     def test_regular_search(self):
+        """
+        With curl:
+        curl -H "Authorization: Bearer $ACCESSWEB" -H "Content-Type: application/json" -X GET -d '{"ingredients": ["pudding", "cherries", "turkey breast"]}' https://www.eaterator.com/recipe/search
+        :return:
+        """
         test_regular_user = self.create_regular_user()
         token, _ = self.get_jwt_token(test_regular_user)
         resp = self.search_ingredients(["potato", "onion", "pepper"],
@@ -61,6 +66,14 @@ class TestRecipeControllers(BaseTempDBTestCase):
 
     def test_business_batch_search(self):
         # TODO later, not a priority
+        pass
+
+    def test_top_ingredients_search(self):
+        # TODO implement test
+        pass
+
+    def test_related_ingredients_search(self):
+        # TODO implement test
         pass
 
     def search_ingredients(self, ingredients, endpoint, token):

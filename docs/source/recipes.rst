@@ -11,6 +11,9 @@ All requests need an authentication token as a header in the request in order to
 
 	"Authorization" => "Bearer ccccccccc.ccccccccccccccccc.ccccccc"
 
+Search
+======
+
 Regular User Endpoints
 ----------------------
 
@@ -63,3 +66,64 @@ Business search has both single and batch search options. Single search is ident
 Batch Search
 ------------
 Allows a business user to input multiple searches in a single request. Note, this is not implemented yet!
+
+Ingredient Search
+=================
+These are a collection API endpoints to allow easier input of ingredients, and for users to explore related ingredients.
+
+Top Ingredients
+---------------
+Envision to put this on the landing page so top ingredients are easy to click to input instead of typing.
+
+.. code-block:: none
+		
+    Method = 'GET'
+    Endpoint = '/top-ingredients/<limit>'
+    limit = integer for top ingredients
+        default = 15
+	maximum = 30
+    Response = {
+        'ingredients': [
+	   {
+            "name": "cream", 
+            "pk": 3813
+           }, 
+           {
+            "name": "parsley", 
+            "pk": 3844
+           }
+
+	]
+    }
+    Error 401 = Unauthorized, no JWT supplied, or invalid/expired token.
+
+
+Related Ingredient API
+----------------------
+Gives a list of related ingredients. URL will probably change an ingredient to a query string to avoid errors associated with spaces in ingredient names.
+
+.. code-block:: none
+		
+    Method = 'GET'
+    Endpoint = '/top-ingredients/<ingredient>/<limit>'
+    ingredient = ingredient name to search for related ones
+    limit = integer for top ingredients
+        default = 15
+	maximum = 30
+    Response = {
+        'ingredients': [
+	   {
+            "name": "cream", 
+            "pk": 3813
+           }, 
+           {
+            "name": "parsley", 
+            "pk": 3844
+           }
+
+	]
+    }
+    Error 401 = Unauthorized, no JWT supplied, or invalid/expired token.
+    Error 400 = BAD REQUEST, no ingredient was supplied or could be parsed
+
+

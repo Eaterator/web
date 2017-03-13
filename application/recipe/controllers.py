@@ -2,23 +2,64 @@ import os
 import json
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, desc, not_
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
 from application.app import db
 from application.auth.auth_utilities import JWTUtilities
-from application.recipe.utilities import RecipeFormatter
+from application.recipe.utilities import RecipeIngredientFormatter
 from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
+# SEARCH RESULT SIZE
 DEFAULT_SEARCH_RESULT_SIZE = 20
 REGULAR_MAX_SEARCH_SIZE = 100
 BUSINESS_MAX_SEARCH_SIZE = 250
+# TOP INGREDIENTS IN RECIPES
+MAX_TOP_INGREDIENTS = 30
+DEFAULT_TOP_INGREDIENTS = 15
+# Related Ingredients
+MAX_RELATED_INGREDIENTS = 15
+DEFAULT_RELATED_INGREDIENTS = 10
 
 recipe_blueprint = Blueprint('recipe', __name__,
                              template_folder=os.path.join('templates', 'recipe'),
                              url_prefix='/recipe')
+
+
+@recipe_blueprint.route('/top-ingredients')
+@recipe_blueprint.route('/top-ingredients/<limit>')
+@jwt_required
+def get_top_ingredients(limit=None):
+    limit = _parse_limit_parameter(limit, DEFAULT_TOP_INGREDIENTS, MAX_TOP_INGREDIENTS)
+    ingredients = db.session.query(Ingredient.pk, Ingredient.name).\
+        join(IngredientRecipe).\
+        group_by(Ingredient.pk, Ingredient.name).\
+        order_by(desc(func.count(IngredientRecipe.ingredient))).\
+        limit(limit).all()
+    return jsonify(RecipeIngredientFormatter.ingredients_to_dict(ingredients))
+
+
+@recipe_blueprint.route('/related-ingredients/<ingredient>/<limit>')
+@jwt_required
+def get_related_ingredients(ingredient, limit):
+    limit = _parse_limit_parameter(limit, DEFAULT_RELATED_INGREDIENTS, MAX_RELATED_INGREDIENTS)
+    if not ingredient:
+        raise InvalidAPIRequest("Must specify an ingredient", status_code=BAD_REQUEST_CODE)
+    related_ingredients = db.session.query(Ingredient.pk, Ingredient.name). \
+        join(IngredientRecipe). \
+        filter(IngredientRecipe.recipe.in_(
+            db.session.query(IngredientRecipe.recipe).\
+            filter(IngredientRecipe.ingredient.in_(
+                db.session.query(Ingredient.pk).filter(Ingredient.name.like('%{0}%'.format(ingredient)))
+            ))
+        )). \
+        filter(not_(Ingredient.name.like('%{0}%'.format(ingredient)))). \
+        group_by(Ingredient.pk, Ingredient.name, IngredientRecipe.ingredient). \
+        order_by(desc(func.count(IngredientRecipe.ingredient))). \
+        limit(limit)
+    return jsonify(RecipeIngredientFormatter.ingredients_to_dict(related_ingredients))
 
 
 @recipe_blueprint.route('/search')
@@ -35,7 +76,7 @@ def search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     recipes = create_recipe_search_query(ingredients, limit=limit)
     register_user_search(user_pk, payload)
-    return jsonify(RecipeFormatter.recipes_to_dict(recipes))
+    return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
 @recipe_blueprint.route('/search/business')
@@ -52,7 +93,7 @@ def business_search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     register_user_search(user_pk, payload)
     recipes = create_recipe_search_query(ingredients, limit=limit)
-    return jsonify(RecipeFormatter.recipes_to_dict(recipes))
+    return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
 @recipe_blueprint.route('/search/business/batch')
@@ -74,8 +115,8 @@ def business_batch_search(limit=None):
         recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
     return jsonify(
         {"searches": [
-            RecipeFormatter.recipes_to_dict(recipe_lst) for recipe_lst in recipes
-        ]}
+            RecipeIngredientFormatter.recipes_to_dict(recipe_lst) for recipe_lst in recipes
+            ]}
     )
 
 
@@ -117,13 +158,15 @@ def apply_dynamic_filters(ingredients):
 
 
 def _parse_limit_parameter(limit, default, maximum):
+    if not limit:
+        return default
     try:
-        if limit:
-            limit = int(limit)
-            limit = limit if limit <= maximum else maximum
+        limit = int(limit)
+        limit = limit if limit <= maximum else maximum
     except (ValueError, TypeError):
         limit = default
     return limit
+
 """
 v1 search query:
 -- general idea is all similar ingredients are found matching the input, then we find all recipes that have at
