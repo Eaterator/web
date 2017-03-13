@@ -44,7 +44,18 @@
                               <li><a href="#">About Us</a></li>
                               <li><a href="#">Team</a></li>
                               <li><a href="#">Contact</a></li>
-                              <li><a href="#">Login</a></li>
+                              <li><a href="#" onclick='window.open("https://www.facebook.com", "Facebook", "width=300", "height=250"); return false;'>Login</a>
+<!--
+                              <form class="login" onsubmit="return false">
+                                  <h1>Facebook</h1>
+                                  <input type="email" name="email" class="login-input" placeholder="Email Address" autofocus>
+                                  <input type="password" name="password" class="login-input" placeholder="Password">
+                                  <input type="submit" value="Login" class="login-submit">
+                                  <p class="login-help"><a href="#">Forgot password?</a></p>
+                              </form>
+-->
+                              
+                              </li>
                             </ul>
                     </div><!-- end #menu --> 
 		        </div>
@@ -118,7 +129,7 @@
                     <div class="col-md-6 col-md-offset-3">
                         <div id="custom-search-input" class="center" >
                             <div class="input-group col-md-12">
-                                <input type="text" class="form-control input-lg" placeholder="ex. potato, chicken, peppermint" data-role="tagsinput"/>
+                                <input type="text" class="form-control input-lg" data-role="tagsinput"/>
                                 <span class="input-group-btn">
                                     <button class="btn btn-info btn-lg" type="button">
                                         <i class="glyphicon glyphicon-search"></i>
@@ -126,6 +137,14 @@
                                 </span>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-md-6 col-md-offset-3 sample-products-list">
+                        <span>potatoes</span>
+                        <span>pepper</span>
+                        <span>salt</span>
+                        <span>tomatoes</span>
+                        <span>cucumbers</span>
+                        
                     </div>
 	            </div>
             </div>
@@ -174,6 +193,7 @@
     <script src="../static/js/controllers.js"></script>
     <script src="../static/js/directives.js"></script>
     <script src="../static/js/services.js"></script>
+    <script src="../static/js/main.js"></script>
     <script src="../static/js/bootstrap-tagsinput.min.js"></script>
     <scrript src="../static/js/bootstrap-tagsinput-angular.min.js"></scrript>
     
