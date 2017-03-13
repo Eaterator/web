@@ -41,9 +41,10 @@ def get_top_ingredients(limit=None):
     return jsonify(RecipeIngredientFormatter.ingredients_to_dict(ingredients))
 
 
+@recipe_blueprint.route('/related-ingredients/<ingredient>')
 @recipe_blueprint.route('/related-ingredients/<ingredient>/<limit>')
 @jwt_required
-def get_related_ingredients(ingredient, limit):
+def get_related_ingredients(ingredient, limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_RELATED_INGREDIENTS, MAX_RELATED_INGREDIENTS)
     if not ingredient:
         raise InvalidAPIRequest("Must specify an ingredient", status_code=BAD_REQUEST_CODE)
