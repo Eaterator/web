@@ -63,8 +63,8 @@ def get_related_ingredients(ingredient, limit=None):
     return jsonify(RecipeIngredientFormatter.ingredients_to_dict(related_ingredients))
 
 
-@recipe_blueprint.route('/search')
-@recipe_blueprint.route('/search/<limit>')
+@recipe_blueprint.route('/search', methods=["POST"])
+@recipe_blueprint.route('/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('consumer')
 def search_recipe(limit=None):
@@ -73,15 +73,15 @@ def search_recipe(limit=None):
     try:
         payload = request.get_json()
         ingredients = parse_ingredients(payload)
-    except KeyError:
+    except (TypeError, KeyError):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     recipes = create_recipe_search_query(ingredients, limit=limit)
     register_user_search(user_pk, payload)
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
-@recipe_blueprint.route('/search/business')
-@recipe_blueprint.route('/search/business/<limit>')
+@recipe_blueprint.route('/search/business', methods=["POST"])
+@recipe_blueprint.route('/search/business/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('business')
 def business_search_recipe(limit=None):
@@ -90,15 +90,15 @@ def business_search_recipe(limit=None):
     try:
         payload = request.get_json()
         ingredients = parse_ingredients(payload)
-    except KeyError:
+    except (TypeError, KeyError):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     register_user_search(user_pk, payload)
     recipes = create_recipe_search_query(ingredients, limit=limit)
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
-@recipe_blueprint.route('/search/business/batch')
-@recipe_blueprint.route('/search/business/batch/<limit>')
+@recipe_blueprint.route('/search/business/batch', methods=["POST"])
+@recipe_blueprint.route('/search/business/batch/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('business')
 def business_batch_search(limit=None):
@@ -111,7 +111,7 @@ def business_batch_search(limit=None):
         register_user_search(user_pk, search)
         try:
             ingredients = parse_ingredients(search["ingredients"])
-        except KeyError:
+        except (TypeError,KeyError):
             raise InvalidAPIRequest("Error parsing request", status_code=BAD_REQUEST_CODE)
         recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
     return jsonify(

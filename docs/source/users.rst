@@ -35,7 +35,7 @@ Registers a favourite recipe for a given user. Requires a JWT token.
 	Response = {"message": "OK"}
 	Error 400 = BAD REQUEST, no recipe_id provided, or it could not be parsed to int
 
-	User Searches
+User Searches
 -------------
 Returns a list of recent user searches ordered by date they were searched.
 
