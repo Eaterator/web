@@ -1,4 +1,5 @@
 from application.auth.models import Role
+from application.auth.roles import ROLES
 from application.recipe.models import Source
 from application.app import db
 
@@ -7,20 +8,23 @@ def insert_role_data():
     roles = [
         {
             'name': 'regular',
-            'type': 'consumer',
-            'admin': False
+            'type_': 'consumer',
+            'is_admin': False
         },
         {
             'name': 'corporate',
-            'type': 'business',
-            'admin': False
+            'type_': 'business',
+            'is_admin': False
         },
         {
             'name': 'admin',
-            'type': 'admin',
-            'admin': True
+            'type_': 'admin',
+            'is_admin': True
         }
     ]
+
+    if len(Role.query.all()) > 0:
+        return
     for role in roles:
         new_role = Role(**role)
         db.session.add(new_role)
@@ -46,6 +50,9 @@ def insert_source_data():
             'name': 'All Recipes',
         }
     ]
+
+    if len(Source.query.all()) > 0:
+        return
     for source in sources:
         new_source = Source(**source)
         db.session.add(new_source)

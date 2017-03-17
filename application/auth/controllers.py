@@ -1,20 +1,17 @@
-import bcrypt
 import os
-from application import config
-from string import punctuation
+from urllib.request import urlopen
 from abc import ABCMeta, abstractmethod
-from flask import url_for, redirect, jsonify, Blueprint, request, render_template
-from flask_jwt_extended import create_access_token
+from werkzeug.datastructures import MultiDict
+from flask import url_for, redirect, Blueprint, request, render_template
 from rauth import OAuth2Service
-from application.auth.models import User
+from application import config
+from application.auth.models import User, UserUtilities
+from application.auth.auth_utilities import JWTUtilities, PasswordUtilities, PasswordMismatchError,\
+    ImproperPasswordError
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
+from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
+    DuplicateUserEmailUsernameException
 from application.app import db, app
-
-PASSWORD_CONSTRAINTS = [
-    lambda x: len(x) >= 7,
-    lambda x: any(char.isdigit() for char in x),
-    lambda x: any(char in punctuation for char in x)
-]
 
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
@@ -23,35 +20,45 @@ auth_blueprint = Blueprint('auth', __name__,
 
 @auth_blueprint.route("/", methods=["POST"])
 def auth_authenticate():
-    # TODO parse form data
-    try:
-        payload = request.get_json()
-    except:
+    payload = MultiDict(request.get_json())
+    login_form = StandardLoginForm(payload)
+    if not login_form.validate():
         raise InvalidAPIRequest("No data submitted", status_code=BAD_REQUEST_CODE)
-    try:
-        bearer = PasswordUtilities.authenticate(payload.username, payload.password)
-        # TODO return proper header
-        return jsonify({'access_token': bearer})
-    except PasswordMismatchError:
+    user = User.query.filter(User.username == login_form.username.data).first()
+    if not user or not PasswordUtilities.authenticate(user, login_form.password.data):
         raise InvalidAPIRequest("Username and/or password is incorrect", status_code=UNAUTHORIZED_CODE)
+    return JWTUtilities.create_access_token_resp(user)
 
 
 @auth_blueprint.route("/register", methods=["GET", "POST"])
 def auth_register_user():
     if request.method == "GET":
         return render_template('register.html')
+    payload = MultiDict(request.get_json())
+    registration_form = StandardRegistrationForm(payload)
     try:
-        payload = request.get_json()
-        password = payload.pop('password')
-    except:
-        raise InvalidAPIRequest("JSON request not in proper format", status_code=BAD_REQUEST_CODE)
-    try:
-        new_user = User(**payload, password=PasswordUtilities.generate_password(password))
-        db.session.add(new_user)
-        db.commit()
-        return render_template('home')  # TODO add/return JWT
-    except ImproperPasswordError:
-        raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
+        if registration_form.validate():
+            if User.query.filter(User.username == registration_form.username.data).first():
+                raise InvalidAPIRequest("Duplicate username, please choose a unique username", status_code=403)
+            try:
+                password = PasswordUtilities.generate_password(
+                    registration_form.password.data, registration_form.confirm.data)
+                user_data = registration_form.to_dict
+                user_data["password"] = password
+                new_user = User(**user_data)
+                new_user.role = UserUtilities.regular_user_pk()
+                db.session.add(new_user)
+                db.session.commit()
+                return JWTUtilities.create_access_token_resp(new_user)
+            except ImproperPasswordError:
+                raise InvalidAPIRequest("Password format error", status_code=BAD_REQUEST_CODE)
+            except PasswordMismatchError:
+                raise InvalidAPIRequest("Password mismatch error, ensure they are the same",
+                                        status_code=BAD_REQUEST_CODE)
+        else:
+            raise InvalidAPIRequest("Bad request, please try again", status_code=BAD_REQUEST_CODE)
+    except DuplicateUserEmailUsernameException:
+        raise InvalidAPIRequest("Username taken")
 
 
 @auth_blueprint.route('/authorize/<provider>')
@@ -68,55 +75,44 @@ def oauth_callback(provider):
     except KeyError:
         app.logger.error("Failed authentication with <{0}>, not listed as a provider".format(provider))
         raise InvalidAPIRequest("Could not authenticate with the given provider", status_code=BAD_REQUEST_CODE)
-    social_id, username, email = oauth.callback()
-    app.logger.debug("Data: | {0} | {1} | {2}".format(social_id, username, email))
+    social_id, email = oauth.callback()
+    app.logger.debug("Data: | {0} | {1}".format(social_id, email))
     if not social_id:
         app.logger.error("OAuth did not return valid data. <{0}>".format(provider))
         raise InvalidAPIRequest('OAuth authentication error', status_code=UNAUTHORIZED_CODE)
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
         try:
-            user = User(social_id=social_id, username=username, email=email)
+            user = User(social_id=social_id, username=email)
+            user.role = UserUtilities.regular_user_pk()
             db.session.add(user)
             db.session.commit()
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
-    bearer = create_access_token(identity=user.pk)
-    return jsonify({'access_token': bearer})
+    return JWTUtilities.create_access_token_resp(user)
 
 
-class ImproperPasswordError(Exception):
-    pass
+@auth_blueprint.route('/app/<provider>', methods=["POST"])
+def app_oauth_login(provider):
+    try:
+        oauth = OAuthSignIn.get_provider(provider)
+    except KeyError:
+        raise InvalidAPIRequest("Invalid request", status_code=400)
+    payload = MultiDict(request.get_json())
+    app_form = AppRegistrationForm(payload)
+    if app_form.validate():
+        if not oauth.verify_token(app_form.auth_token.data):
+            raise InvalidAPIRequest("Unauthenticated user")
+        user = User.query.filter(User.social_id == app_form.social_id.data).first()
+        if not user:
+            user = User(**app_form.to_dict)
+            user.role = UserUtilities.regular_user_pk()
+            db.session.add(user)
+            db.session.commit()
+        return JWTUtilities.create_access_token_resp(user)
 
 
-class PasswordMismatchError(Exception):
-    pass
-
-
-class JWTUtilities:
-    pass
-
-
-class PasswordUtilities:
-
-    @staticmethod
-    def authenticate(user, password):
-        if bcrypt.hashpw(password, user.password) == user.password:
-            return create_access_token(identity=user.pk)
-        else:
-            return PasswordMismatchError()
-
-    @staticmethod
-    def generate_password(password):
-        for func in PASSWORD_CONSTRAINTS:
-            if not func(password):
-                raise ImproperPasswordError('Password is not valid')
-        return bcrypt.hashpw(password, bcrypt.gensalt(config.SALT_HASH_PARAMETER))
-
-
-# TODO look at OAuth for Facebook authentication, Miguel has a good tutorial
 # https://blog.miguelgrinberg.com/post/oauth-authentication-with-flask
-
 class OAuthSignIn:
     __metaclass__ = ABCMeta
     providers = None
@@ -129,6 +125,10 @@ class OAuthSignIn:
 
     @abstractmethod
     def authorize(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def verify_token(self, token):
         raise NotImplementedError()
 
     def get_callback_url(self):
@@ -179,6 +179,9 @@ class FacebookSignIn(OAuthSignIn):
         me = oauth_session.get('me').json()
         return (
             'facebook$' + me['id'],
-            me.get('email').split('@')[0] if me.get('email') else None,
             me.get('email')
         )
+
+    def verify_token(self, token):
+        resp = urlopen("https://graph.facebook.com/me?access_token={0}".format(token))
+        return resp.status == 200

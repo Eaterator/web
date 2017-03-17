@@ -27,6 +27,11 @@ def insert_recipe_data():
 
 
 @manager.command
+def delete_recipe_data():
+    management_commands.clean_recipe_data()
+
+
+@manager.command
 def create_super_user_account():
     management_commands.create_super_user()
 

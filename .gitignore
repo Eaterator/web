@@ -1,6 +1,7 @@
 # Project files
 config_dev.py
 application/database
+migrations/versions/
 # PyCharm files
 .idea/
 
