@@ -32,12 +32,24 @@ class UserUtilities:
         return Role.query.filter(Role.name == 'regular').first().pk
 
     @classmethod
+    def regular_user_role(cls):
+        return Role.query.filter(Role.name == 'regular').first()
+
+    @classmethod
     def business_user_pk(cls):
         return Role.query.filter(Role.name == 'business').first().pk
 
     @classmethod
+    def business_user_role(cls):
+        return Role.query.filter(Role.name == 'business').first()
+
+    @classmethod
     def admin_user_pk(cls):
         return Role.query.filter(Role.name == 'admin').first().pk
+
+    @classmethod
+    def admin_user_role(cls):
+        return Role.query.fiter(Role.name == 'admin').first()
 
 
 

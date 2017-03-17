@@ -84,12 +84,12 @@ def oauth_callback(provider):
     if not user:
         try:
             user = User(social_id=social_id, username=username, email=email)
-            user.role = UserUtilities.regular_user_pk()
+            user.Role = UserUtilities.regular_user_role()
+            user.role = user.Role.pk
             db.session.add(user)
             db.session.commit()
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
-    app.logger.debug("User: {0}. Social ID: {1}".format(str(user), social_id))
     return JWTUtilities.create_access_token_resp(user)
 
 
@@ -107,7 +107,8 @@ def app_oauth_login(provider):
         user = User.query.filter(User.social_id == app_form.social_id.data).first()
         if not user:
             user = User(**app_form.to_dict)
-            user.role = UserUtilities.regular_user_pk()
+            user.Role = UserUtilities.regular_user_role()
+            user.role = user.Role.pk
             db.session.add(user)
             db.session.commit()
         return JWTUtilities.create_access_token_resp(user)
