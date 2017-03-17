@@ -76,14 +76,14 @@ def oauth_callback(provider):
         app.logger.error("Failed authentication with <{0}>, not listed as a provider".format(provider))
         raise InvalidAPIRequest("Could not authenticate with the given provider", status_code=BAD_REQUEST_CODE)
     social_id, username, email = oauth.callback()
-    app.logger.debug("Data: | {0} | {1} | {2}".format(social_id, username, email))
+    app.logger.debug("Data: | {0} | {1}".format(social_id, email))
     if not social_id:
         app.logger.error("OAuth did not return valid data. <{0}>".format(provider))
         raise InvalidAPIRequest('OAuth authentication error', status_code=UNAUTHORIZED_CODE)
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
         try:
-            user = User(social_id=social_id, username=username, email=email)
+            user = User(social_id=social_id, username=email)
             user.role = UserUtilities.regular_user_pk()
             db.session.add(user)
             db.session.commit()
@@ -179,7 +179,6 @@ class FacebookSignIn(OAuthSignIn):
         me = oauth_session.get('me').json()
         return (
             'facebook$' + me['id'],
-            me.get('email').split('@')[0] if me.get('email') else None,
             me.get('email')
         )
 
