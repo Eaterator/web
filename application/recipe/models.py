@@ -24,8 +24,71 @@ class Recipe(RequiredFields):
     source = db.Column(db.Integer, db.ForeignKey('recipe_source.pk'))
     reviews = db.relationship('Review', backref='recipe_recipe',
                               lazy='dynamic')
-    recipe_ingredients = db.relationship('IngredientRecipe', backref='recipe_recipe',
-                                         lazy='dynamic')
+    ingredient_recipes = db.relationship("IngredientRecipe", backref="recipe_recipe",
+                                         lazy="subquery")
+    recipe_images = db.relationship("RecipeImage", backref="recipe_recipe",
+                                    lazy="joined")
+
+    @property
+    def thumbnail(self):
+        if self.recipe_images:
+            return self.recipe_images[0].get_flickr_url(size="thumbnail")
+        return ''
+
+    @property
+    def medium_img(self):
+        if self.recipe_images:
+            return self.recipe_images[0].get_flickr_url()
+        return ''
+
+
+class RecipeImage(RequiredFields):
+    __tablename__ = 'recipe_recipe_image'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    photo_id = db.Column(db.String(25), nullable=False)
+    farm_id = db.Column(db.String(10), nullable=False)
+    server_id = db.Column(db.String(10), nullable=False)
+    secret = db.Column(db.String(20), nullable=False)
+    recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
+
+    # photo sizes from flickr: https://www.flickr.com/services/api/misc.urls.html
+    photo_sizes = {
+        'small-square': 'sq',
+        'large-swaure': 'q',
+        'thumbnail': 't',
+        'small_240': 'm',
+        'small_320': 'n',
+        'medium_500': '',
+        'medium_640': 'z',
+        'medium_800': 'c',
+        'larger': 'b'
+    }
+    img_types = ('jpg', 'gif', 'png')
+    url_formatter = "https://farm{0}.staticflickr.com/{1}/{2}_{3}.{4}"
+    url_formatter_size = "https://farm{0}.staticflickr.com/{1}/{2}_{3}_{4}.{5}"
+
+    def get_flickr_url(self, size='medium', img_type='jpg'):
+        if img_type not in self.img_types:
+            img_type = 'jpg'
+        size_letter = self.photo_sizes.get(size)
+        if not size_letter:
+            return self.url_formatter.format(
+                self.farm_id,
+                self.server_id,
+                self.photo_id,
+                self.secret,
+                img_type
+            )
+        else:
+            return self.url_formatter_size.format(
+                self.farm_id,
+                self.server_id,
+                self.photo_id,
+                self.secret,
+                size_letter,
+                img_type
+            )
 
 
 class Review(RequiredFields):
@@ -58,3 +121,7 @@ class IngredientRecipe(RequiredFields):
     ingredient_modifier = db.Column(db.Integer,
                                     db.ForeignKey('recipe_ingredientmodifier.pk'),
                                     nullable=True)
+    Ingredient = db.relationship("Ingredient", backref="recipe_ingredientrecipe",
+                                 lazy="subquery")
+    IngredientModifier = db.relationship("IngredientModifier", backref="recipe_ingredientmodifier",
+                                         lazy='joined')

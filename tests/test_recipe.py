@@ -77,10 +77,10 @@ class TestRecipeControllers(BaseTempDBTestCase):
         pass
 
     def search_ingredients(self, ingredients, endpoint, token):
-        return self.app.get(endpoint,
-                            data=json.dumps({"ingredients": ingredients}),
-                            content_type='application/json',
-                            headers={"Authorization": "Bearer {0}".format(token)})
+        return self.app.post(endpoint,
+                             data=json.dumps({"ingredients": ingredients}),
+                             content_type='application/json',
+                             headers={"Authorization": "Bearer {0}".format(token)})
 
     def assert_search_not_empty(self, resp):
         recipes = json.loads(resp.data.decode('utf-8'))

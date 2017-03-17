@@ -15,7 +15,7 @@ Regular users can submit a list of ingredients to complete a search, which retur
 
 .. code-block:: none
 		
-	Method = "GET"
+	Method = "POST"
 	Endpoint = '/recipe/search'
 	Endpoint = '/recipe/search/<limit:int>'
 	limit = search param for number of recipes to return
@@ -46,7 +46,7 @@ Business search has both single and batch search options. Single search is ident
 
 .. code-block:: none
 
-	Method = "GET"
+	Method = "POST"
 	Endpoint = '/recipe/search/business'
 	Endpoint = '/recipe/search/business/<limit:int>'
 	limit = search param for number to return
@@ -67,7 +67,7 @@ Envision to put this on the landing page so top ingredients are easy to click to
 
 .. code-block:: none
 		
-    Method = 'GET'
+    Method = 'POST'
     Endpoint = '/top-ingredients/<limit:int>'
     limit = integer for number top ingredients to return
         default = 15
@@ -94,7 +94,7 @@ Gives a list of related ingredients. URL will probably change an ingredient to a
 
 .. code-block:: none
 		
-    Method = 'GET'
+    Method = 'POST'
     Endpoint = '/top-ingredients/<ingredient:string>/<limit:int>'
     ingredient = ingredient name to search for related ones
     limit = integer for number related ingredients to return

@@ -89,6 +89,7 @@ def oauth_callback(provider):
             db.session.commit()
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
+    app.logger.debug("User: {0}. Social ID: {1}".format(str(user), social_id))
     return JWTUtilities.create_access_token_resp(user)
 
 

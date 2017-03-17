@@ -28,8 +28,8 @@ recipe_blueprint = Blueprint('recipe', __name__,
                              url_prefix='/recipe')
 
 
-@recipe_blueprint.route('/top-ingredients')
-@recipe_blueprint.route('/top-ingredients/<limit>')
+@recipe_blueprint.route('/top-ingredients', methods=["POST"])
+@recipe_blueprint.route('/top-ingredients/<limit>', methods=["POST"])
 @jwt_required
 def get_top_ingredients(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_TOP_INGREDIENTS, MAX_TOP_INGREDIENTS)
@@ -38,11 +38,13 @@ def get_top_ingredients(limit=None):
         group_by(Ingredient.pk, Ingredient.name).\
         order_by(desc(func.count(IngredientRecipe.ingredient))).\
         limit(limit).all()
-    return jsonify(RecipeIngredientFormatter.ingredients_to_dict(ingredients))
+    return jsonify(RecipeIngredientFormatter.ingredients_to_dict(
+        ingredients, attr=["pk", "title", "url", "average_rating"])
+    )
 
 
-@recipe_blueprint.route('/related-ingredients/<ingredient>')
-@recipe_blueprint.route('/related-ingredients/<ingredient>/<limit>')
+@recipe_blueprint.route('/related-ingredients/<ingredient>', methods=["POST"])
+@recipe_blueprint.route('/related-ingredients/<ingredient>/<limit>', methods=["POST"])
 @jwt_required
 def get_related_ingredients(ingredient, limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_RELATED_INGREDIENTS, MAX_RELATED_INGREDIENTS)
@@ -119,6 +121,19 @@ def business_batch_search(limit=None):
             RecipeIngredientFormatter.recipes_to_dict(recipe_lst) for recipe_lst in recipes
             ]}
     )
+
+
+@recipe_blueprint.route('/recipe/<pk>')
+@jwt_required
+@JWTUtilities.user_role_required(["consumer", "business"])
+def recipe_information(pk):
+    try:
+        recipe = Recipe.query.filter(Recipe.pk == int(pk)).first()
+        if recipe:
+            return jsonify(RecipeIngredientFormatter.recipe_to_dict(recipe))
+    except (ValueError, TypeError):
+        pass
+    raise InvalidAPIRequest("Could not find specified ID, please try again", status_code=BAD_REQUEST_CODE)
 
 
 def register_user_search(user_pk, json_data):
