@@ -36,10 +36,6 @@ class StandardRegistrationForm(FlaskForm, UserDictMixin):
     last_name = StringField('Last name')
     social_id = None
 
-    def validate_unique_user(self, field):
-        if User.query.filter(User.username == field.data).first():
-            raise DuplicateUserEmailUsernameException("Email taken")
-
 
 class AppRegistrationForm(FlaskForm, UserDictMixin):
 

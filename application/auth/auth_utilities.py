@@ -39,7 +39,7 @@ class JWTUtilities:
             @wraps(func)
             def wrapper(*args, **kwargs):
                 claims = get_jwt_claims()
-                r = role if isinstance(role, list) else list(role)
+                r = role if isinstance(role, list) else [role]
                 if not claims or claims[config.ROLE_CLAIM_FIELD] not in r:
                     raise InvalidAPIRequest("Route restricted for your account", status_code=UNAUTHORIZED_CODE)
                 return func(*args, **kwargs)

@@ -32,7 +32,6 @@ class TestAuthModels(BaseTempDBTestCase):
             username='test_user',
             social_id=None,
             password=PasswordUtilities.generate_password('TestUser123!'),
-            email='123@123.com',
             first_name='test',
             last_name='user',
             date_of_birth=datetime(1991, 10, 10).date(),
@@ -46,7 +45,6 @@ class TestAuthModels(BaseTempDBTestCase):
         self.assertEqual(users[0].username, 'test_user')
         self.assertEqual(users[0].social_id, None)
         self.assertTrue(PasswordUtilities.authenticate(test_user, 'TestUser123!'))
-        self.assertEqual(users[0].email, '123@123.com')
         self.assertEqual(users[0].first_name, 'test')
         self.assertEqual(users[0].last_name, 'user')
         self.assertEqual(users[0].date_of_birth, datetime(1991, 10, 10).date())
@@ -107,23 +105,23 @@ class TestAuthRoutes(BaseTempDBTestCase):
     def test_jwt_required_regular(self):
         self.create_user(TEST_REGULAR_USER, self.roles["regular"])
         token, _ = self.get_jwt_token(TEST_REGULAR_USER)
-        resp = self.app.get('/recipe/search',
-                            content_type='application/json',
-                            data=json.dumps({
+        resp = self.app.post('/recipe/search',
+                             content_type='application/json',
+                             data=json.dumps({
                                  "ingredients": ["apples", "oranges", "ice cream"]
-                            }),
-                            headers={"Authorization": "Bearer {0}".format(token)})
+                             }),
+                             headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 200)
 
     def test_jwt_required_business(self):
         self.create_user(TEST_BUSINESS_USER, self.roles["corporate"])
         token, _ = self.get_jwt_token(TEST_BUSINESS_USER)
-        resp = self.app.get('/recipe/search/business',
-                            content_type='application/json',
-                            data=json.dumps({
+        resp = self.app.post('/recipe/search/business',
+                             content_type='application/json',
+                             data=json.dumps({
                                  "ingredients": ["apples", "oranges", "ice cream"]
-                            }),
-                            headers={"Authorization": "Bearer {0}".format(token)})
+                             }),
+                             headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 200)
 
     def test_jwt_required_admin(self):

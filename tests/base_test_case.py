@@ -122,35 +122,31 @@ RECIPES = [
 ]
 
 TEST_REGISTER_USER_PAYLOAD = dict(
-    username="testuser",
+    username="testuser@123.com",
     password="TestUser123!",
     confirm="TestUser123!",
-    email="test@user.com",
     first_name="test",
     last_name="user",
     date_of_birth=datetime(1991, 1, 1)
 )
 
 TEST_REGULAR_USER = dict(
-    username="testregularuser",
+    username="testregularuser@123.com",
     password="TestUser123!",
-    email="test@user.com",
     first_name="test",
     last_name="user",
     date_of_birth=datetime(1991, 1, 1)
 )
 TEST_BUSINESS_USER = dict(
-    username="testbusinessuser",
+    username="testbusinessuser@123.com",
     password="TestUser123!",
-    email="test@user.com",
     first_name="test",
     last_name="user",
     date_of_birth=datetime(1991, 1, 1)
 )
 TEST_ADMIN_USER = dict(
-    username="testadminuser",
+    username="testadminuser@123.com",
     password="TestUser123!",
-    email="test@user.com",
     first_name="test",
     last_name="user",
     date_of_birth=datetime(1991, 1, 1)
