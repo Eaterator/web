@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="eateratorApp">
 
 {% include 'header.html' %}
 
-<body class="bootstrap-overrides" ng-app="eateratorApp">
+<body class="bootstrap-overrides" ng-controller='MainCtrl'>
    {% include 'navigation.html' %}
    
     <header>
@@ -58,12 +58,11 @@
         
     </header> <!-- end header-->
     
-    <main>
+   <main>   <!-- ng-view-->
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
                         <h2 class="text-center">Input available products</h2>
-                        <p>{{token}}</p>
                         <hr>
                         <div class="color-line center"></div>
                     </div>

@@ -1,23 +1,22 @@
 'use strict';
 
+angular.module('eateratorApp', [])
 
-var app = angular.module('eateratorApp', []);
-app.controller('MainCtrl', 'localStorageService', function($scope, $localStorageService, $http, $window){
+// to fix iternal server error
 
-        $scope.token = localStorageService;
-               
-               
-  //          $scope.submit = function() {
-  //           localStorage.setItem('id_token', authToken);
-  //           fbToken = localStorage.getItem('id_token');
-  //           
-  //           $http.post('/auth/callback/facebook', fbToken, {"auth": fbToken})
-  //              .then(function(response){
-  //              //sucess
-  //              //response contains auth token
-  //              // localStorage.setItem("authToken", response.token);
-  //              }, function(response){
-  //                  //error
-  //              });  
-  //       }
-})
+    .controller('MainCtrl',['$scope', 'localStorageService', '$http', '$window', function($scope, localStorageService, $http, $window){
+
+//        $scope.token = localStorageService;         
+            localStorageService.getToken().then(function(response){
+                $scope.token = response.data.access_token;
+                $window.localStorage.setItem('id_token', $scope.token);
+            }
+            )
+            .catch(function(){
+                console.log("ebites` konem");
+            });
+        
+            //$scope.login = function() {           
+                //$scope.headers = AuthInterceptor; 
+         //}
+}])

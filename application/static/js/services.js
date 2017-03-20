@@ -1,22 +1,43 @@
 'use strict';
 
-//angular.module('eateratorApp')
-  //  .constant("baseURL", "http://localhost:5000")
 
-var app = angular.module('eateratorApp', []);
+angular.module('eateratorApp')
 
-app.factory('localStorageService', ['$scope', function ($scope){
+
+.factory('localStorageService', function ($http){
     
-         $http.get('/auth/authorize/facebook')      
-               .success(function(data, status, headers, config){
-                    var authToken = data.access_token; // probably just token
-                })
-                .error(function(data, status, headers, config){
-                    // error handler
-                });
+    var getToken = function(){
+    // getting token from url
+         return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));       
+        };
+    return {
+    getToken: getToken
+  };
     
-        return authToken;
-    
-}]);
+        
+})
+
+.factory('AuthInterceptor', function ($window, $q) {
+    return {
+        request: function(config) {
+            config.headers = config.headers || {};
+            if ($window.localStorage.getItem('id_token')) {
+                config.headers.Authorization = 'Bearer ' + $window.localStorage.getItem('id_token');
+            }
+            return config || $q.when(config);
+        },
+        response: function(response) {
+            if (response.status === 401) {
+                // TODO: Redirect user to login page.
+            }
+            return response || $q.when(response);
+        }
+    };
+})
+
+// Register the previously created AuthInterceptor.
+.config(function ($httpProvider) {
+    $httpProvider.interceptors.push('AuthInterceptor');
+});
     
     
