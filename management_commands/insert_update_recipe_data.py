@@ -15,6 +15,8 @@ from application.app import db
 MAX_INGREDIENT_LENGTH = 50
 
 
+# TODO need to handle ingredient_modifier case properly, very wrong data in DB from current version
+# TODO ingredient parser also needs to trim whitespace and/or punctuation from ingredients!
 class IngredientParserPipeline:
 
     def __init__(self):
@@ -207,3 +209,30 @@ def clean_recipe_data():
     Review.query.delete()
     Recipe.query.delete()
     db.session.commit()
+
+# TODO implement the following updates via SQLAlchemy:
+"""
+---- Update the ingredients text fields ----
+
+UPDATE
+  recipe_recipe r
+SET
+  recipe_ingredients_text = sq.t
+FROM
+  (SELECT ir.recipe AS r_pk, string_agg(i.name, ' ') as t FROM recipe_ingredient i
+    INNER JOIN ingredient_recipe ir ON ir.ingredient = i.pk GROUP BY r_pk) AS sq
+WHERE r.pk = sq.r_pk
+
+---- Update Ingredient Modifier Text Fields ------
+
+UPDATE
+  recipe_recipe r
+SET
+  recipe_ingredients_modofier_text = sq.t
+FROM
+  (SELECT ir.recipe AS r_pk, string_agg(im.name, ' ') as t FROM recipe_ingredientmodifier im
+    INNER JOIN ingredient_recipe ir ON ir.ingredient_modifier = im.pk AND im.name IS NOT NULL GROUP BY r_pk) AS sq
+WHERE r.pk = sq.r_pk
+"""
+def create_fulltext_recipe_fields():
+    pass

@@ -4,7 +4,7 @@ from application.recipe.models import Recipe, Ingredient
 class RecipeIngredientFormatter:
 
     @staticmethod
-    def recipes_to_dict(recipes, attr=['pk', 'title', 'rating_average', 'thumbnail']):
+    def recipes_to_dict(recipes, attr=['pk', 'title', 'average_rating', 'thumbnail']):
         if isinstance(recipes, Recipe):
             recipes = list(recipes)
         return {

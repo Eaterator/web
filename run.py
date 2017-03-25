@@ -13,8 +13,8 @@ if config.USE_GEVENT:
     # modify db for gevent
     db.engine.pool._use_threadlocal = True
 
-
-if __name__ == '__main__':  # development and testing
+# development and testing
+if __name__ == '__main__':
     if config.USE_GEVENT and config.DEBUG:
         app.config['DEBUG'] = config.DEBUG
         server = WSGIServer(('', config.GEVENT_PORT), app)
@@ -23,7 +23,9 @@ if __name__ == '__main__':  # development and testing
     elif config.DEBUG or not config.USE_GEVENT:
         print("Running flask development server")
         app.run(debug=True)
-elif config.USE_UWSGI and config.USE_GEVENT:  # production
+
+# production
+elif config.USE_UWSGI and config.USE_GEVENT:
     from logging.handlers import RotatingFileHandler
     with open('/home/ubuntu/eaterator/logging/test_log.txt', 'w') as f:
         f.write(os.path.join(config.LOG_DIR, 'app.log'))

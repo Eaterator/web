@@ -82,6 +82,40 @@ def search_recipe(limit=None):
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
+@recipe_blueprint.route('v2/search', methods=["POST"])
+@recipe_blueprint.route('v2/search/<limit>', methods=["POST"])
+@jwt_required
+@JWTUtilities.user_role_required('consumer')
+def fulltext_search_recipe(limit=None):
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
+    user_pk = get_jwt_identity()
+    try:
+        payload = request.get_json()
+        ingredients = parse_ingredients(payload)
+    except:
+        pass
+    """
+    First attempt at full text search. N.B. indexes already made. Exluding search
+    results based on an & query is ~100x more performant. Maybe look into this.
+
+    EXPLAIN ANALYZE SELECT pk, title,
+      (
+         ts_rank_cd(
+          to_tsvector('english', recipe_recipe.recipe_ingredients_text),
+          to_tsquery('onion&tomato&beef&red&peppers')
+         ) +
+         ts_rank_cd(
+          to_tsvector('english', recipe_recipe.title),
+          to_tsquery('onion|tomato|beef|red|peppers')
+         ) * 2
+      ) AS rank
+    FROM recipe_recipe WHERE to_tsquery('onion&tomato&beef&red&peppers') @@ to_tsvector('english', recipe_recipe.recipe_ingredients_text)
+    ORDER BY rank DESC
+    LIMIT 50;
+
+    """
+
+
 @recipe_blueprint.route('/search/business', methods=["POST"])
 @recipe_blueprint.route('/search/business/<limit>', methods=["POST"])
 @jwt_required

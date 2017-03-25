@@ -36,5 +36,10 @@ def create_super_user_account():
     management_commands.create_super_user()
 
 
+@manager.command
+def create_indexes():
+    management_commands.create_indexes(db)
+
+
 if __name__ == '__main__':
     manager.run()

@@ -21,6 +21,8 @@ class Recipe(RequiredFields):
     highest_rating = db.Column(db.Float)
     count_rating = db.Column(db.Integer)
     raw_data = db.Column(db.Text)
+    recipe_ingredients_text = db.Column(db.Text)
+    recipe_ingredients_modifier_text = db.Column(db.Text)
     source = db.Column(db.Integer, db.ForeignKey('recipe_source.pk'))
     reviews = db.relationship('Review', backref='recipe_recipe',
                               lazy='dynamic')
@@ -28,6 +30,24 @@ class Recipe(RequiredFields):
                                          lazy="subquery")
     recipe_images = db.relationship("RecipeImage", backref="recipe_recipe",
                                     lazy="joined")
+
+    __table_args__ = (
+        db.Index(
+            'idx_fulltext_recipe_title',
+            RequiredFields.create_tsvector(title),
+            postgresql_using="gin"
+        ),
+        db.Index(
+            'idx_fulltext_ingredients',
+            RequiredFields.create_tsvector(recipe_ingredients_text),
+            postgresql_using="gin"
+        ),
+        db.Index(
+            'idx_fulltext_ingredient_modifiers',
+            RequiredFields.create_tsvector(recipe_ingredients_modifier_text),
+            postgresql_using="gin"
+        )
+    )
 
     @property
     def thumbnail(self):
