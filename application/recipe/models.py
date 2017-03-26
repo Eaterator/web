@@ -27,7 +27,7 @@ class Recipe(RequiredFields):
     reviews = db.relationship('Review', backref='recipe_recipe',
                               lazy='dynamic')
     ingredient_recipes = db.relationship("IngredientRecipe", backref="recipe_recipe",
-                                         lazy="subquery")
+                                         lazy="dynamic")
     recipe_images = db.relationship("RecipeImage", backref="recipe_recipe",
                                     lazy="joined")
 
