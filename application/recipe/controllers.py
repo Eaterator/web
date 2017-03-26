@@ -3,7 +3,7 @@ import json
 from itertools import combinations
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy import func, or_, desc, not_, select
+from sqlalchemy import func, or_, desc, not_
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
@@ -33,18 +33,6 @@ FULLTEXT_INDEX_CONFIG = 'english'
 recipe_blueprint = Blueprint('recipe', __name__,
                              template_folder=os.path.join('templates', 'recipe'),
                              url_prefix='/recipe')
-
-
-from functools import wraps
-from timeit import default_timer
-def timer(func):
-    wraps(func)
-    def decorator(*args, **kwargs):
-        start = default_timer()
-        ret = func(*args, *kwargs)
-        print("time taken: {0} s".format(default_timer() - start))
-        return ret
-    return decorator
 
 
 @recipe_blueprint.route('/top-ingredients', methods=["POST"])

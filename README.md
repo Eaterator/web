@@ -30,13 +30,17 @@ a PostgreSQL instance. Note that not having a config_dev.py will throw an `Impor
     DATABASE = 'database'
     USE_GEVENT = False  # for windows as gevent isn't compatible
     
-In production or locally, some data from the `nltk` package needs to be downloaded. Activate the virtualenv and then run the following commands:
+In production or locally, some data from the `nltk` package needs to be downloaded. Activate the virtualenv and then
+run the following commands:
   
    >>nltk.download('punkt')
    >>nltk.download('wordnet')
    >>nltk.download('maxent_treebank_tagger')
    
- Note that this will be copied to the `/home/user/nltk_data` folder by default, and therefore, in production, this folder must be copied to `/var/www/nltk_data`. Error messages from nltk will also point to the locations it searches by default.
+Note that this will be copied to the `/home/<user>/nltk_data` folder by default, and therefore, in production, this
+folder must be copied to `/var/www/nltk_data`.  Error messages from nltk will also point to the locations it searches
+by default. When running the `python manage.py ~` commands from the virtual env as non www-data user, the nltk_data
+folder must also exist in the /home/<user>/nltk_data folder. Maybe look into symlinking this or changing permissions.
 
 ##Windows Notes
 When using windows, change the database engine in the `config_dev.py` to:
@@ -46,5 +50,13 @@ When using windows, change the database engine in the `config_dev.py` to:
 
 and the Flask development server will run with an SQLite database in `~/application/database/'localdb.sqlite'`. 
 
-#Pipeline Notes
-Data can be inserted in the database for the `recipe` module using raw text data created from the `hrecipe_scraper`. All that's needed is the `EATERATOR_DATA_SCRAPING_PATH` environemnt variable defining the location. Then the `python manage.py insert_recipe_data` can be used to populate the data.
+#Deployment Pipeline: Data Creation and Insertion
+The following commands are needed to insert data and make the API functional. Remember to set the
+`EATERATOR_DATA_SCRAPING_PATH` to point the scripts to the proper data source.
+
+    (virtual-env)$ python manage.py init_db # creates db
+    (virtual-env)$ python manage.py db migrate # if DB exists and there are model changes
+    (virtual-env)$ python manage.py insert_base_data  # insert base source url, and roles/permissions data
+    (virtual-env)$ python manage.py insert_recipe_data  # inserts recipe data
+    (virtual-env)$ python manage.py update_fulltext_fields  # populates fulltext fields for fulltext search API
+    (virtual-env)$ python manage.py create_indexes  # creates indexes for to expedite fulltext search API
