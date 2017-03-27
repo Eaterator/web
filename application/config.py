@@ -45,6 +45,11 @@ OAUTH_CREDENTIALS = {
 }
 
 ###########################################
+#             FLICKR API KEYS             #
+FLICKR_API_KEY = os.environ["FLICKR_API_KEY"] if 'FLICKR_API_KEY' in os.environ else ''
+FLICKR_API_SECRET = os.environ["FLICKR_API_SECRET"] if 'FLICKR_API_SECRET' in os.environ else ''
+
+###########################################
 #            JWT/Auth Settings            #
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)
 JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=31)

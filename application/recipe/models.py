@@ -70,6 +70,7 @@ class RecipeImage(RequiredFields):
     farm_id = db.Column(db.String(10), nullable=False)
     server_id = db.Column(db.String(10), nullable=False)
     secret = db.Column(db.String(20), nullable=False)
+    title = db.Column(db.String(100), nullable=True)
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
 
     # photo sizes from flickr: https://www.flickr.com/services/api/misc.urls.html
@@ -138,6 +139,7 @@ class IngredientRecipe(RequiredFields):
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
     ingredient_amount = db.Column(db.Float)
     amount_units = db.Column(db.String(25))
+    percent_amount = db.Column(db.Float)
     ingredient_modifier = db.Column(db.Integer,
                                     db.ForeignKey('recipe_ingredientmodifier.pk'),
                                     nullable=True)

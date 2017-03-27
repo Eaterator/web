@@ -218,16 +218,15 @@ def create_fulltext_search_query(ingredients, modifiers, limit=DEFAULT_SEARCH_RE
     :return:
     """
     # TODO add modifiers when the database structure is fixed!
-    filter_group_size = int(len(ingredients)/2) + 1
     ingredients = list(map(lambda s: s.replace(' ', '&'), ingredients))
     return db.session.query(Recipe).filter(
             func.to_tsquery(
-                '|'.join('(' + '&'.join(i) + ')' for i in list(combinations(ingredients, filter_group_size)))
+                minimum_ingredients_combinations_filter(ingredients)
             ).op('@@')(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text)
             )
         ).order_by(desc(
-            func.ts_rank_cd(
+            func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
                 func.to_tsquery('&'.join(ingredients))
             ) * ALL_MATCHING_INGREDIENTS +
@@ -235,11 +234,20 @@ def create_fulltext_search_query(ingredients, modifiers, limit=DEFAULT_SEARCH_RE
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
                 func.to_tsquery('|'.join(ingredients))
             ) * INCLUDES_INGREDIENT +
-            func.ts_rank_cd(
+            func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
                 func.to_tsquery('|'.join(ingredients))
             ) * INCLUDES_TITLE
         )).limit(limit).all()
+
+
+def minimum_ingredients_combinations_filter(ingredients):
+    minimum_ingredients = int(len(ingredients)/2) + 1
+    return '|'.join(
+        '(' + '&'.join(i) + ')' for i in list(
+            combinations(ingredients, minimum_ingredients)
+        )
+    )
 
 
 def _parse_limit_parameter(limit, default, maximum):
@@ -309,4 +317,11 @@ v1 search query:
     FROM recipe_recipe WHERE to_tsquery('onion&tomato&beef&red&peppers') @@ to_tsvector('english', recipe_recipe.recipe_ingredients_text)
     ORDER BY rank DESC
     LIMIT 50
+--v3 uses the same general approach as above but makes the following modifications:
+    i) Using a min  inredient amount (i.e. 3) or int(len(ingredients)/2) + 1, WHERE clause uses '|' or all
+        combinations of ingredients to restrict search of ingredients to improve query performance
+    ii) ts_rank is used with & joined ingredients as multiple occurences of the word can improve score
+        i.e. searching chicken&rice in chicken chicken chicken rice beans > rice&beans
+    iii) ts_rank_cd for '|' ingredient queries kept to improve score if they are included in the recipe BUT the
+        are given a penaly INCLUDES INGREDIENT
 """

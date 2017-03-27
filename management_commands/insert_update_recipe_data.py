@@ -1,10 +1,14 @@
 import json
+import string
+import re
 import warnings
 from urllib.parse import urlparse
 from sqlalchemy.exc import DataError
+from sqlalchemy import func
 try:
     from recipe_scraper.tools.data_loader import DataLoader
     from recipe_parser.ingredient_parser import IngredientParser
+    from recipe_parser.amount_conversions import AmountPercentConverter
 except ImportError as e:
     warnings.warn("Dependency packages not setup (scraper and parser). "
                   "Inserting data tools/commands data will not be possible")
@@ -13,6 +17,9 @@ from application.recipe.models import Source, Recipe, IngredientRecipe, Ingredie
 from application.app import db
 
 MAX_INGREDIENT_LENGTH = 50
+INGREDIENT_SPLITTING_PATTERN = re.compile(r'\band\b\W+\bor\b')
+PUNCTUATION_TRANSLATOR = str.maketrans('', '', string.punctuation)
+AMOUNT_PERCENT_CONVERTER = AmountPercentConverter()
 
 
 # TODO need to handle ingredient_modifier case properly, very wrong data in DB from current version
@@ -37,6 +44,7 @@ class IngredientParserPipeline:
         """
         for data_chunk in self.data_loader.iter_json_data():
             for recipe_data in data_chunk:
+                self._clean_recipe_ingredients(recipe_data)
                 try:
                     recipe = self._insert_if_new_recipe(recipe_data)
                     if not recipe:
@@ -125,8 +133,7 @@ class IngredientParserPipeline:
             )
             recipe.reviews.append(new_review)
 
-    @staticmethod
-    def _insert_if_new_ingredient(parsed_ingredient):
+    def _insert_if_new_ingredient(self, parsed_ingredient):
         """
         Inserts a new ingredient entry if it does not exist
         :param parsed_ingredient: A ParsedIngredient (from recipe_parser) containing the parsed recipe data
@@ -136,7 +143,7 @@ class IngredientParserPipeline:
         if not ingredient:
             try:
                 ingredient = Ingredient(
-                    name=parsed_ingredient.ingredient.primary
+                    name=self._clean_ingredient_text(parsed_ingredient.ingredient.primary)
                 )
                 db.session.add(ingredient)
                 db.session.commit()
@@ -145,8 +152,7 @@ class IngredientParserPipeline:
                 ingredient = None
         return ingredient
 
-    @staticmethod
-    def _insert_if_new_ingredient_modifier(modifier):
+    def _insert_if_new_ingredient_modifier(self, modifier):
         """
         A function to insert a new modifier row if it exists
         :param modifier: Text of the modifier to be added (i.e. boneless in boneless chicken breast)
@@ -155,7 +161,7 @@ class IngredientParserPipeline:
         modifier = IngredientModifier.query.filter(IngredientModifier.name == modifier).first()
         if not modifier:
             modifier = IngredientModifier(
-                name=modifier
+                name=self._clean_ingredient_text(modifier)
             )
             db.session.add(modifier)
             db.session.commit()
@@ -169,6 +175,7 @@ class IngredientParserPipeline:
         :param parsed_ingredients: a list of ParsedIngredient objects
         :return: None
         """
+        recipe_ingredients = []
         for ingredient, parsed_ingredient in zip(ingredients, parsed_ingredients):
             if not ingredient:
                 continue
@@ -184,8 +191,31 @@ class IngredientParserPipeline:
             ingredient_recipe.ingredient = ingredient.pk
             ingredient_recipe.ingredient_modifier = modifier.pk
             ingredient_recipe.recipe = recipe.pk
+            recipe_ingredients.append(ingredient_recipe)
+        # Update relative percent amounts of ingredients in the recipe
+        AMOUNT_PERCENT_CONVERTER.calculate_percent_amounts(recipe_ingredients)
         db.session.commit()
         return
+
+    @staticmethod
+    def _clean_recipe_ingredients(recipe_data):
+        """
+        Splits ingredients that contain 'and', 'and/or', 'or' words in the ingredient for splitting up compound
+        ingredients in the ingredient. I.e. basil and/or thyme -> basil, thyme
+        :param recipe_data: the recipe_data entry from the DataLoader iter function
+        :return:
+        """
+        new_ingredients = []
+        for ingredient in recipe_data["ingredients"]:
+            matches = INGREDIENT_SPLITTING_PATTERN.findall(ingredient)
+            if matches:
+                new_ingredients.extend(ingredient.split(matches[0]))
+            elif 'or' in ingredient:
+                new_ingredients.extend(ingredient.split('or'))
+
+    @staticmethod
+    def _clean_ingredient_text(text):
+        return text.translate(PUNCTUATION_TRANSLATOR).strip()
 
 
 class DuplicateRecipeException(Exception):
@@ -210,7 +240,6 @@ def clean_recipe_data():
     Recipe.query.delete()
     db.session.commit()
 
-# TODO implement the following updates via SQLAlchemy:
 """
 ---- Update the ingredients text fields ----
 
@@ -234,5 +263,25 @@ FROM
     INNER JOIN ingredient_recipe ir ON ir.ingredient_modifier = im.pk AND im.name IS NOT NULL GROUP BY r_pk) AS sq
 WHERE r.pk = sq.r_pk
 """
+
+
 def create_fulltext_recipe_fields():
-    pass
+    ingredients_subquery = db.session.query(IngredientRecipe.recipe.label('r_pk'),
+                                                 func.repeat(
+                                                     func.string_agg(IngredientModifier.name, ' '),
+                                                     int(IngredientRecipe.percent_amount*10)
+                                                 )).\
+                                                 filter(IngredientRecipe.ingredient_modifier == IngredientModifier.pk).\
+                                                 group_by('r_pk')
+    ingredient_modifiers_subquery = db.session.query(IngredientRecipe.recipe.label('r_pk'),
+                                                 func.repeat(
+                                                     func.string_agg(IngredientModifier.name, ' '),
+                                                     int(IngredientRecipe.percent_amount*10)
+                                                 )).\
+                                                 filter(IngredientRecipe.ingredient == Ingredient.pk).\
+                                                 group_by('r_pk')
+    update = Recipe.update().values(
+        recipe_ingredients_text=ingredients_subquery,
+        recipe_ingredients_modifier_text=ingredient_modifiers_subquery
+
+    ).where(Recipe.pk == 'r_pk')
