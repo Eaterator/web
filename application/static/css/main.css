@@ -7,6 +7,7 @@
 	background: #9DC209 !important;
     position: relative;
     margin: 0;
+    border: 0;
 }
 .bootstrap-overrides nav .logo img {
 	width: 50px;
@@ -333,11 +334,47 @@
     margin-bottom: 100px;
 }
 .bootstrap-overrides .sample-products-list span{
-     border-bottom: 1px dashed #000;
+    border-bottom: 1px dashed #000;
     cursor: pointer;
     margin-right: 7px;
     
 }
 .bootstrap-overrides main{
 	 min-height: calc(100vh - 70px); 
+}
+.bootstrap-overrides header .line-heading{
+	background-color: #252f38;
+    width: 100%;
+    height: 160px;
+}
+.bootstrap-overrides header .line-heading p{
+    text-transform: uppercase;
+    color: #fff;
+    text-align: center;
+    font-size: 70px;
+    line-height: 160px;
+    font-weight: 600;
+}
+.bootstrap-overrides main #recipes-list{
+    padding-bottom: 50px; 
+}
+.bootstrap-overrides main #recipes-list .recipe{
+/*    width: 480px;*/
+    text-align: center;
+/*    padding: 10px;*/
+/*    display: inline-block;*/
+    text-transform: capitalize;    
+    padding-bottom: 20px;
+}
+.bootstrap-overrides main h3{
+    color: black;
+    text-transform: uppercase;
+    padding: 10px;
+    cursor: pointer;
+}
+.bootstrap-overrides main .recipe img{
+	width: 350px;
+    height: 350px;
+    padding-bottom: 20px;
+    cursor: pointer;
 }

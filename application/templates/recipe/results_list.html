@@ -1,6 +1,27 @@
 {% include 'header.html' %}
 
-<body class="bootstrap-overrides">
+<body class="bootstrap-overrides" ng-controller="MainCtrl">
     {% include 'navigation.html' %}
+    
+    <header>
+        <div class="line-heading">
+            <p>search</p>
+        </div>
+        
+    </header>
+    <main>    
+        <div id="recipes-list" class="container">
+           <div class="row">
+                <div class="recipe col-md-4 col-sm-4"> <!--ng-repeat="recipe in recipes"--> 
+                    <h3>Lorem ipsum dolor sit</h3>
+                    <img src="/static/images/recipe-icon.png" alt="recipe-icon">
+                    <a href="" class="details text-center" ng-click="checkField(recipe)">details</a>
+                    <div class="recipe-description" ng-if="showDescription">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates accusamus praesentium nam aperiam, voluptatibus aut cum eius necessitatibus ducimus obcaecati. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates sapiente, non, sequi nemo repellendus perferendis, ipsum commodi laudantium in voluptatem animi quod a officiis libero eum dolor eos. Exercitationem, sequi. </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    
     {% include 'footer.html' %}
 </body>
