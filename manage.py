@@ -29,11 +29,17 @@ def insert_recipe_data():
 @manager.command
 def delete_recipe_data():
     management_commands.clean_recipe_data()
+    management_commands.create_indexes(db, drop_index=True)
 
 
 @manager.command
 def create_super_user_account():
     management_commands.create_super_user()
+
+
+@manager.command
+def create_fulltext_fields():
+    management_commands.create_fulltext_recipe_fields()
 
 
 @manager.command
