@@ -104,7 +104,6 @@ def fulltext_search_recipe(limit=None):
     try:
         register_user_search(user_pk, payload)
         recipes = create_fulltext_search_query(ingredients, modifiers, limit=limit)
-        print('check')
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
@@ -234,6 +233,10 @@ def create_fulltext_search_query(ingredients, modifiers, limit=DEFAULT_SEARCH_RE
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
                 func.to_tsquery('|'.join(ingredients))
             ) * INCLUDES_INGREDIENT +
+            func.ts_rank(
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_modifier_text),
+                func.to_tsquery('|'.join(ingredients))
+            ) * INCLUDES_MODIFIER +
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
                 func.to_tsquery('|'.join(ingredients))
