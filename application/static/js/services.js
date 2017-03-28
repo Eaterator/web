@@ -35,9 +35,40 @@ angular.module('eateratorApp')
     };
 })
 
+
+
+// grab recipes from the server
+.factory('recipesFactory', function($http){
+    var allRecipes = [];
+    return{
+        saveRecipes: function(parameter){
+            console.log(parameter);
+            return $http({
+                method: 'POST',
+                url: '/recipe/search',
+                data: parameter
+                //JSON.stringify({$params})
+         }).then(function(response) {
+                allRecipes = JSON.parse(response.data);
+                consol.log(allRecipes);
+                return allRecipes;
+              })  
+        },
+        //getRecipes: function(){
+        //    return $http({
+        //        method: 'GET',
+        //        url: '/recipe/search',
+        //    }).then(function(response) {
+        //        allRecipes = response.data;
+        //        return allRecipes;
+        //      }
+        //)}
+    }
+})
+    
+
 // Register the previously created AuthInterceptor.
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('AuthInterceptor');
-});
-    
+})
     
