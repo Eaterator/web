@@ -158,6 +158,8 @@ class IngredientParserPipeline:
         :param modifier: Text of the modifier to be added (i.e. boneless in boneless chicken breast)
         :return: returns an IngredientModifier object that is guaranteed to exist in the DB
         """
+        if not modifier:
+            return
         modifier = IngredientModifier.query.filter(IngredientModifier.name == modifier).first()
         if not modifier:
             modifier = IngredientModifier(
@@ -189,7 +191,7 @@ class IngredientParserPipeline:
             )
             db.session.add(ingredient_recipe)
             ingredient_recipe.ingredient = ingredient.pk
-            ingredient_recipe.ingredient_modifier = modifier.pk
+            ingredient_recipe.ingredient_modifier = modifier.pk if modifier else None
             ingredient_recipe.recipe = recipe.pk
             recipe_ingredients.append(ingredient_recipe)
         # Update relative percent amounts of ingredients in the recipe
@@ -273,12 +275,12 @@ def create_fulltext_recipe_fields():
                                                  )).\
                                                  filter(IngredientRecipe.ingredient_modifier == IngredientModifier.pk).\
                                                  group_by('r_pk')
-    ingredient_modifiers_subquery = db.session.query(IngredientRecipe.recipe.label('r_pk'),
+    ingredient_modifiers_subquery = db.session.query(IngredientRecipe.recipe.label('r_m_pk'),
                                                  func.repeat(
                                                      func.string_agg(IngredientModifier.name, ' '),
                                                      int(IngredientRecipe.percent_amount*10)
                                                  )).\
-                                                 filter(IngredientRecipe.ingredient == Ingredient.pk).\
+                                                 filter(IngredientRecipe.ingredient == IngredientModifier.pk).\
                                                  group_by('r_pk')
     update = Recipe.update().values(
         recipe_ingredients_text=ingredients_subquery,

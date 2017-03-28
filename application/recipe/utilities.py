@@ -1,9 +1,30 @@
+from copy import deepcopy
+from functools import wraps
 from application.recipe.models import Recipe, Ingredient
+
+
+def _convert_none_to_string(obj):
+    ret = deepcopy(obj)
+    if isinstance(obj, dict):
+        for k, v in ret.items():
+            ret[k] = _convert_none_to_string(v)
+    if isinstance(obj, (list, tuple)):
+        for i, item in enumerate(obj):
+            obj[i] = _convert_none_to_string(item)
+    return '' if obj is None else obj
+
+
+def replace_none_with_string(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return _convert_none_to_string(func(*args, **kwargs))
+    return wrapper
 
 
 class RecipeIngredientFormatter:
 
     @staticmethod
+    @replace_none_with_string
     def recipes_to_dict(recipes, attr=['pk', 'title', 'average_rating', 'thumbnail']):
         if isinstance(recipes, Recipe):
             recipes = list(recipes)
@@ -14,6 +35,7 @@ class RecipeIngredientFormatter:
         }
 
     @staticmethod
+    @replace_none_with_string
     def recipe_to_dict(recipe,
                        attr=['pk', 'title', 'url', 'average_rating', 'lowest_rating',
                              'count_rating', 'highest_rating', 'medium_img', "thumbnail"]):
@@ -32,6 +54,7 @@ class RecipeIngredientFormatter:
         }
 
     @staticmethod
+    @replace_none_with_string
     def ingredients_to_dict(ingredients, attr=['pk', 'name']):
         if isinstance(ingredients, Ingredient):
             ingredients = list(ingredients)

@@ -1,10 +1,11 @@
 import requests
 from fuzzywuzzy import fuzz
 from uwsgidecorators import spool, cron
+from sqlalchemy import desc, func
 from time import sleep
 from timeit import default_timer
 from application.app import app, db
-from application.recipe.models import Recipe, RecipeImage
+from application.recipe.models import Recipe, RecipeImage, Ingredient, IngredientRecipe
 from application.config import FLICKR_API_KEY
 
 TOPN_FLICKR = 10  # number of photos to keep
@@ -20,7 +21,25 @@ CRON_FREQUENCY = 60 * 60 * 24  # 1 day
 @spool
 def update_flickr_images(recipe_pk, recipe_title):
     # TODO somehow parse the most desirable/pertinent words from the title
-    pertinent_recipe_words = 'salmon dill asparagus'
+    title_words_query = '|'.join(recipe_title.split())
+    top_ingredients = Ingredient.query().\
+        join(IngredientRecipe).\
+        filter(
+            func.to_tsquery(title_words_query).op('@@')(
+                func.to_tsvector('english', Ingredient.name)
+            )
+        ).\
+        group_by(Ingredient.name).\
+        order_by(desc(
+            func.to_rank(
+                func.to_tsvector('english', Recipe.name),
+                func.to_ts_query(title_words_query)
+            )
+        )).\
+        order_by(desc(
+            func.count(Ingredient.name)
+        )).limit(15)
+    # pertinent_recipe_words = find_top_words_from_query()
     resp = requests.get(FLICKR_URL_FORMATTER.format(
         FLICKR_SEARCH_METHOD, FLICKR_API_KEY, pertinent_recipe_words, FLICKR_RESPONSE_TYPE
     ))

@@ -46,7 +46,7 @@ class AppRegistrationForm(FlaskForm, UserDictMixin):
 
     social_id = StringField("Social ID", validators=[DataRequired()])
     auth_token = StringField("Token", validators=[DataRequired()])
-    email = StringField("Email")
+    username = StringField("Email")
     first_name = StringField("First name")
     last_name = StringField("Last name")
     date_of_birth = DateField("Birthday")
