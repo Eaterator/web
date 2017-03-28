@@ -4,7 +4,8 @@ import re
 import warnings
 from urllib.parse import urlparse
 from sqlalchemy.exc import DataError
-from sqlalchemy import func
+from sqlalchemy import func, Integer
+from sqlalchemy.sql.expression import cast
 try:
     from recipe_scraper.tools.data_loader import DataLoader
     from recipe_parser.ingredient_parser import IngredientParser
@@ -42,13 +43,14 @@ class IngredientParserPipeline:
         in the parser, or code, all recipes from the DB recipe_recipe table must be dropped.
         :return:
         """
+        current_recipes = {r.url.lower(): 1 for r in Recipe.query.all() if r.url}
         for data_chunk in self.data_loader.iter_json_data():
             for recipe_data in data_chunk:
                 self._clean_recipe_ingredients(recipe_data)
                 try:
-                    recipe = self._insert_if_new_recipe(recipe_data)
-                    if not recipe:
+                    if not recipe_data['url'] or recipe_data['url'].lower() in current_recipes:
                         continue
+                    recipe = self._insert_if_new_recipe(recipe_data)
                     ingredients = []
                     parsed_ingredients = []
                     for ingredient in recipe_data['ingredients']:
@@ -139,7 +141,10 @@ class IngredientParserPipeline:
         :param parsed_ingredient: A ParsedIngredient (from recipe_parser) containing the parsed recipe data
         :return: an Ingredient object that exists in the DB
         """
-        ingredient = Ingredient.query.filter(Ingredient.name == parsed_ingredient.ingredient.primary).first()
+        ingredient_text = self._clean_ingredient_text(parsed_ingredient.ingredient.primary)
+        if not ingredient_text:
+            return None
+        ingredient = Ingredient.query.filter(Ingredient.name == ingredient_text).first()
         if not ingredient:
             try:
                 ingredient = Ingredient(
@@ -152,22 +157,23 @@ class IngredientParserPipeline:
                 ingredient = None
         return ingredient
 
-    def _insert_if_new_ingredient_modifier(self, modifier):
+    def _insert_if_new_ingredient_modifier(self, modifier_text):
         """
         A function to insert a new modifier row if it exists
         :param modifier: Text of the modifier to be added (i.e. boneless in boneless chicken breast)
         :return: returns an IngredientModifier object that is guaranteed to exist in the DB
         """
-        if not modifier:
+        if not modifier_text:
             return
-        modifier = IngredientModifier.query.filter(IngredientModifier.name == modifier).first()
-        if not modifier:
+        modifier = IngredientModifier.query.filter(IngredientModifier.name == modifier_text).all()
+        if len(modifier) < 1:
             modifier = IngredientModifier(
-                name=self._clean_ingredient_text(modifier)
+                name=self._clean_ingredient_text(modifier_text)
             )
             db.session.add(modifier)
             db.session.commit()
-        return modifier
+            modifier = [modifier]
+        return modifier[0]
 
     def _insert_ingredient_recipe(self, recipe, ingredients, parsed_ingredients):
         """
@@ -217,7 +223,7 @@ class IngredientParserPipeline:
 
     @staticmethod
     def _clean_ingredient_text(text):
-        return text.translate(PUNCTUATION_TRANSLATOR).strip()
+        return text.translate(PUNCTUATION_TRANSLATOR).strip() if isinstance(text, str) else text
 
 
 class DuplicateRecipeException(Exception):
@@ -242,48 +248,116 @@ def clean_recipe_data():
     Recipe.query.delete()
     db.session.commit()
 
-"""
----- Update the ingredients text fields ----
-
-UPDATE
-  recipe_recipe r
-SET
-  recipe_ingredients_text = sq.t
-FROM
-  (SELECT ir.recipe AS r_pk, string_agg(i.name, ' ') as t FROM recipe_ingredient i
-    INNER JOIN ingredient_recipe ir ON ir.ingredient = i.pk GROUP BY r_pk) AS sq
-WHERE r.pk = sq.r_pk
-
----- Update Ingredient Modifier Text Fields ------
-
-UPDATE
-  recipe_recipe r
-SET
-  recipe_ingredients_modofier_text = sq.t
-FROM
-  (SELECT ir.recipe AS r_pk, string_agg(im.name, ' ') as t FROM recipe_ingredientmodifier im
-    INNER JOIN ingredient_recipe ir ON ir.ingredient_modifier = im.pk AND im.name IS NOT NULL GROUP BY r_pk) AS sq
-WHERE r.pk = sq.r_pk
-"""
-
 
 def create_fulltext_recipe_fields():
+    """
+    # TODO update to SQLAlchemy eventually?
+    :return:
     ingredients_subquery = db.session.query(IngredientRecipe.recipe.label('r_pk'),
                                                  func.repeat(
                                                      func.string_agg(IngredientModifier.name, ' '),
-                                                     int(IngredientRecipe.percent_amount*10)
-                                                 )).\
+                                                     cast(IngredientRecipe.percent_amount*10+1, Integer)
+                                                 ).label('ft_ingredients')).\
                                                  filter(IngredientRecipe.ingredient_modifier == IngredientModifier.pk).\
-                                                 group_by('r_pk')
-    ingredient_modifiers_subquery = db.session.query(IngredientRecipe.recipe.label('r_m_pk'),
+                                                 group_by('r_pk', IngredientRecipe.percent_amount).subquery()
+    ingredient_modifiers_subquery = db.session.query(IngredientRecipe.recipe.label('r_pk'),
                                                  func.repeat(
                                                      func.string_agg(IngredientModifier.name, ' '),
-                                                     int(IngredientRecipe.percent_amount*10)
-                                                 )).\
+                                                     cast(IngredientRecipe.percent_amount*10+1, Integer)
+                                                 ).label('ft_modifiers')).\
                                                  filter(IngredientRecipe.ingredient == IngredientModifier.pk).\
-                                                 group_by('r_pk')
-    update = Recipe.update().values(
-        recipe_ingredients_text=ingredients_subquery,
-        recipe_ingredients_modifier_text=ingredient_modifiers_subquery
+                                                 group_by('r_pk', IngredientRecipe.percent_amount).subquery()
+    conn = db.engine.connect()
+    update = Recipe.__table__.update().values(
+        recipe_ingredients_text=ingredients_subquery.c.ft_ingredients,
+    ).where(Recipe.pk == ingredients_subquery.c.r_pk)
+    update = conn.execute(update)
+    print("Updated full text fields for ingredients: {0} rows".format(update.rowcount))
 
-    ).where(Recipe.pk == 'r_pk')
+    update = Recipe.__table__.update().values(
+        recipe_ingredients_modifier_text=ingredient_modifiers_subquery.c.ft_modifiers
+    ).where(Recipe.pk == ingredient_modifiers_subquery.c.r_pk)
+    update = conn.execute(update)
+    print("Updated full text fields for ingredients: {0} rows".format(update.rowcount))
+    """
+    conn = db.engine.connect()
+    update = conn.execute("""
+        UPDATE
+          recipe_recipe r
+        SET
+          recipe_ingredients_modifier_text = sq2.ft_modifiers
+        FROM (
+          SELECT sq.r_pk AS r_pk, string_agg(sq.ft_modifiers, ' ') AS ft_modifiers FROM (
+            SELECT
+              ingredient_recipe.recipe AS r_pk,
+              string_agg(
+            repeat(
+              (recipe_ingredientmodifier.name || ' '),
+              CAST(ingredient_recipe.percent_amount * 10 + 1 AS INTEGER)
+            ), ''
+              ) AS ft_modifiers
+            FROM ingredient_recipe INNER JOIN recipe_ingredientmodifier ON
+            ingredient_recipe.ingredient_modifier = recipe_ingredientmodifier.pk
+            GROUP BY r_pk, ingredient_recipe.percent_amount, recipe_ingredientmodifier.name
+            ORDER BY r_pk
+          ) AS sq
+          GROUP BY sq.r_pk
+        ) AS sq2
+        WHERE r.pk = sq2.r_pk
+    """)
+    print("Fulltext Ingredient Modifiers Populated")
+    print("Rows updated: {0}\n".format(update.rowcount))
+
+    update = conn.execute("""
+        UPDATE
+          recipe_recipe r
+        SET
+          recipe_ingredients_text = sq2.ft_ingredients
+        FROM (
+          SELECT sq.r_pk AS r_pk, string_agg(sq.ft_ingredients, ' ') AS ft_ingredients FROM (
+            SELECT
+              ingredient_recipe.recipe AS r_pk,
+              string_agg(
+                repeat(
+                    (recipe_ingredient.name || ' '),
+                    CAST(ingredient_recipe.percent_amount * 10 + 1 AS INTEGER)
+                ), ''
+              ) AS ft_ingredients
+            FROM ingredient_recipe INNER JOIN recipe_ingredient ON
+            ingredient_recipe.ingredient = recipe_ingredient.pk
+            GROUP BY r_pk, ingredient_recipe.percent_amount, recipe_ingredient.name
+            ORDER BY r_pk
+          ) AS sq
+          GROUP BY sq.r_pk
+        ) AS sq2
+        WHERE r.pk = sq2.r_pk
+    """)
+    print("Fulltext Ingredient Populated")
+    print("Rows updated: {0}\n".format(update.rowcount))
+
+    print("Re-creating Indexes")
+
+    """
+    N.B. Non-weighted fulltext search field population (V1):
+    ---- Update the ingredients text fields ----
+
+    UPDATE
+      recipe_recipe r
+    SET
+      recipe_ingredients_text = sq.t
+    FROM
+      (SELECT ir.recipe AS r_pk, string_agg(i.name, ' ') as t FROM recipe_ingredient i
+        INNER JOIN ingredient_recipe ir ON ir.ingredient = i.pk GROUP BY r_pk) AS sq
+    WHERE r.pk = sq.r_pk
+
+    ---- Update Ingredient Modifier Text Fields ------
+
+    UPDATE
+      recipe_recipe r
+    SET
+      recipe_ingredients_modofier_text = sq.t
+    FROM
+      (SELECT ir.recipe AS r_pk, string_agg(im.name, ' ') as t FROM recipe_ingredientmodifier im
+        INNER JOIN ingredient_recipe ir ON ir.ingredient_modifier = im.pk AND im.name IS NOT NULL GROUP BY r_pk) AS sq
+    WHERE r.pk = sq.r_pk
+    """

@@ -8,10 +8,10 @@ def _convert_none_to_string(obj):
     if isinstance(obj, dict):
         for k, v in ret.items():
             ret[k] = _convert_none_to_string(v)
-    if isinstance(obj, (list, tuple)):
+    if isinstance(obj, list):
         for i, item in enumerate(obj):
-            obj[i] = _convert_none_to_string(item)
-    return '' if obj is None else obj
+            ret[i] = _convert_none_to_string(item)
+    return '' if ret is None else ret
 
 
 def replace_none_with_string(func):
@@ -45,11 +45,12 @@ class RecipeIngredientFormatter:
                 "ingredients": [{
                     "ingredient": {
                         "name": ingredient_recipe.Ingredient.name,
-                        "modifier": ingredient_recipe.IngredientModifier.name,
+                        "modifier": ingredient_recipe.IngredientModifier.name
+                        if ingredient_recipe.IngredientModifier else None,
                         "amount": ingredient_recipe.ingredient_amount,
                         "unit": ingredient_recipe.amount_units
                     }
-                } for ingredient_recipe in recipe.ingredient_recipes],
+                } for ingredient_recipe in recipe.ingredient_recipes if ingredient_recipe.Ingredient],
             }
         }
 

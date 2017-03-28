@@ -123,7 +123,7 @@ class Review(RequiredFields):
 class Ingredient(RequiredFields):
     __tablename__ = 'recipe_ingredient'
     pk = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    name = db.Column(db.String(200), unique=True)
 
 
 class IngredientModifier(RequiredFields):

@@ -40,11 +40,14 @@ def create_super_user_account():
 @manager.command
 def create_fulltext_fields():
     management_commands.create_fulltext_recipe_fields()
-
-
-@manager.command
-def create_indexes():
+    management_commands.create_indexes(db, drop_index=True)
     management_commands.create_indexes(db)
+
+
+@manager.option('-d', '--delete', dest='delete', default=None)
+def create_indexes(delete):
+    drop_indexes = True if delete else False
+    management_commands.create_indexes(db, drop_index=drop_indexes)
 
 
 if __name__ == '__main__':
