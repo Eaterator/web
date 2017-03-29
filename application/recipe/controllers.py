@@ -43,10 +43,13 @@ def get_top_ingredients(limit=None):
     ingredients = db.session.query(Ingredient.pk, Ingredient.name).\
         join(IngredientRecipe).\
         group_by(Ingredient.pk, Ingredient.name).\
-        order_by(desc(func.count(IngredientRecipe.ingredient))).\
+        order_by(desc(
+            func.avg(IngredientRecipe.percent_amount) *
+            func.count(IngredientRecipe.ingredient)
+        )).\
         limit(limit).all()
     return jsonify(RecipeIngredientFormatter.ingredients_to_dict(
-        ingredients, attr=["pk", "title", "url", "average_rating"])
+        ingredients, attr=["pk", "name"])
     )
 
 
