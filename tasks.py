@@ -1,6 +1,9 @@
 import requests
+import uwsgidecorators
+import uwsgi
+import traceback
 from fuzzywuzzy import fuzz
-from uwsgidecorators import spool, cron
+from uwsgidecorators import cron
 from sqlalchemy import desc, func
 from time import sleep
 from timeit import default_timer
@@ -19,65 +22,69 @@ CRON_FREQUENCY = 60 * 60  # 1 day
 
 
 # how to setup ini: http://wp.hthieu.com/?p=296
-@spool
 def update_flickr_images(data):
-    # TODO somehow parse the most desirable/pertinent words from the title
-    if not data['title']:
-        return
-    title_words_query = '|'.join(data['recipe_title'].split())
-    top_ingredients = Ingredient.query().\
-        join(IngredientRecipe).\
-        filter(
-            func.to_tsquery(title_words_query).op('@@')(
-                func.to_tsvector('english', Ingredient.name)
-            )
-        ).\
-        group_by(Ingredient.name).\
-        order_by(desc(
-            func.to_rank(
-                func.to_tsvector('english', Recipe.title),
-                func.to_ts_query(title_words_query)
-            )
-        )).\
-        order_by(desc(
-            func.count(Ingredient.name)
-        )).limit(FLICKR_WORD_SERACH_SIZE)
-    pertinent_recipe_words = " ".join(i.name for i in top_ingredients)
-    resp = requests.get(
-        FLICKR_URL_FORMATTER.format(
-            FLICKR_SEARCH_METHOD, FLICKR_API_KEY, pertinent_recipe_words, FLICKR_RESPONSE_TYPE
-        )
-    )
-    resp = resp.json()
-    start = default_timer()
     try:
-        top_photos = sorted(
-            [(fuzz.partial_ratio(p['title'], recipe_title), p["server"], p["id"], p["farm"], p["secret"], p["title"])
-            for p in resp["photos"]["photo"]],
-            reverse=True,
-            key=lambda i: i[0])[:TOPN_FLICKR]
-    except KeyError:
-        app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
-            data["pk"], data["title"], pertinent_recipe_words
-        ))
-        sleep(FLICKR_REQUEST_DELAY - (default_timer() - start()))
-        return
-
-    for photo in top_photos:
-        app.logger.debug("FLICKR SPOOLER | Added photo ({0}): {1} ; {2}".format(
-            data["pk"], data["title"], photo[5]
-        ))
-        new_recipe_image = RecipeImage(
-            recipe=data["pk"],
-            server_id=photo[1],
-            photo_id=photo[2],
-            farm_id=photo[3],
-            secret=photo[4],
-            title=photo[5]
+        # TODO somehow parse the most desirable/pertinent words from the title
+        if not data['title']:
+            return
+        title_words_query = '|'.join(data['recipe_title'].split())
+        top_ingredients = Ingredient.query().\
+            join(IngredientRecipe).\
+            filter(
+                func.to_tsquery(title_words_query).op('@@')(
+                    func.to_tsvector('english', Ingredient.name)
+                )
+            ).\
+            group_by(Ingredient.name).\
+            order_by(desc(
+                func.to_rank(
+                    func.to_tsvector('english', Recipe.title),
+                    func.to_ts_query(title_words_query)
+                )
+            )).\
+            order_by(desc(
+                func.count(Ingredient.name)
+            )).limit(FLICKR_WORD_SERACH_SIZE)
+        pertinent_recipe_words = " ".join(i.name for i in top_ingredients)
+        resp = requests.get(
+            FLICKR_URL_FORMATTER.format(
+                FLICKR_SEARCH_METHOD, FLICKR_API_KEY, pertinent_recipe_words, FLICKR_RESPONSE_TYPE
+            )
         )
-        db.session.add(new_recipe_image)
-    db.session.commit()
-    sleep(FLICKR_REQUEST_DELAY - (default_timer() - start))
+        resp = resp.json()
+        start = default_timer()
+        try:
+            top_photos = sorted(
+                [(fuzz.partial_ratio(p['title'], data["title"]), p["server"], p["id"], p["farm"], p["secret"], p["title"])
+                for p in resp["photos"]["photo"]],
+                reverse=True,
+                key=lambda i: i[0])[:TOPN_FLICKR]
+        except KeyError:
+            app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
+                data["pk"], data["title"], pertinent_recipe_words
+            ))
+            sleep(FLICKR_REQUEST_DELAY - (default_timer() - start()))
+            return uwsgi.SPOOL_OK
+
+        for photo in top_photos:
+            app.logger.debug("FLICKR SPOOLER | Added photo ({0}): {1} ; {2}".format(
+                data["pk"], data["title"], photo[5]
+            ))
+            new_recipe_image = RecipeImage(
+                recipe=data["pk"],
+                server_id=photo[1],
+                photo_id=photo[2],
+                farm_id=photo[3],
+                secret=photo[4],
+                title=photo[5]
+            )
+            db.session.add(new_recipe_image)
+        db.session.commit()
+        sleep(FLICKR_REQUEST_DELAY - (default_timer() - start))
+        return uwsgi.SPOOL_OK
+    except:
+        app.logger.error("FLICKR | Unknown error: {0}".format(traceback.format_exc()))
+        return uwsgi.SPOOL_OK
 
 
 # run every hour at *:30
@@ -91,4 +98,4 @@ def get_recipes_without_images(*args):
     for recipe in recipes:
         update_flickr_images.spool(pk=recipe.pk, title=recipe.title)
 
-
+uwsgi.spooler = update_flickr_images
