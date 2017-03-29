@@ -3,8 +3,43 @@ Recipe Module API
 #################
 The recipes API focuses solely on searching the database for recipes for regular and business users.
 
-Recipe Search
+Recipe Detail
 =============
+Get detailed information about a recipe.
+
+.. code-block:: none
+
+      Method = "GET"
+      Endpoint = '/recipe/recipe/<pk:int>'
+      Response = {
+		"recipe": {
+			"recipe": {
+				    "pk": 1234
+				    "title": "My great recipe"
+				    "url": "http://foodnetwork.com.recipe/my-great-recipe
+				    "average_rating": 3.4
+				    "lowest_rating": 1
+				    "count_rating": 34
+				    "highest_rating": 4
+				    "medium_img": "https://flickr.com/234243_m.jpg"
+				    "thumbnail": "https://flickr.com/234243.jpb
+				  },
+			"ingredients": [
+				    {
+				      "ingredient": {
+						      "name": "potato"
+						      "modifier": "small"
+						      "amount": 4
+						      "unit": None
+				                    }
+				    }
+			]
+		}
+	}
+
+
+Recipe and Ingredient Search
+============================
 
 Regular User Endpoints
 ----------------------
@@ -28,11 +63,15 @@ Regular users can submit a list of ingredients to complete a search, which retur
 		"recipes" : [
 		    {
                         "pk": 6442, 
-                        "title": "Turkey Saut\u00e9 with Fresh Cherry Sauce recipe | Epicurious.com"
+                        "title": "Turkey Saut\u00e9 with Fresh Cherry Sauce recipe | Epicurious.com",
+                        "average_rating": 3.4,
+                        "thumbnail": "https://flickr.com/image.jpg"
                     }, 
                     {
                         "pk": 6904, 
-                        "title": "Kirsch and Tart Cherry Souffles recipe | Epicurious.com"
+                        "title": "Kirsch and Tart Cherry Souffles recipe | Epicurious.com",
+                        "average_rating": 4.2,
+                        "thumbnail": https://flikr.com.image2.jpg"
                     }
 
 		]

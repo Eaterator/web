@@ -3,7 +3,7 @@ from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from application import config
-from application.exceptions import InvalidAPIRequest
+from application.exceptions import InvalidAPIRequest, get_traceback
 from application.auth.auth_utilities import JWTUtilities
 
 # Initialize application and DB
@@ -57,4 +57,4 @@ def handle_api_error(error):
             return response
         return render_template('404.html')
     else:
-        app.logger.error("Unknown error. Stacktrace: {0}".format(str(error)))
+        app.logger.error("Unknown error: {0}. Stacktrace: {1}".format(str(error), get_traceback()))

@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 BAD_REQUEST_CODE = 400
 UNAUTHORIZED_CODE = 403
 NOT_FOUND_CODE = 404
@@ -20,5 +23,9 @@ class InvalidAPIRequest(Exception):
         elif isinstance(self.payload, dict):
             self.payload['message'] = self.message
         return self.payload
+
+
+def get_traceback():
+    return traceback.format_exc(10)
 
 

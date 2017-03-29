@@ -39,14 +39,14 @@ class StandardRegistrationForm(FlaskForm, UserDictMixin):
 
 class AppRegistrationForm(FlaskForm, UserDictMixin):
 
-    data_fields = ['social_id', 'email', 'first_name', 'last_name', 'date_of_birth']
+    data_fields = ['social_id', 'username', 'first_name', 'last_name', 'date_of_birth']
 
     class Meta:
         csrf = False
 
     social_id = StringField("Social ID", validators=[DataRequired()])
     auth_token = StringField("Token", validators=[DataRequired()])
-    email = StringField("Email")
+    username = StringField("Email")
     first_name = StringField("First name")
     last_name = StringField("Last name")
     date_of_birth = DateField("Birthday")

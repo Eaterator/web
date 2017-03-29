@@ -21,13 +21,33 @@ class Recipe(RequiredFields):
     highest_rating = db.Column(db.Float)
     count_rating = db.Column(db.Integer)
     raw_data = db.Column(db.Text)
+    recipe_ingredients_text = db.Column(db.Text)
+    recipe_ingredients_modifier_text = db.Column(db.Text)
     source = db.Column(db.Integer, db.ForeignKey('recipe_source.pk'))
     reviews = db.relationship('Review', backref='recipe_recipe',
                               lazy='dynamic')
     ingredient_recipes = db.relationship("IngredientRecipe", backref="recipe_recipe",
-                                         lazy="subquery")
+                                         lazy="dynamic")
     recipe_images = db.relationship("RecipeImage", backref="recipe_recipe",
                                     lazy="joined")
+
+    __table_args__ = (
+        db.Index(
+            'idx_fulltext_recipe_title',
+            RequiredFields.create_tsvector(title),
+            postgresql_using="gin"
+        ),
+        db.Index(
+            'idx_fulltext_ingredients',
+            RequiredFields.create_tsvector(recipe_ingredients_text),
+            postgresql_using="gin"
+        ),
+        db.Index(
+            'idx_fulltext_ingredient_modifiers',
+            RequiredFields.create_tsvector(recipe_ingredients_modifier_text),
+            postgresql_using="gin"
+        )
+    )
 
     @property
     def thumbnail(self):
@@ -50,6 +70,7 @@ class RecipeImage(RequiredFields):
     farm_id = db.Column(db.String(10), nullable=False)
     server_id = db.Column(db.String(10), nullable=False)
     secret = db.Column(db.String(20), nullable=False)
+    title = db.Column(db.String(100), nullable=True)
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
 
     # photo sizes from flickr: https://www.flickr.com/services/api/misc.urls.html
@@ -102,7 +123,7 @@ class Review(RequiredFields):
 class Ingredient(RequiredFields):
     __tablename__ = 'recipe_ingredient'
     pk = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    name = db.Column(db.String(200), unique=True)
 
 
 class IngredientModifier(RequiredFields):
@@ -118,6 +139,7 @@ class IngredientRecipe(RequiredFields):
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
     ingredient_amount = db.Column(db.Float)
     amount_units = db.Column(db.String(25))
+    percent_amount = db.Column(db.Float)
     ingredient_modifier = db.Column(db.Integer,
                                     db.ForeignKey('recipe_ingredientmodifier.pk'),
                                     nullable=True)
