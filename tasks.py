@@ -20,9 +20,11 @@ CRON_FREQUENCY = 60 * 60  # 1 day
 
 # how to setup ini: http://wp.hthieu.com/?p=296
 @spool
-def update_flickr_images(recipe_pk, recipe_title):
+def update_flickr_images(data):
     # TODO somehow parse the most desirable/pertinent words from the title
-    title_words_query = '|'.join(recipe_title.split())
+    if not data['title']:
+        return
+    title_words_query = '|'.join(data['recipe_title'].split())
     top_ingredients = Ingredient.query().\
         join(IngredientRecipe).\
         filter(
@@ -56,17 +58,17 @@ def update_flickr_images(recipe_pk, recipe_title):
             key=lambda i: i[0])[:TOPN_FLICKR]
     except KeyError:
         app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
-            recipe_pk, recipe_title, pertinent_recipe_words
+            data["pk"], data["title"], pertinent_recipe_words
         ))
         sleep(FLICKR_REQUEST_DELAY - (default_timer() - start()))
         return
 
     for photo in top_photos:
         app.logger.debug("FLICKR SPOOLER | Added photo ({0}): {1} ; {2}".format(
-            recipe_pk, recipe_title, photo[5]
+            data["pk"], data["title"], photo[5]
         ))
         new_recipe_image = RecipeImage(
-            recipe=recipe_pk,
+            recipe=data["pk"],
             server_id=photo[1],
             photo_id=photo[2],
             farm_id=photo[3],
@@ -79,14 +81,14 @@ def update_flickr_images(recipe_pk, recipe_title):
 
 
 # run every hour at *:30
-@cron(30, -1, -1, -1, -1)
-def get_recipes_without_images():
+@cron(53, -1, -1, -1, -1)
+def get_recipes_without_images(*args):
     app.logger.debug("CRON job called for FLICKR update")
     maximum_recipes = CRON_FREQUENCY / FLICKR_REQUEST_DELAY
     recipes = Recipe.query.\
         filter(Recipe.recipe_images == None).\
         limit(int(maximum_recipes * .9))
     for recipe in recipes:
-        update_flickr_images(recipe.pk, recipe.title)
+        update_flickr_images.spool(pk=recipe.pk, title=recipe.title)
 
 
