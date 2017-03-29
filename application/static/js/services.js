@@ -45,7 +45,7 @@ angular.module('eateratorApp')
             numberOfRecipes = numberOfRecipes || 20
             return $http({
                 method: 'POST',
-                url: '/recipe/search/' + numberOfRecipes,
+                url: '/recipe/v2/search/' + numberOfRecipes,
                 data: ingredientsPayload
              })
         },
