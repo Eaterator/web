@@ -6,7 +6,7 @@ class UserSearchData(RequiredFields):
     __tablename__ = 'user_searchdata'
 
     pk = db.Column(db.Integer, primary_key=True)
-    search = db.Column(db.String(65))
+    search = db.Column(db.JSON)
     user = db.Column(db.Integer, db.ForeignKey('auth_user.pk'))
 
 

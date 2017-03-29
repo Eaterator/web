@@ -21,6 +21,7 @@ angular.module('eateratorApp')
     return {
         request: function(config) {
             config.headers = config.headers || {};
+            config.headers.ContentType = 'application/json';
             if ($window.localStorage.getItem('id_token')) {
                 config.headers.Authorization = 'Bearer ' + $window.localStorage.getItem('id_token');
             }
@@ -35,38 +36,68 @@ angular.module('eateratorApp')
     };
 })
 
-
-
 // grab recipes from the server
 .factory('recipesFactory', function($http){
     var allRecipes = [];
-    return{
-        saveRecipes: function(parameter){
-            console.log(parameter);
+    return {
+        searchRecipes: function(ingredientsPayload, numberOfRecipes){
+            console.log(ingredientsPayload);
+            numberOfRecipes = numberOfRecipes || 20
             return $http({
                 method: 'POST',
-                url: '/recipe/search',
-                data: parameter
-                //JSON.stringify({$params})
-         }).then(function(response) {
-                allRecipes = JSON.parse(response.data);
-                consol.log(allRecipes);
-                return allRecipes;
-              })  
+                url: '/recipe/search/' + numberOfRecipes,
+                data: ingredientsPayload
+             })
         },
-        //getRecipes: function(){
-        //    return $http({
-        //        method: 'GET',
-        //        url: '/recipe/search',
-        //    }).then(function(response) {
-        //        allRecipes = response.data;
-        //        return allRecipes;
-        //      }
-        //)}
+        getDetailedRecipe: function(recipePk) {
+            return $http({
+                method: "GET",
+                url: '/recipe/recipe/' + recipePk
+            })
+        },
+        getTopIngredients: function(numberOfTopIngredients) {
+            numberOfTopIngredients = numberOfTopIngredients || 15;
+            return $http({
+                method: "GET",
+                url: '/recipe/top-ingredients/' + numberOfTopIngredients
+            })
+        },
+        getRelatedIngredient: function(ingredient, numberOfRelatedIngredients){
+            numberOfRelatedIngredients = numberOfRelatedIngredients || 10;
+            // encodeURIComponent just replaces spaces with %20 for making valid url, allows inclusion of spaces in ingredient
+            ingredient = encodeURIComponent(ingredient.trim())
+            return $http({
+                method: "GET",
+                url: '/recipe/related_ingredients/' + ingredient + '/' + numberOfRelatedIngredients
+            })
+        }
     }
 })
-    
 
+.factory('userFactory', function($http){
+    return {
+        getUserFavouriteRecipes: function(maximumNumber) {
+            maximumNumber = maximumNumber || 15;
+            return $http({
+                method: "GET",
+                url: '/user/favourite-recipes/' + maximumNumber,
+            })
+        },
+        getUserRecentSearches: function(maximumNumber) {
+            maximumNumber = maxmimumNumber || 15;
+            return $http({
+                method: "GET",
+                url: '/user/recent-searches/' + maxmimumNumber,
+            })
+        },
+        addUserFavourite: function(recipePk) {
+            return $http({
+                method: "POST",
+                url: '/user/favourite-recipe/' + recipePk
+            })
+        }
+    }
+})
 // Register the previously created AuthInterceptor.
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('AuthInterceptor');

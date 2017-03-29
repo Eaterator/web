@@ -4,6 +4,7 @@ from itertools import combinations
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, or_, desc, not_
+from application.controllers import _parse_limit_parameter
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
@@ -57,6 +58,7 @@ def get_top_ingredients(limit=None):
 @recipe_blueprint.route('/related-ingredients/<ingredient>/<limit>', methods=["POST"])
 @jwt_required
 def get_related_ingredients(ingredient, limit=None):
+    print(ingredient)
     limit = _parse_limit_parameter(limit, DEFAULT_RELATED_INGREDIENTS, MAX_RELATED_INGREDIENTS)
     if not ingredient:
         raise InvalidAPIRequest("Must specify an ingredient", status_code=BAD_REQUEST_CODE)
@@ -101,12 +103,13 @@ def fulltext_search_recipe(limit=None):
     user_pk = get_jwt_identity()
     try:
         payload = request.get_json()
+        raw_search = set(payload["ingredients"])
         ingredients, modifiers = parse_ingredients_with_modifiers(payload)
     except (TypeError, ValueError):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     try:
         register_user_search(user_pk, payload)
-        recipes = create_fulltext_search_query(ingredients, modifiers, limit=limit)
+        recipes = create_fulltext_search_query(ingredients, raw_search, limit=limit)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
@@ -179,10 +182,12 @@ def parse_ingredients(payload):
 
 def parse_ingredients_with_modifiers(payload):
     return (
-        [pi.ingredient.primary if pi.ingredient and pi.ingredient.primary else None for pi in
-         [PARSER(ingredient) for ingredient in payload["ingredients"]]],
-        [pi.ingredient.modifier if pi.ingredient and pi.ingredient.modifier else None for pi in
-         [PARSER(ingredient) for ingredient in payload["ingredients"]]]
+        [pi.ingredient.primary for pi in
+         [PARSER(ingredient) for ingredient in payload["ingredients"]]
+         if pi.ingredient and pi.ingredient.primary],
+        [pi.ingredient.modifier for pi in
+         [PARSER(ingredient) for ingredient in payload["ingredients"]]
+         if pi.ingredient and pi.ingredient.modifier]
     )
 
 
@@ -212,10 +217,10 @@ def _apply_dynamic_filters(ingredients):
     return dynamic_filters
 
 
-def create_fulltext_search_query(ingredients, modifiers, limit=DEFAULT_SEARCH_RESULT_SIZE):
+def create_fulltext_search_query(ingredients, raw_search, limit=DEFAULT_SEARCH_RESULT_SIZE):
     """
     :param ingredients: List of primary ingredients
-    :param modifiers: list of parsed ingredient modifiers
+    :param raw_search: raw user search words
     :param limit: number of searches to return
     :return:
     """
@@ -234,15 +239,15 @@ def create_fulltext_search_query(ingredients, modifiers, limit=DEFAULT_SEARCH_RE
             ) * ALL_MATCHING_INGREDIENTS +
             func.ts_rank_cd(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
-                func.to_tsquery('|'.join(ingredients))
+                func.to_tsquery('|'.join(raw_search))
             ) * INCLUDES_INGREDIENT +
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_modifier_text),
-                func.to_tsquery('|'.join(ingredients))
+                func.to_tsquery('|'.join(raw_search))
             ) * INCLUDES_MODIFIER +
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery('|'.join(ingredients))
+                func.to_tsquery('|'.join(raw_search))
             ) * INCLUDES_TITLE
         )).limit(limit).all()
 
@@ -254,17 +259,6 @@ def minimum_ingredients_combinations_filter(ingredients):
             combinations(ingredients, minimum_ingredients)
         )
     )
-
-
-def _parse_limit_parameter(limit, default, maximum):
-    if not limit:
-        return default
-    try:
-        limit = int(limit)
-        limit = limit if limit <= maximum else maximum
-    except (ValueError, TypeError):
-        limit = default
-    return limit
 
 """
 v1 search query:

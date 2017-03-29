@@ -18,11 +18,17 @@ angular.module('eateratorApp', [])
            //    $scope.allRecipes = allRecipes;
            //})
            //
-           $scope.addIngredientsToJSON = function(ingredients){
-               $scope.parameter = {
+           $scope.searchRecipes = function(ingredients){
+               $scope.ingredientsPayload = {
                     'ingredients': ingredients.name.split(",")
                 }
-                recipesFactory.saveRecipes($scope.parameter);
+                var request = recipesFactory.searchRecipes($scope.ingredientsPayload);
+                request.then(function(response) {
+                    // response.data is already parsed into a JSON object, contains recipe format from documentation
+                    console.log(response.data);
+                    console.log(response.data.recipes);
+                    return $scope.searchedRecipes = response.data.recipes || [];
+                })
            }
            
         

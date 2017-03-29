@@ -39,3 +39,14 @@ def get_css(file):
             file)
     except:
         InvalidAPIRequest("Could not locate resource", status_code=404)
+
+
+def _parse_limit_parameter(limit, default, maximum):
+    if not limit:
+        return default
+    try:
+        limit = int(limit)
+        limit = limit if limit <= maximum else maximum
+    except (ValueError, TypeError):
+        limit = default
+    return limit

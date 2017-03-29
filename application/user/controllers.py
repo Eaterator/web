@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import FavouriteRecipe, UserSearchData
 from application.recipe.models import Recipe
+from application.controllers import _parse_limit_parameter
 from application.recipe.utilities import RecipeIngredientFormatter
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 from application.app import db
@@ -11,6 +12,7 @@ DEFAULT_FAVOURITE_RECIPE_NUMBER = 25
 DEFAULT_FAVOURITE_RECIPE_ORDER = 'created_at'
 DEFAULT_USER_SEARCH_HISTORY_SIZE = 10
 MAXIMUM_USER_SEARCH_HISTORY_SIZE = 30
+MAXIMUM_USER_FAVOURITE_NUMBER = 100
 
 
 user_blueprint = Blueprint('user_data', __name__,
@@ -19,11 +21,13 @@ user_blueprint = Blueprint('user_data', __name__,
 
 
 @user_blueprint.route('/favourite-recipes', methods=["GET"])
+@user_blueprint.route('/favourite-recipes/<limit>', methods=["GET"])
 @jwt_required
-def user_favourites():
+def user_favourites(limit=None):
+    limit = _parse_limit_parameter(limit, DEFAULT_FAVOURITE_RECIPE_NUMBER, MAXIMUM_USER_FAVOURITE_NUMBER)
     favourite_recipes = db.session.query(Recipe).filter(Recipe.pk.in_(
         db.session.query(FavouriteRecipe.pk).filter(FavouriteRecipe.user == get_jwt_identity())
-    )).all()
+    )).limit(limit).all()
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(favourite_recipes))
 
 

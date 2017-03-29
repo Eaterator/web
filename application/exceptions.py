@@ -12,7 +12,7 @@ class InvalidAPIRequest(Exception):
 
     def __init__(self, message, status_code=None, payload=None):
         Exception.__init__(self)
-        self.message = message
+        self.message = message + get_traceback()
         if status_code:
             self.status_code = status_code
         self.payload = payload if isinstance(payload, dict) or isinstance(payload, str) else {}
