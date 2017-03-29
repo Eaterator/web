@@ -8,6 +8,7 @@ class UserSearchData(RequiredFields):
     pk = db.Column(db.Integer, primary_key=True)
     search = db.Column(db.JSON)
     user = db.Column(db.Integer, db.ForeignKey('auth_user.pk'))
+    User = db.relationship("User", backref="user_searchdata")
 
 
 class FavouriteRecipe(RequiredFields):
@@ -16,3 +17,5 @@ class FavouriteRecipe(RequiredFields):
     pk = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.Integer, db.ForeignKey('auth_user.pk'))
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
+    Recipes = db.relationship("Recipe", backref="user_favouriterecipe")
+    User = db.relationship("User", backref="user_favourite_recipe")

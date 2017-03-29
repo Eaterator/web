@@ -14,7 +14,8 @@ FLICKR_URL_FORMATTER = "https://api.flickr.com/services/rest/?"\
     "method={0}&api_key={1}&&text={2}&format={3}&nojsoncallback=1"
 FLICKR_SEARCH_METHOD = 'flickr.photos.search'
 FLICKR_RESPONSE_TYPE = 'json'
-CRON_FREQUENCY = 60 * 60 * 24  # 1 day
+FLICKR_WORD_SERACH_SIZE = 3
+CRON_FREQUENCY = 60 * 60  # 1 day
 
 
 # how to setup ini: http://wp.hthieu.com/?p=296
@@ -32,25 +33,38 @@ def update_flickr_images(recipe_pk, recipe_title):
         group_by(Ingredient.name).\
         order_by(desc(
             func.to_rank(
-                func.to_tsvector('english', Recipe.name),
+                func.to_tsvector('english', Recipe.title),
                 func.to_ts_query(title_words_query)
             )
         )).\
         order_by(desc(
             func.count(Ingredient.name)
-        )).limit(15)
-    # pertinent_recipe_words = find_top_words_from_query()
-    resp = requests.get(FLICKR_URL_FORMATTER.format(
-        FLICKR_SEARCH_METHOD, FLICKR_API_KEY, pertinent_recipe_words, FLICKR_RESPONSE_TYPE
-    ))
+        )).limit(FLICKR_WORD_SERACH_SIZE)
+    pertinent_recipe_words = " ".join(i.name for i in top_ingredients)
+    resp = requests.get(
+        FLICKR_URL_FORMATTER.format(
+            FLICKR_SEARCH_METHOD, FLICKR_API_KEY, pertinent_recipe_words, FLICKR_RESPONSE_TYPE
+        )
+    )
     resp = resp.json()
     start = default_timer()
-    top_photos = sorted(
-        [(fuzz.partial_ratio(p['title'], recipe_title), p["server"], p["id"], p["farm"], p["secret"], p["title"])
-         for p in resp["photos"]["photo"]],
-        reverse=True,
-        key=lambda i: i[0])[:TOPN_FLICKR]
+    try:
+        top_photos = sorted(
+            [(fuzz.partial_ratio(p['title'], recipe_title), p["server"], p["id"], p["farm"], p["secret"], p["title"])
+            for p in resp["photos"]["photo"]],
+            reverse=True,
+            key=lambda i: i[0])[:TOPN_FLICKR]
+    except KeyError:
+        app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
+            recipe_pk, recipe_title, pertinent_recipe_words
+        ))
+        sleep(FLICKR_REQUEST_DELAY - (default_timer() - start()))
+        return
+
     for photo in top_photos:
+        app.logger.debug("FLICKR SPOOLER | Added photo ({0}): {1} ; {2}".format(
+            recipe_pk, recipe_title, photo[5]
+        ))
         new_recipe_image = RecipeImage(
             recipe=recipe_pk,
             server_id=photo[1],
@@ -64,8 +78,10 @@ def update_flickr_images(recipe_pk, recipe_title):
     sleep(FLICKR_REQUEST_DELAY - (default_timer() - start))
 
 
-@cron(-1, -1, 0, 0, -1)
+# run every hour at *:30
+@cron(30, -1, -1, -1, -1)
 def get_recipes_without_images():
+    app.logger.debug("CRON job called for FLICKR update")
     maximum_recipes = CRON_FREQUENCY / FLICKR_REQUEST_DELAY
     recipes = Recipe.query.\
         filter(Recipe.recipe_images == None).\

@@ -58,7 +58,6 @@ def get_top_ingredients(limit=None):
 @recipe_blueprint.route('/related-ingredients/<ingredient>/<limit>', methods=["POST"])
 @jwt_required
 def get_related_ingredients(ingredient, limit=None):
-    print(ingredient)
     limit = _parse_limit_parameter(limit, DEFAULT_RELATED_INGREDIENTS, MAX_RELATED_INGREDIENTS)
     if not ingredient:
         raise InvalidAPIRequest("Must specify an ingredient", status_code=BAD_REQUEST_CODE)
@@ -323,5 +322,5 @@ v1 search query:
     ii) ts_rank is used with & joined ingredients as multiple occurences of the word can improve score
         i.e. searching chicken&rice in chicken chicken chicken rice beans > rice&beans
     iii) ts_rank_cd for '|' ingredient queries kept to improve score if they are included in the recipe BUT the
-        are given a penaly INCLUDES INGREDIENT
+        are given a penalty INCLUDES INGREDIENT
 """

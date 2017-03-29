@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, DateField
 from wtforms.validators import Email, DataRequired
-from application.auth.models import User
 
 
 class StandardLoginForm(FlaskForm):
