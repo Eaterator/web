@@ -26,8 +26,6 @@ graph = create_schema_graph(
 graph.write_png(os.path.join(output_dir, 'erd_diagram_eaterator.png'))
 
 models = [m for m in [model for model in db.Model.__subclasses__()[0].__subclasses__()]]
-print(models)
-print(dir(models[0]))
 mappers = []
 for model in models:
     try:
