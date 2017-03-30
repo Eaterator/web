@@ -71,6 +71,7 @@ class RecipeImage(RequiredFields):
     server_id = db.Column(db.String(10), nullable=False)
     secret = db.Column(db.String(20), nullable=False)
     title = db.Column(db.String(100), nullable=True)
+    relevance = db.Column(db.Float, nullable=True)
     recipe = db.Column(db.Integer, db.ForeignKey('recipe_recipe.pk'))
 
     # photo sizes from flickr: https://www.flickr.com/services/api/misc.urls.html

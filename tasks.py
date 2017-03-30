@@ -4,7 +4,7 @@ import uwsgi
 import traceback
 from fuzzywuzzy import fuzz
 from uwsgidecorators import cron
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, not_
 from time import sleep
 from timeit import default_timer
 from application.app import app, db
@@ -81,7 +81,8 @@ def update_flickr_images(data):
                 photo_id=photo[2],
                 farm_id=photo[3],
                 secret=photo[4],
-                title=photo[5]
+                title=photo[5],
+                relevance=photo[0]
             )
             db.session.add(new_recipe_image)
         db.session.commit()
@@ -93,16 +94,24 @@ def update_flickr_images(data):
 
 
 # run every hour at *:30
-@cron(15, -1, -1, -1, -1)
+@cron(5, -1, -1, -1, -1)
 def get_recipes_without_images(*args):
     app.logger.debug("CRON job called for FLICKR update")
     maximum_recipes = CRON_FREQUENCY / FLICKR_REQUEST_DELAY
     recipes = Recipe.query.\
-        filter(Recipe.recipe_images == None).\
-        limit(int(maximum_recipes * .9)).all()
+        filter(
+            not_(
+                Recipe.pk.in_(
+                    db.session.query(func.distinct(RecipeImage.recipe))
+                )
+            )
+        ).all()
     app.logger.debug("Number of recipes without images: {0}".format(len(recipes)))
     for recipe in recipes:
         if recipe.title:
-            uwsgi.spool({b'pk':str(recipe.pk).encode('utf-8'), b'title': recipe.title.encode('utf-8')})
+            uwsgi.spool({
+                b'pk': str(recipe.pk).encode('utf-8'),
+                b'title': recipe.title.encode('utf-8')
+            })
 
 uwsgi.spooler = update_flickr_images
