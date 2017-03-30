@@ -1,7 +1,6 @@
-
 $(function() {
 	// adding tags to input
-    $(document).on("click",".sample-products-list>span",function(){
+    $(document).on("click",".sample-products-list>span", function() {
         var span = $("<span />").attr("data-role", "remove");
         $(this).prependTo(".bootstrap-tagsinput").addClass("tag label label-info");
         span.appendTo($(this));
@@ -12,15 +11,9 @@ $(function() {
         $(this).appendTo(".sample-products-list").removeClass().find("span").remove();
     });
 	
-    //smooth transition
+    // smooth transition
 	function scrollNav() {
-		$('.carousel-caption > a').click(function(){  
-			//Toggle Class
-//			$(".active").removeClass("active");      
-//			$(this).closest('li').addClass("active");
-//			var theClass = $(this).attr("class");
-//			$('.'+theClass).parent('li').addClass('active');
-			//Animate
+		$('.carousel-caption > a').click(function() {  
 			$('html, body').stop().animate({
 				scrollTop: $( $(this).attr('href') ).offset().top - 150
 			}, 400);
@@ -30,6 +23,31 @@ $(function() {
 	}
 	
 	scrollNav();
-	
+    
+	// evaluate rating
+    $(document).on("mouseup", ".btn-search",
+    function() {
+        setTimeout(function() {
+//        $('.star').attr('data-content', '\f006');
+            $('.recipe-rating').each(function(){
+                if (0.5 < $(this).html() && $(this).html() <= 1.5) {
+                     $(this).next().find('.rating-form').find('label.star-1').addClass('filled-star');
+                }
+                if (1.5 < $(this).html() && $(this).html() <= 2.5) {
+                    $(this).next().find('.rating-form').find('label.star-1, label.star-2').addClass('filled-star');
+                }
+                if (2.5 < $(this).html() && $(this).html() <= 3.5) {
+                    $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3').addClass('filled-star');
+                }
+                if (3.5 < $(this).html() && $(this).html() <= 4.5) {
+                    $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3, label.star-4').addClass('filled-star');
+                }
+                if (4.5 < $(this).html() && $(this).html() <= 5) {
+                    $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3,label.star-4, label.star-5').addClass('filled-star');
+                }
+            })
+        }, 1000);
+    }
+    );
     
 });

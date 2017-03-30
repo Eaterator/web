@@ -8,7 +8,7 @@ angular.module('eateratorApp')
     
     var getToken = function(){
     // getting token from url
-         return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));       
+         return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"})); 
         };
     return {
     getToken: getToken
@@ -98,6 +98,7 @@ angular.module('eateratorApp')
         }
     }
 })
+
 // Register the previously created AuthInterceptor.
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('AuthInterceptor');

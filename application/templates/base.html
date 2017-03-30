@@ -19,7 +19,7 @@
                   <div class="carousel-caption">
                       <p>cook faster with</p>
                       <h1>eaterator</h1>
-                      <a class="btn btn-lg btn-default hvr-buzz-out" href="#custom-search-input">search recipe</a>
+                      <a class="btn btn-lg btn-default out" href="#custom-search-input">search recipe</a>
                   </div>
               </div>
             </div>
@@ -29,7 +29,7 @@
                   <div class="carousel-caption">
                       <p>enjoy cooking with</p>
                       <h1>eaterator</h1>
-                      <a class="btn btn-lg btn-default hvr-buzz-out" href="#custom-search-input">search recipe</a>
+                      <a class="btn btn-lg btn-default out" href="#custom-search-input">search recipe</a>
                   </div>
               </div>
             </div>
@@ -39,7 +39,7 @@
                   <div class="carousel-caption">
                       <p>eat tasty with</p>
                       <h1>eaterator</h1>
-                      <a class="btn btn-lg btn-default hvr-buzz-out" href="#custom-search-input">search recipe</a>
+                      <a class="btn btn-lg btn-default out" href="#custom-search-input">search recipe</a>
                   </div>
               </div>
             </div>
@@ -73,7 +73,7 @@
                         <div class="input-group col-md-12">
                             <input type="text" class="form-control input-lg" data-role="tagsinput" ng-model="ingredients.name"/>
                             <span class="input-group-btn">
-                                <button class="btn btn-info btn-lg" type="button" ng-click="searchRecipes(ingredients)">
+                                <button class="btn btn-info btn-lg btn-search" type="button" ng-click="searchRecipes(ingredients)">
                                     <i class="glyphicon glyphicon-search"></i>
                                 </button>
                             </span>
@@ -89,16 +89,28 @@
                 </div>
             </div>
         </div>
-        <div ng-model="allRecipes">
-            <div class="recipe-snippet" ng-repeat="recipe in searchedRecipes">
-                <div class="recipe-thumbnail">
-                    <img class="recipe-thumbnail" src="{{ recipe.thumbnail }}">
-                </div>
-                <div class="recipe-info">
-                    <a ng-click="getRecipeDetail(recipe.pk)">
-                        <h3 class="recipe-title">{{ recipe.title }}</h3>
-                    </a>
-                    <p class="recipe-rating">Rating: {{ recipe.average_rating }} </p>
+        <div ng-model="allRecipes" class="container recipe-list">
+           <div class="row">
+               <div class="recipe-snippet col-md-4 col-sm-4" ng-repeat="recipe in searchedRecipes">
+                       <img class="recipe-img in" ng-src="{{ recipe.medium_img }}" src="/static/images/default-recipe-pic.jpg" alt="recipe-pic">
+                        <a ng-click="getRecipeDetail(recipe.pk)">
+                            <h3 class="recipe-title">{{ recipe.title }}</h3>
+                        </a>
+                        <p class="recipe-rating">{{ recipe.average_rating }} </p>
+                        <div class="stars">
+                           <form action="" class="rating-form">
+                             <input class="star star-5" id="star-5" type="radio" name="star"/>
+                             <label class="star star-5" for="star-5"></label>
+                             <input class="star star-4" id="star-4" type="radio" name="star"/>
+                             <label class="star star-4" for="star-4"></label>
+                             <input class="star star-3" id="star-3" type="radio" name="star"/>
+                             <label class="star star-3" for="star-3"></label>
+                             <input class="star star-2" id="star-2" type="radio" name="star"/>
+                             <label class="star star-2" for="star-2"></label>
+                             <input class="star star-1" id="star-1" type="radio" name="star"/>
+                             <label class="star star-1" for="star-1"></label>
+                           </form>
+                        </div>
                 </div>
             </div>
         </div>

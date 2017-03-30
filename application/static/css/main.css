@@ -94,7 +94,7 @@
     color: #252f38;
 }
 /*buzz-out button hover effect*/
-@-webkit-keyframes hvr-buzz-out {
+@-webkit-keyframes out {
   10% {
     -webkit-transform: translateX(3px) rotate(2deg);
     transform: translateX(3px) rotate(2deg);
@@ -136,7 +136,7 @@
     transform: translateX(-1px) rotate(0);
   }
 }
-@keyframes hvr-buzz-out {
+@keyframes out {
   10% {
     -webkit-transform: translateX(3px) rotate(2deg);
     transform: translateX(3px) rotate(2deg);
@@ -178,16 +178,16 @@
     transform: translateX(-1px) rotate(0);
   }
 }
-.hvr-buzz-out {
+.out {
   display: inline-block;
   vertical-align: middle;
   -webkit-transform: perspective(1px) translateZ(0);
   transform: perspective(1px) translateZ(0);
   box-shadow: 0 0 1px transparent;
 }
-.hvr-buzz-out:hover, .hvr-buzz-out:focus, .hvr-buzz-out:active {
-  -webkit-animation-name: hvr-buzz-out;
-  animation-name: hvr-buzz-out;
+.out:hover, .out:focus, .out:active {
+  -webkit-animation-name: out;
+  animation-name: out;
   -webkit-animation-duration: 0.75s;
   animation-duration: 0.75s;
   -webkit-animation-timing-function: linear;
@@ -275,11 +275,7 @@
 	background-color: #000;
     padding: 30px 0 80px 0;
     height: 200px;
-/*    position: absolute;*/
-/*    bottom: 0;*/
     width: 100%;
-    
-
 }
 .bootstrap-overrides footer p{
     color: #e6e6e6;
@@ -291,7 +287,7 @@
     color: #9DC209;
     text-transform: uppercase;
     font-family: "Open Sans", sans-serif;
-    font-size: 19px;
+    font-size: 17px;
 }
 .bootstrap-overrides footer a span{
 	background-color: #9DC209;
@@ -355,26 +351,87 @@
     line-height: 160px;
     font-weight: 600;
 }
-.bootstrap-overrides main #recipes-list{
+.bootstrap-overrides main .recipe-list{
     padding-bottom: 50px; 
 }
-.bootstrap-overrides main #recipes-list .recipe{
-/*    width: 480px;*/
+.bootstrap-overrides main .recipe-list .recipe-snippet{
     text-align: center;
-/*    padding: 10px;*/
-/*    display: inline-block;*/
     text-transform: capitalize;    
-    padding-bottom: 20px;
+    padding-bottom: 30px;
+    height: 510px;
+}
+.bootstrap-overrides main .recipe-list .recipe-snippet a{
+    text-decoration: none;
 }
 .bootstrap-overrides main h3{
     color: black;
     text-transform: uppercase;
-    padding: 10px;
+    padding: 5px;
     cursor: pointer;
+    text-align: center;
+    font-family: "Open Sans", sans-serif;
+    text-decoration: none;
+    margin-bottom: 0;
 }
-.bootstrap-overrides main .recipe img{
+.bootstrap-overrides main .recipe-snippet img{
 	width: 350px;
     height: 350px;
-    padding-bottom: 20px;
+    padding-bottom: 5px;
     cursor: pointer;
+}
+.bootstrap-overrides .in{
+    display: inline-block;
+    vertical-align: middle;
+    -webkit-transform: perspective(1px) translateZ(0);
+    transform: perspective(1px) translateZ(0);
+    box-shadow: 0 0 1px transparent;
+    -webkit-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+}
+.bootstrap-overrides .in {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px transparent;
+  -webkit-transition-duration: 0.5s;
+  transition-duration: 0.5s;
+}
+.bootstrap-overrides .in:hover, .in:focus, .in:active {
+  -webkit-transform: scale(1.2);
+  transform: scale(1.2);
+  -webkit-transition-timing-function: cubic-bezier(0.47, 2.02, 0.31, -0.36);
+  transition-timing-function: cubic-bezier(0.47, 2.02, 0.31, -0.36);
+}
+.bootstrap-overrides main .recipe-rating {
+	color: #9DC209;
+}
+/*rating*/
+
+div.stars {
+  width: 270px;
+  display: inline-block;
+}
+
+input.star { display: none; }
+
+label.star {
+  float: right;
+  padding: 10px;
+  font-size: 34px;
+  color: #444;
+  transition: all .2s;
+}
+
+label.star:before {
+  content: "\f006";
+  font-family: FontAwesome;
+}
+.filled-star:before {
+  color: #FD4;
+  content: "\f005" !important;
+  font-family: FontAwesome;
+}
+.bootstrap-overrides main .recipe-rating{
+	display: none;
 }
