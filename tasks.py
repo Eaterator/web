@@ -1,16 +1,17 @@
 import requests
 import uwsgi
 import traceback
-from uwsgidecorators import spoolraw, cron
+from uwsgidecorators import cron
 from fuzzywuzzy import fuzz
-from itertools import chain
-from collections import OrderedDict
-from sqlalchemy import desc, func, not_
+from sqlalchemy import func, not_
 from application.app import app, db
 from application.recipe.models import Recipe, RecipeImage, Ingredient, IngredientRecipe
 from application.config import FLICKR_API_KEY
 from string import punctuation
+from recipe_parser import GRAMMAR
+from recipe_parser.ingredient_parser import IngredientParser
 
+INGREDIENT_PARSER = IngredientParser(GRAMMAR)
 PUNCTUATION_TRANSLATOR = str.maketrans('', '', punctuation)
 
 TOPN_FLICKR = 10  # number of photos to keep
@@ -31,32 +32,18 @@ def update_flickr_images(data):
             translate(PUNCTUATION_TRANSLATOR).strip()
         if not data['title']:
             return uwsgi.SPOOL_OK
-        title_words_query = '|'.join(data['title'].split())
-        top_ingredients = db.session.query(Ingredient).\
-            filter(
-                func.to_tsquery(title_words_query).op('@@')(
-                    func.to_tsvector('english', Ingredient.name)
-                )
-            ).\
-            group_by(Ingredient.pk, Ingredient.name, Ingredient.created_at, Ingredient.updated_at, Ingredient.deleted_at).\
-            order_by(desc(
-                func.ts_rank(
-                    func.to_tsvector('english', Ingredient.name),
-                    func.to_tsquery(title_words_query)
-                )
-            ), desc(
-                func.count(Ingredient.name)
-            )).limit(FLICKR_WORD_SERACH_SIZE)
-        search_words = ' '.join(
-            list(
-                OrderedDict(
-                    [(i, 1) for i in chain([ing.name for ing in top_ingredients], data["title"].split())]
-                ).keys()
-            )[:FLICKR_WORD_SERACH_SIZE]
-        )
+        tagged_sentence = INGREDIENT_PARSER._parse_sentence_tree(data["title"])
+        words = [j[0] for sublist in
+                 [i.leaves() for i in
+                  [t for t in tagged_sentence if hasattr(t, 'label') and t.label() == 'NPI']
+                  ] for j in sublist if len(j) == 2 and j[1] == 'NN'
+                 ]
+        search_text = " ".join(words[:FLICKR_WORD_SERACH_SIZE]) if len(words) > 1 \
+            else " ".join(data["title"].split()[:FLICKR_WORD_SERACH_SIZE])
+
         resp = requests.get(
             FLICKR_URL_FORMATTER.format(
-                FLICKR_SEARCH_METHOD, FLICKR_API_KEY, search_words, FLICKR_RESPONSE_TYPE
+                FLICKR_SEARCH_METHOD, FLICKR_API_KEY, search_text, FLICKR_RESPONSE_TYPE
             )
         )
         resp = resp.json()
@@ -68,10 +55,10 @@ def update_flickr_images(data):
                 key=lambda i: i[0])[:TOPN_FLICKR]
             if len(top_photos) < 1:
                 app.logger.debug("FLICKR | NO RESULTS recipe: {0} | search words: {1}".format(
-                    data['pk'], search_words))
+                    data['pk'], search_text))
         except KeyError:
             app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
-                data["pk"], data["title"], search_words
+                data["pk"], data["title"], search_text
             ))
             return uwsgi.SPOOL_OK
 
