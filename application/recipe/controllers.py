@@ -224,7 +224,7 @@ def create_fulltext_search_query(ingredients, raw_search, limit=DEFAULT_SEARCH_R
     :return:
     """
     # TODO add modifiers when the database structure is fixed!
-    ingredients = list(map(lambda s: s.replace(' ', '&'), ingredients))
+    ingredients = list(map(lambda s: s.replace('&', ''), ingredients))
     return db.session.query(Recipe).filter(
             func.to_tsquery(
                 minimum_ingredients_combinations_filter(ingredients)
@@ -236,17 +236,17 @@ def create_fulltext_search_query(ingredients, raw_search, limit=DEFAULT_SEARCH_R
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
                 func.to_tsquery('&'.join(ingredients))
             ) * ALL_MATCHING_INGREDIENTS +
-            func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
-                func.to_tsquery('|'.join(raw_search))
-            ) * INCLUDES_INGREDIENT +
+            # func.ts_rank_cd(
+            #     func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
+            #     func.to_tsquery('|'.join(raw_search))
+            # ) * INCLUDES_INGREDIENT +
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_modifier_text),
-                func.to_tsquery('|'.join(raw_search))
+                func.to_tsquery('&'.join(raw_search))
             ) * INCLUDES_MODIFIER +
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery('|'.join(raw_search))
+                func.to_tsquery('&'.join(raw_search))
             ) * INCLUDES_TITLE
         )).limit(limit).all()
 
