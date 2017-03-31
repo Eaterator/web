@@ -5,7 +5,7 @@ from uwsgidecorators import cron
 from fuzzywuzzy import fuzz
 from sqlalchemy import func, not_
 from application.app import app, db
-from application.recipe.models import Recipe, RecipeImage, Ingredient, IngredientRecipe
+from application.recipe.models import Recipe, RecipeImage
 from application.config import FLICKR_API_KEY
 from string import punctuation
 from recipe_parser import GRAMMAR
@@ -54,8 +54,19 @@ def update_flickr_images(data):
                 reverse=True,
                 key=lambda i: i[0])[:TOPN_FLICKR]
             if len(top_photos) < 1:
-                app.logger.debug("FLICKR | NO RESULTS recipe: {0} | search words: {1}".format(
-                    data['pk'], search_text))
+                new_recipe_image = RecipeImage(
+                    recipe=data["pk"],
+                    server_id=1,
+                    photo_id=1,
+                    farm_id=1,
+                    title=search_text,
+                    secret="default",
+                    relevance=-1 
+                )
+                db.session.add(new_recipe_image)
+                db.session.commit()
+                db.session.close()
+                return uwsgi.SPOOL_OK
         except KeyError:
             app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
                 data["pk"], data["title"], search_text
@@ -74,6 +85,7 @@ def update_flickr_images(data):
             )
             db.session.add(new_recipe_image)
         db.session.commit()
+        db.session.close()
         return uwsgi.SPOOL_OK
     except:
         app.logger.error("FLICKR | Unknown error, exited spooler: {0}".format(traceback.format_exc()))
@@ -97,5 +109,6 @@ def get_recipes_without_images(*args):
                 b'pk': str(recipe.pk).encode('utf-8'),
                 b'title': recipe.title.encode('utf-8')
             })
+    db.session.close()
 
 uwsgi.spooler = update_flickr_images
