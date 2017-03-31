@@ -323,4 +323,15 @@ v1 search query:
         i.e. searching chicken&rice in chicken chicken chicken rice beans > rice&beans
     iii) ts_rank_cd for '|' ingredient queries kept to improve score if they are included in the recipe BUT the
         are given a penalty INCLUDES INGREDIENT
+
+
+--v4 I think v4 needs to better differentiate between ingredients so grouping aliases to central ingredients may be a
+good idea so this will be useful to find word frequencies, a query like this:
+
+    SELECT * FROM ts_stat($$SELECT to_tsvector('english', string_agg(recipe_ingredients_text, ' ')) FROM recipe_recipe$$) WHERE word LIKE 'beef' ORDER BY nentry DESC;
+
+Maybe create a full text index on these poplar aliases and then complete a search similar to v1 search where the
+restriction on possible recipes is done via a search on ingredients then comparing a set where a recipe contains
+at least n of these matching ingredients. Probably take some investigation into which methods produce the best results.
+--
 """
