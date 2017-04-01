@@ -1,6 +1,6 @@
 # Project files
 *.save
-erd_diagrams/*
+erd_diagrams/
 config_dev.py
 application/database
 migrations/versions/

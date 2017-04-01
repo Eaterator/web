@@ -13,11 +13,6 @@ angular.module('eateratorApp', [])
                 console.log("ebites` konem");
             })
          
-             
-           //recipesFactory.getRecipes().then(function(recipes){
-           //    $scope.allRecipes = allRecipes;
-           //})
-           //
            $scope.searchRecipes = function(ingredients){
                $scope.ingredientsPayload = {
                     'ingredients': ingredients.name.split(",")
@@ -30,27 +25,6 @@ angular.module('eateratorApp', [])
                     return $scope.searchedRecipes = response.data.recipes || [];
                 })
            }
-           
-        
-        //recipesFactory.getRecipes().then(function(response){
-            //    $scope.recipes = {
-            //        'title': 'response.recipes.title',
-            //        'pk': 'response.recipes.pk'
-            //    };
-            //})
-            //.catch(function(){
-            //    console.log("kill me please");
-            //});
-        
-            //$scope.checkField = function($event){
-            //    if($scope.showDescription == false){
-            //        $scope.showDescription = true;
-            //    }
-            //    else if($scope.showDescription == true){
-            //        $scope.showDescription = false;
-            //    }
-            //    return $scope.showDescription;
-            //} 
     }
     ])
     

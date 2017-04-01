@@ -108,7 +108,8 @@ def fulltext_search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     try:
         register_user_search(user_pk, payload)
-        recipes = create_fulltext_search_query(ingredients, raw_search, limit=limit)
+        # recipes = create_fulltext_search_query(ingredients, raw_search, limit=limit)
+        recipes = create_fulltext_ingredient_search(raw_search)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
@@ -210,6 +211,62 @@ def _apply_dynamic_filters(ingredients):
             IngredientRecipe.ingredient.in_(
                 db.session.query(Ingredient.pk).filter(
                     Ingredient.name.like(r'%{0}%'.format(ingredient))
+                )
+            )
+        )
+    return dynamic_filters
+
+
+def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE):
+    """
+    Function to create a fulltext query to filter out all recipes not containing <min_ingredients> ingredients. Ranks by
+    recipe that contains the most ingredients, and then ranks by match of ingredients list to the title. This could
+    probably be improved by adding additional search criteria similar to the previous fulltext search approach in
+    create_fulltext_search_query.
+    :param ingredients: List<string> ["onion", "chicken", "peppers"]
+    :param limit: number of recipes to return
+    :return: List<Recipe>
+    """
+    min_ingredients = 3
+    return db.session.query(Recipe).\
+        join(IngredientRecipe).\
+        join(Ingredient).\
+        filter(
+            or_(
+                *_apply_dynamic_fulltext_filers(ingredients)
+            )
+        ).\
+        group_by(Recipe.pk).\
+        having(
+            func.count(IngredientRecipe.pk) >= min_ingredients
+        ).\
+        order_by(
+            func.count(IngredientRecipe.pk)
+        ).\
+        order_by(
+            func.ts_rank(
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
+                func.to_tsquery('&'.join(i for i in ingredients))
+            )
+        ).limit(limit).all()
+
+
+def _apply_dynamic_fulltext_filers(ingredients):
+    """
+    Applies full text filters similar to v1 but uses full text search approach for lexemes and speed up with
+    index usage. N.B. that spaces in ingredient names will be replaced with '&'
+    :param ingredients: List<string>: ["onion", "chicken", "pork tenderloin"]
+    :return:
+    """
+    ingredients = list(map(lambda s: s.replace(' ', '&'), ingredients))
+    dynamic_filters = []
+    for ingredient in ingredients:
+        dynamic_filters.append(
+            IngredientRecipe.ingredient.in_(
+                db.session.query(Ingredient.pk).filter(
+                    func.to_tsquery(ingredient).op('@@')(
+                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
+                    )
                 )
             )
         )
