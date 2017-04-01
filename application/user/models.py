@@ -6,8 +6,8 @@ class UserSearchData(RequiredFields):
     __tablename__ = 'user_searchdata'
 
     pk = db.Column(db.Integer, primary_key=True)
-    # search = db.COlumn(db.JSON)
-    search = db.Column(db.Text)
+    search = db.Column(db.JSON)
+    # search = db.Column(db.Text)  ## windows
     user = db.Column(db.Integer, db.ForeignKey('auth_user.pk'))
     User = db.relationship("User", backref="user_searchdata")
 

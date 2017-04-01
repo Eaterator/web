@@ -52,6 +52,8 @@ for blueprint in blueprints:
 def handle_api_error(error):
     if isinstance(error, InvalidAPIRequest):
         if error.status_code != 404:
+            if error.status_code == 500 and config.DEBUG:
+                print(get_traceback())
             response = jsonify(error.to_dict())
             response.status_code = error.status_code
             return response

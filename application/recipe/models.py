@@ -31,23 +31,24 @@ class Recipe(RequiredFields):
     recipe_images = db.relationship("RecipeImage", backref="recipe_recipe",
                                     lazy="joined")
 
-#    __table_args__ = (
-#        db.Index(
-#            'idx_fulltext_recipe_title',
-#            RequiredFields.create_tsvector(title),
-#            postgresql_using="gin"
-#        ),
-#        db.Index(
-#            'idx_fulltext_ingredients',
-#            RequiredFields.create_tsvector(recipe_ingredients_text),
-#            postgresql_using="gin"
-#        ),
-#        db.Index(
-#            'idx_fulltext_ingredient_modifiers',
-#            RequiredFields.create_tsvector(recipe_ingredients_modifier_text),
-#            postgresql_using="gin"
-#        )
-#    )
+    ## windows comment out table args for sqlite
+    __table_args__ = (
+        db.Index(
+           'idx_fulltext_recipe_title',
+           RequiredFields.create_tsvector(title),
+           postgresql_using="gin"
+        ),
+        db.Index(
+           'idx_fulltext_ingredients',
+           RequiredFields.create_tsvector(recipe_ingredients_text),
+           postgresql_using="gin"
+        ),
+        db.Index(
+           'idx_fulltext_ingredient_modifiers',
+           RequiredFields.create_tsvector(recipe_ingredients_modifier_text),
+           postgresql_using="gin"
+        ),
+    )
 
     @property
     def thumbnail(self):
@@ -125,6 +126,14 @@ class Ingredient(RequiredFields):
     __tablename__ = 'recipe_ingredient'
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True)
+
+    __table_args__ = (
+        db.Index(
+            'idx_fulltext_ingredient_name',
+            RequiredFields.create_tsvector(name),
+            postgresql_using="gin"
+        ),
+    )
 
 
 class IngredientModifier(RequiredFields):

@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from itertools import combinations
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -14,6 +15,7 @@ from application.recipe.utilities import RecipeIngredientFormatter
 from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
+INTERNAL_INGREDIENT_SPACE_PATTERN = re.compile(r'\s+')
 # SEARCH RESULT SIZE
 DEFAULT_SEARCH_RESULT_SIZE = 20
 REGULAR_MAX_SEARCH_SIZE = 100
@@ -103,13 +105,13 @@ def fulltext_search_recipe(limit=None):
     try:
         payload = request.get_json()
         raw_search = set(payload["ingredients"])
-        ingredients, modifiers = parse_ingredients_with_modifiers(payload)
+        # ingredients, modifiers = parse_ingredients_with_modifiers(payload)
     except (TypeError, ValueError):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     try:
         register_user_search(user_pk, payload)
         # recipes = create_fulltext_search_query(ingredients, raw_search, limit=limit)
-        recipes = create_fulltext_ingredient_search(raw_search)
+        recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search], limit=limit)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
@@ -228,27 +230,38 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     :return: List<Recipe>
     """
     min_ingredients = 3
-    return db.session.query(Recipe).\
-        join(IngredientRecipe).\
-        join(Ingredient).\
+    return db.session.query(Recipe). \
+        join(IngredientRecipe). \
+        join(Ingredient). \
         filter(
             or_(
                 *_apply_dynamic_fulltext_filers(ingredients)
             )
-        ).\
-        group_by(Recipe.pk).\
+        ). \
+        group_by(Recipe.pk). \
         having(
-            func.count(IngredientRecipe.pk) >= min_ingredients
-        ).\
-        order_by(
+            # func.count(IngredientRecipe.ingredient) >= min_ingredients,
+            func.to_tsquery('&'.join(i for i in ingredients)).op('@@')(
+                    func.to_tsvector(
+                        func.string_agg(Ingredient.name, ' ')
+                    )
+                )
+        ). \
+        order_by(desc(
             func.count(IngredientRecipe.pk)
-        ).\
-        order_by(
+        )). \
+        order_by(desc(
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery('&'.join(i for i in ingredients))
+                func.to_tsquery('|'.join(i for i in ingredients))
+            ) * INCLUDES_TITLE +
+            func.sum(
+                func.ts_rank(
+                    func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
+                    func.to_tsquery('|'.join(i for i in ingredients))
+                ) * IngredientRecipe.percent_amount
             )
-        ).limit(limit).all()
+        )).limit(limit).all()
 
 
 def _apply_dynamic_fulltext_filers(ingredients):
@@ -258,7 +271,7 @@ def _apply_dynamic_fulltext_filers(ingredients):
     :param ingredients: List<string>: ["onion", "chicken", "pork tenderloin"]
     :return:
     """
-    ingredients = list(map(lambda s: s.replace(' ', '&'), ingredients))
+    ingredients = list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s), ingredients))
     dynamic_filters = []
     for ingredient in ingredients:
         dynamic_filters.append(
@@ -390,5 +403,63 @@ good idea so this will be useful to find word frequencies, a query like this:
 Maybe create a full text index on these poplar aliases and then complete a search similar to v1 search where the
 restriction on possible recipes is done via a search on ingredients then comparing a set where a recipe contains
 at least n of these matching ingredients. Probably take some investigation into which methods produce the best results.
+    -> Added in the thought where the ts rank of each match to ingredient should be factored in, as well as possibly
+    the percent_amount in the ingredient recipe table
+    -> Example query:
+
+SELECT
+    recipe_recipe.created_at AS recipe_recipe_created_at,
+    recipe_recipe.updated_at AS recipe_recipe_updated_at,
+    recipe_recipe.deleted_at AS recipe_recipe_deleted_at,
+    recipe_recipe.pk AS recipe_recipe_pk, recipe_recipe.url AS recipe_recipe_url,
+    recipe_recipe.title AS recipe_recipe_title,
+    recipe_recipe.average_rating AS recipe_recipe_average_rating,
+    recipe_recipe.lowest_rating AS recipe_recipe_lowest_rating,
+    recipe_recipe.highest_rating AS recipe_recipe_highest_rating,
+    recipe_recipe.count_rating AS recipe_recipe_count_rating,
+    recipe_recipe.raw_data AS recipe_recipe_raw_data,
+    recipe_recipe.recipe_ingredients_text AS recipe_recipe_recipe_ingredients_text,
+    recipe_recipe.recipe_ingredients_modifier_text AS recipe_recipe_recipe_ingredients_modifier_text,
+    recipe_recipe.source AS recipe_recipe_source,
+    count(ingredient_recipe.pk) AS count_1,
+    ts_rank(
+      to_tsvector('english', recipe_recipe.title),
+      to_tsquery('rice|bean|chicken')
+    ) * 0.25 +
+    sum(
+      ts_rank(
+	to_tsvector('english', recipe_ingredient.name),
+	to_tsquery('rice|chicken|beans')
+      ) * ingredient_recipe.percent_amount
+    ) AS anon_2
+FROM
+  recipe_recipe JOIN ingredient_recipe ON recipe_recipe.pk = ingredient_recipe.recipe
+  JOIN recipe_ingredient ON recipe_ingredient.pk = ingredient_recipe.ingredient
+WHERE
+  ingredient_recipe.ingredient IN (
+    SELECT recipe_ingredient.pk AS recipe_ingredient_pk
+    FROM recipe_ingredient
+    WHERE
+      to_tsquery('rice') @@ to_tsvector('english', recipe_ingredient.name)
+  ) OR ingredient_recipe.ingredient IN (
+    SELECT recipe_ingredient.pk AS recipe_ingredient_pk
+    FROM recipe_ingredient
+    WHERE
+      to_tsquery('chicken') @@ to_tsvector('english', recipe_ingredient.name)
+  ) OR ingredient_recipe.ingredient IN (
+    SELECT recipe_ingredient.pk AS recipe_ingredient_pk
+    FROM recipe_ingredient
+    WHERE
+      to_tsquery('bean') @@ to_tsvector('english', recipe_ingredient.name)
+  )
+GROUP BY recipe_recipe.pk
+HAVING
+  to_tsquery('rice&chicken&bean') @@ to_tsvector('english', string_agg(recipe_ingredient.name, ' '))
+ORDER BY
+  count(ingredient_recipe.pk) DESC,
+  ts_rank(to_tsvector('english', recipe_recipe.title), to_tsquery('rice|chicken|bean'))
+  * 0.25 +
+  sum(ts_rank(to_tsvector('english', recipe_ingredient.name), to_tsquery('rice|chicken|bean')) * ingredient_recipe.percent_amount) DESC
+LIMIT 20;
 --
 """
