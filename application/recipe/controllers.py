@@ -239,8 +239,9 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         ). \
         group_by(Recipe.pk). \
         having(
-            func.to_tsquery('&'.join(i for i in ingredients)).op('@@')(
+            func.to_tsquery(FULLTEXT_INDEX_CONFIG, '&'.join(i for i in ingredients)).op('@@')(
                     func.to_tsvector(
+                        FULLTEXT_INDEX_CONFIG,
                         func.string_agg(Ingredient.name, ' ')
                     )
                 )
@@ -252,18 +253,18 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         order_by(desc(
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery('|'.join(i for i in ingredients))
+                func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients))
             ) * INCLUDES_TITLE +
             func.sum(
                 func.ts_rank(
                     func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
-                    func.to_tsquery('|'.join(i for i in ingredients)),
+                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
                     2
                 ) * IngredientRecipe.percent_amount
             ) +
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
-                func.to_tsquery('&'.join(i for i in ingredients)),
+                func.to_tsquery(FULLTEXT_INDEX_CONFIG, '&'.join(i for i in ingredients)),
                 2
             )
         )).limit(limit).all()
@@ -282,7 +283,7 @@ def _apply_dynamic_fulltext_filers(ingredients):
         dynamic_filters.append(
             IngredientRecipe.ingredient.in_(
                 db.session.query(Ingredient.pk).filter(
-                    func.to_tsquery(ingredient).op('@@')(
+                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
                         func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
                     )
                 )
