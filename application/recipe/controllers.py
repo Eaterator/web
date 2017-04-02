@@ -4,7 +4,7 @@ import re
 from itertools import combinations
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy import func, or_, desc, not_
+from sqlalchemy import func, or_, desc, not_, and_
 from application.controllers import _parse_limit_parameter
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
@@ -229,7 +229,6 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     :param limit: number of recipes to return
     :return: List<Recipe>
     """
-    min_ingredients = 3
     return db.session.query(Recipe). \
         join(IngredientRecipe). \
         join(Ingredient). \
@@ -240,16 +239,16 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         ). \
         group_by(Recipe.pk). \
         having(
-            # func.count(IngredientRecipe.ingredient) >= min_ingredients,
             func.to_tsquery('&'.join(i for i in ingredients)).op('@@')(
                     func.to_tsvector(
                         func.string_agg(Ingredient.name, ' ')
                     )
                 )
         ). \
-        order_by(desc(
-            func.count(IngredientRecipe.pk)
-        )). \
+        order_by(
+            func.count(IngredientRecipe.pk) / len(ingredients),
+            func.count(IngredientRecipe.ingredient)
+        ). \
         order_by(desc(
             func.ts_rank(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
@@ -258,8 +257,14 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
             func.sum(
                 func.ts_rank(
                     func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
-                    func.to_tsquery('|'.join(i for i in ingredients))
+                    func.to_tsquery('|'.join(i for i in ingredients)),
+                    2
                 ) * IngredientRecipe.percent_amount
+            ) +
+            func.ts_rank(
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
+                func.to_tsquery('&'.join(i for i in ingredients)),
+                2
             )
         )).limit(limit).all()
 
