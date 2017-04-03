@@ -43,7 +43,9 @@ class IngredientParserPipeline:
         in the parser, or code, all recipes from the DB recipe_recipe table must be dropped.
         :return:
         """
-        current_recipes = {r.url.lower(): 1 for r in Recipe.query.all() if r.url}
+        print("Getting recipe url list")
+        current_recipes = {i for i in db.session.query(Recipe.url).all()}
+        # current_recipes = {r.url.lower(): 1 for r in Recipe.query.all() if r.url}
         print("Loaded in recipe dictionary, starting pipeline")
         for data_chunk in self.data_loader.iter_json_data():
             for recipe_data in data_chunk:
@@ -51,7 +53,7 @@ class IngredientParserPipeline:
                 try:
                     if not recipe_data['url'] or recipe_data['url'].lower() in current_recipes:
                         continue
-                    current_recipes[recipe_data['url']] = 1
+                    current_recipes.add(recipe_data['url'])
                     recipe = self._insert_if_new_recipe(recipe_data)
                     ingredients = []
                     parsed_ingredients = []
