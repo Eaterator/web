@@ -4,8 +4,7 @@ import re
 import warnings
 from urllib.parse import urlparse
 from sqlalchemy.exc import DataError
-from sqlalchemy import func, Integer
-from sqlalchemy.sql.expression import cast
+import traceback
 try:
     from recipe_scraper.tools.data_loader import DataLoader
     from recipe_parser.ingredient_parser import IngredientParser
@@ -15,7 +14,7 @@ except ImportError as e:
                   "Inserting data tools/commands data will not be possible")
 
 from application.recipe.models import Source, Recipe, IngredientRecipe, Ingredient, Review, IngredientModifier
-from application.app import db
+from application.app import app, db
 
 MAX_INGREDIENT_LENGTH = 50
 INGREDIENT_SPLITTING_PATTERN = re.compile(r'\band\b\W+\bor\b')
@@ -59,7 +58,6 @@ class IngredientParserPipeline:
                     parsed_ingredients = []
                     for ingredient in recipe_data['ingredients']:
                         parsed_ingredient = self.parser(ingredient)
-                        # Case for malformed or odd ingredients # TODO may want to log these cases for review
                         if (parsed_ingredient and
                            parsed_ingredient.ingredient and
                            parsed_ingredient.ingredient.primary):
@@ -70,7 +68,7 @@ class IngredientParserPipeline:
                             )
                     self._insert_ingredient_recipe(recipe, ingredients, parsed_ingredients)
                 except DuplicateRecipeException:
-                    # TODO use logger here?
+                    app.logger.error("RECIPE INSERT | Recipe Error: {0}", traceback.format_exc())
                     pass
 
     @staticmethod
@@ -92,7 +90,7 @@ class IngredientParserPipeline:
         if not recipe:
             source = Source.query.filter(Source.base_url == self._find_base_url(data['url'])).first()
             if not source:
-                # TODO input logging information here instead of printing
+                app.logger.error("RECIPE SOURCE ERROR | Recipe Error: {0}", traceback.format_exc())
                 print("Error with url: {0}".format(data['url']))
                 return
             ratings_data = self._get_recipe_ratings(data)
