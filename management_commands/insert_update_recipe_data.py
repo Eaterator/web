@@ -44,12 +44,14 @@ class IngredientParserPipeline:
         :return:
         """
         current_recipes = {r.url.lower(): 1 for r in Recipe.query.all() if r.url}
+        print("Loaded in recipe dictionary, starting pipeline")
         for data_chunk in self.data_loader.iter_json_data():
             for recipe_data in data_chunk:
                 self._clean_recipe_ingredients(recipe_data)
                 try:
                     if not recipe_data['url'] or recipe_data['url'].lower() in current_recipes:
                         continue
+                    current_recipes[recipe_data['url']] = 1
                     recipe = self._insert_if_new_recipe(recipe_data)
                     ingredients = []
                     parsed_ingredients = []
