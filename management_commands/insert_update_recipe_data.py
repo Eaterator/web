@@ -43,7 +43,7 @@ class IngredientParserPipeline:
         :return:
         """
         print("Getting recipe url list")
-        current_recipes = {i for i in db.session.query(Recipe.url).all()}
+        current_recipes = {i[0] for i in db.session.query(Recipe.url).all()}
         # current_recipes = {r.url.lower(): 1 for r in Recipe.query.all() if r.url}
         print("Loaded in recipe dictionary, starting pipeline")
         for data_chunk in self.data_loader.iter_json_data():
@@ -52,7 +52,7 @@ class IngredientParserPipeline:
                 try:
                     if not recipe_data['url'] or recipe_data['url'].lower() in current_recipes:
                         continue
-                    current_recipes.add(recipe_data['url'])
+                    current_recipes.add(recipe_data['url'].lower())
                     recipe = self._insert_if_new_recipe(recipe_data)
                     ingredients = []
                     parsed_ingredients = []
@@ -68,7 +68,7 @@ class IngredientParserPipeline:
                             )
                     self._insert_ingredient_recipe(recipe, ingredients, parsed_ingredients)
                 except DuplicateRecipeException:
-                    app.logger.error("RECIPE INSERT | Recipe Error: {0}", traceback.format_exc())
+                    app.logger.error("RECIPE INSERT | Recipe Error: {0}".format(traceback.format_exc()))
                     pass
 
     @staticmethod
@@ -90,7 +90,7 @@ class IngredientParserPipeline:
         if not recipe:
             source = Source.query.filter(Source.base_url == self._find_base_url(data['url'])).first()
             if not source:
-                app.logger.error("RECIPE SOURCE ERROR | Recipe Error: {0}", traceback.format_exc())
+                app.logger.error("RECIPE SOURCE ERROR | Recipe Error: {0}".format(traceback.format_exc()))
                 print("Error with url: {0}".format(data['url']))
                 return
             ratings_data = self._get_recipe_ratings(data)
