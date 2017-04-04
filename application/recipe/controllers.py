@@ -233,22 +233,16 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         join(IngredientRecipe). \
         join(Ingredient). \
         filter(
-            or_(
+            and_(
                 *_apply_dynamic_fulltext_filers(ingredients)
             )
         ). \
         group_by(Recipe.pk). \
         having(
-            func.to_tsquery(FULLTEXT_INDEX_CONFIG, '&'.join(i for i in ingredients)).op('@@')(
-                    func.to_tsvector(
-                        FULLTEXT_INDEX_CONFIG,
-                        func.string_agg(Ingredient.name, ' ')
-                    )
-                )
+            func.count(IngredientRecipe.pk) >= len(ingredients)
         ). \
         order_by(
-            func.count(IngredientRecipe.pk) / len(ingredients),
-            func.count(IngredientRecipe.ingredient)
+            func.count(IngredientRecipe.pk)
         ). \
         order_by(desc(
             func.ts_rank(
@@ -281,10 +275,14 @@ def _apply_dynamic_fulltext_filers(ingredients):
     dynamic_filters = []
     for ingredient in ingredients:
         dynamic_filters.append(
-            IngredientRecipe.ingredient.in_(
-                db.session.query(Ingredient.pk).filter(
-                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
-                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
+            IngredientRecipe.recipe.in_(
+                db.session.query(IngredientRecipe.recipe).filter(
+                    IngredientRecipe.ingredient.in_(
+                        db.session.query(Ingredient.pk).filter(
+                            func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
+                                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
+                            )
+                        )
                     )
                 )
             )
@@ -467,5 +465,28 @@ ORDER BY
   * 0.25 +
   sum(ts_rank(to_tsvector('english', recipe_ingredient.name), to_tsquery('rice|chicken|bean')) * ingredient_recipe.percent_amount) DESC
 LIMIT 20;
---
+-- v5 update the sub query in the WHERE to include all ingredients in the following method:
+
+    WHERE
+  recipe IN (SELECT recipe FROM ingredient_recipe
+	    WHERE ingredient IN (SELECT pk FROM recipe_ingredient WHERE name LIKE '%beef%') AND
+    recipe IN (SELECT recipe FROM ingredient_recipe
+      WHERE ingredient IN (SELECT pk FROM recipe_ingredient WHERE name LIKE '%onion%')
+    )
+  )
+
+  entire query example:
+    SELECT recipe, COUNT(ingredient) c
+        FROM ingredient_recipe
+        WHERE
+          recipe IN (SELECT recipe FROM ingredient_recipe
+                WHERE ingredient IN (SELECT pk FROM recipe_ingredient WHERE name LIKE '%beef%') AND
+            recipe IN (SELECT recipe FROM ingredient_recipe
+              WHERE ingredient IN (SELECT pk FROM recipe_ingredient WHERE name LIKE '%onion%')
+            )
+          )
+        GROUP BY recipe
+        HAVING COUNT(ingredient) > 2
+        ORDER BY c
+        LIMIT 10;
 """

@@ -25,15 +25,20 @@ user_blueprint = Blueprint('user_data', __name__,
 @jwt_required
 def user_favourites(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_FAVOURITE_RECIPE_NUMBER, MAXIMUM_USER_FAVOURITE_NUMBER)
-    favourite_recipes = db.session.query(Recipe).filter(Recipe.pk.in_(
-        db.session.query(FavouriteRecipe.pk).filter(FavouriteRecipe.user == get_jwt_identity())
-    )).limit(limit).all()
+    favourite_recipes = db.session.query(Recipe).filter(
+        Recipe.pk.in_(
+            db.session.query(FavouriteRecipe.recipe).filter(
+                FavouriteRecipe.user == get_jwt_identity()
+            )
+        )
+    ).limit(limit).all()
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(favourite_recipes))
 
 
+@user_blueprint.route('/recent-searches', methods=["GET"])
 @user_blueprint.route('/recent-searches/<num_searches>', methods=["GET"])
 @jwt_required
-def user_searches(num_searches):
+def user_searches(num_searches=None):
     try:
         num_searches = int(num_searches) if num_searches else DEFAULT_USER_SEARCH_HISTORY_SIZE
     except (ValueError, TypeError):
@@ -42,10 +47,8 @@ def user_searches(num_searches):
     searches = db.session.query(UserSearchData.search).\
         filter(UserSearchData.user == get_jwt_identity()).\
         order_by(UserSearchData.created_at.desc()).\
-        limit(num_searches)
-    response = jsonify({"searches": searches})
-    response.error_code = 200
-    return response
+        limit(num_searches).all()
+    return jsonify({"searches": searches})
 
 
 @user_blueprint.route('/favourite-recipe/<recipe_id>', methods=["POST"])

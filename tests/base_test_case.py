@@ -24,10 +24,13 @@ class BaseTempDBTestCase(TestCase):
         self.app.config['TESTING'] = True
         self.tmp_dir = TemporaryDirectory()
         self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(self.tmp_dir.name, 'tmp.db')
-        self.app = app.test_client()
         self.db = db
-        self.db.session.close()
-        self.db.drop_all()
+        # testing tweaks, also work for SQLite/window. Need to figure out a way to avoid making table indexes/full
+        self.db.app.config.update(
+            SQLALCHEMY_MAX_OVERFLOW=None,
+            SQLALCHEMY_POOL_SIZE=None
+        )
+        self.app = app.test_client()
         self.db.create_all()
         self.roles = self.ingredients = self.recipes = None
 
@@ -101,6 +104,7 @@ class BaseTempDBTestCase(TestCase):
 
     def tearDown(self):
         self.db.session.remove()
+        self.db.session.close()
         self.db.drop_all()
         del self.tmp_dir
 
