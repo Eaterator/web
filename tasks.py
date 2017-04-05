@@ -30,6 +30,7 @@ CRON_FREQUENCY = 60 * 60  # 1 hour
 def update_flickr_images(data):
     try:
         data['pk'] = int(data[b'pk'].decode('utf-8'))
+        data['default'] = int(data[b'default'].decode('utf-8'))
         data['title'] = data[b'title'].decode('utf-8').lower().replace('epicurious', "").replace('.com', '').\
             translate(PUNCTUATION_TRANSLATOR).strip()
         if not data['title']:
@@ -53,7 +54,7 @@ def update_flickr_images(data):
                         recipe=data["pk"],
                         server_id=1,
                         photo_id=1,
-                        farm_id=1,
+                        farm_id=data['default'],
                         title=search_text,
                         secret="default",
                         relevance=-1
@@ -107,18 +108,21 @@ def update_flickr_images(data):
 # run every hour at *:30
 @cron(-1, -1, -1, -1, -1)
 def get_recipes_without_images(*args):
+    default = 2
     recipes = Recipe.query.\
         filter(
-            or_(
-                not_(
-                    Recipe.pk.in_(
-                        db.session.query(func.distinct(RecipeImage.recipe))
-                    )
-                ),
+            not_(
                 Recipe.pk.in_(
-                    db.session.query(RecipeImage.recipe).filter(
-                        RecipeImage.secret == 'default'
-                    )
+                    db.session.query(func.distinct(RecipeImage.recipe))
+                )
+            ),
+        ).limit(55).all()
+    if len(recipes) <= 0:
+        default = 2
+        recipes = Recipe.query.filter(
+            Recipe.pk.in_(
+                db.session.query(RecipeImage.recipe).filter(
+                    RecipeImage.secret == 'default', RecipeImage.farm_id != '2'
                 )
             )
         ).limit(55).all()
@@ -126,7 +130,8 @@ def get_recipes_without_images(*args):
         if recipe.title:
             uwsgi.spool({
                 b'pk': str(recipe.pk).encode('utf-8'),
-                b'title': recipe.title.encode('utf-8')
+                b'title': recipe.title.encode('utf-8'),
+                b'default': str(default).encode('utf-8')
             })
     db.session.close()
 
