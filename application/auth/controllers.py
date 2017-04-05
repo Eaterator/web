@@ -12,6 +12,7 @@ from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHOR
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
     DuplicateUserEmailUsernameException
 from application.app import db, app
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
@@ -59,6 +60,14 @@ def auth_register_user():
             raise InvalidAPIRequest("Bad request, please try again", status_code=BAD_REQUEST_CODE)
     except DuplicateUserEmailUsernameException:
         raise InvalidAPIRequest("Username taken")
+
+
+@auth_blueprint.route('/refresh', methods=["GET"])
+@jwt_required
+def refresh_token():
+    user_id = get_jwt_identity()
+    user = User.query.filter(User.pk == user_id).first()
+    return JWTUtilities.create_access_token_resp(user)
 
 
 @auth_blueprint.route('/authorize/<provider>')

@@ -3,18 +3,26 @@
 
 angular.module('eateratorApp')
 
-
-.factory('localStorageService', function ($http){
-    
-    var getToken = function(){
-    // getting token from url
-         return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"})); 
-        };
+.factory('authenticationService', function ($http){
     return {
-    getToken: getToken
-  };
-    
-        
+        getToken: function(){
+            // getting token from url
+            return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));
+        },
+        registerUser: function(registerPayload){
+            return $http({
+                method: "POST",
+                url: '/auth/register',
+                data: registerPayload
+            });
+        },
+        refreshToken: function(token) {
+            return $http({
+                method: "GET",
+                url: '/auth/refresh',
+            });
+        }
+    };
 })
 
 .factory('AuthInterceptor', function ($window, $q) {
@@ -39,6 +47,7 @@ angular.module('eateratorApp')
 // grab recipes from the server
 .factory('recipesFactory', function($http){
     var allRecipes = [];
+    var defaultImage = "/static/images/default-recipe-pic.jpg";
     return {
         searchRecipes: function(ingredientsPayload, numberOfRecipes){
             console.log(ingredientsPayload);
@@ -70,6 +79,14 @@ angular.module('eateratorApp')
                 method: "GET",
                 url: '/recipe/related_ingredients/' + ingredient + '/' + numberOfRelatedIngredients
             })
+        },
+        setDefaultImageIfEmpty: function(searchRecipes) {
+            for (var i = 0; i < searchRecipes.length; i++) {
+                if (searchRecipes[i]["medium_img"] == '') {
+                    searchRecipes[i]["medium_img"] = defaultImage;
+                }
+            }
+            return searchRecipes;
         }
     }
 })
@@ -94,6 +111,12 @@ angular.module('eateratorApp')
             return $http({
                 method: "POST",
                 url: '/user/favourite-recipe/' + recipePk
+            })
+        },
+        deleteUserFavourite: function(recipePk) {
+            return $http({
+                method: "POST",
+                url: '/user/favourite-favourite/delete/' + recipePk
             })
         }
     }

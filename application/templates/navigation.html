@@ -18,8 +18,8 @@
                               <li id="current"><a href="base.html">Home</a></li>
                               <li><a href="#">About Us</a></li>
                               <li><a href="#">Contact</a></li>
-                              <li><a href="#" ng-click="login()">Login</a>
-                              </li>
+                              <li ng-hide="isLoggedIn()"><a href="#" ng-click="showLogin()">Login</a></li>
+                              <li ng-hide="!isLoggedIn()"><a href="#" ng-click="logout()">Logout </a></li>
                             </ul>
                     </div><!-- end #menu --> 
 		        </div>
