@@ -52,8 +52,8 @@ def update_flickr_images(data):
                 if not possible_searches:
                     new_recipe_image = RecipeImage(
                         recipe=data["pk"],
-                        server_id=1,
-                        photo_id=1,
+                        server_id=-1,
+                        photo_id=-1,
                         farm_id=data['default'],
                         title=search_text,
                         secret="default",
@@ -63,7 +63,7 @@ def update_flickr_images(data):
                     db.session.commit()
                     db.session.close()
                     return uwsgi.SPOOL_OK
-                search_text = possible_searches.pop()
+                search_text = ' '.join(possible_searches.pop())
                 sleep(1)
             resp = requests.get(
                 FLICKR_URL_FORMATTER.format(
@@ -108,7 +108,7 @@ def update_flickr_images(data):
 # run every hour at *:30
 @cron(-1, -1, -1, -1, -1)
 def get_recipes_without_images(*args):
-    default = 2
+    default = -1
     recipes = Recipe.query.\
         filter(
             not_(
@@ -120,11 +120,11 @@ def get_recipes_without_images(*args):
         ).limit(55).all()
     if len(recipes) <= 0:
         app.logger.debug("CLICKR CRON | Added reicpes from failed searches")
-        default = 2
+        default = -2
         recipes = Recipe.query.filter(
             Recipe.pk.in_(
                 db.session.query(RecipeImage.recipe).filter(
-                    RecipeImage.secret == 'default', RecipeImage.farm_id != '2'
+                    RecipeImage.secret == 'default', RecipeImage.farm_id != '-2'
                 )
             )
         ).limit(55).all()
