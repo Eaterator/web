@@ -35,6 +35,10 @@ def update_flickr_images(data):
             translate(PUNCTUATION_TRANSLATOR).strip()
         if not data['title']:
             return uwsgi.SPOOL_OK
+        check_no_images = RecipeImage.query.filter(
+            RecipeImage.recipe == data['pk'], RecipeImage.secret != 'default').all()
+        if len(check_no_images) > 3:
+            return uwsgi.SPOOL_OK
         tagged_sentence = INGREDIENT_PARSER._parse_sentence_tree(data["title"])
         words = [j[0] for sublist in
                  [i.leaves() for i in
