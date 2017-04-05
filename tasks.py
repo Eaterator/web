@@ -118,6 +118,7 @@ def get_recipes_without_images(*args):
             ),
         ).limit(55).all()
     if len(recipes) <= 0:
+        app.logger.debug("CLICKR CRON | Added reicpes from failed searches")
         default = 2
         recipes = Recipe.query.filter(
             Recipe.pk.in_(
