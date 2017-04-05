@@ -64,6 +64,7 @@ def update_flickr_images(data):
                     db.session.close()
                     return uwsgi.SPOOL_OK
                 search_text = ' '.join(possible_searches.pop())
+                app.logger.debug("FLICKR SPOOLER | retrying search with combination: {0}".format(search_text))
                 sleep(1)
             resp = requests.get(
                 FLICKR_URL_FORMATTER.format(
@@ -79,6 +80,7 @@ def update_flickr_images(data):
                     key=lambda i: i[0])[:TOPN_FLICKR]
                 if len(top_photos) < 1:
                     attempts += 1
+                    continue
                 continue_search = False
             except KeyError:
                 attempts += 1
@@ -87,6 +89,7 @@ def update_flickr_images(data):
                 ))
 
         for photo in top_photos:
+            app.logger.debug("FLICKR SPOOLER | Added images for search")
             new_recipe_image = RecipeImage(
                 recipe=data["pk"],
                 server_id=photo[1],
