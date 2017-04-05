@@ -1,9 +1,11 @@
 import requests
 import uwsgi
 import traceback
+from time import sleep
+from itertools import combinations
 from uwsgidecorators import cron
 from fuzzywuzzy import fuzz
-from sqlalchemy import func, not_
+from sqlalchemy import func, not_, or_
 from application.app import app, db
 from application.recipe.models import Recipe, RecipeImage
 from application.config import FLICKR_API_KEY
@@ -41,37 +43,47 @@ def update_flickr_images(data):
         search_text = " ".join(words[:FLICKR_WORD_SERACH_SIZE]) if len(words) > 1 \
             else " ".join(data["title"].split()[:FLICKR_WORD_SERACH_SIZE])
 
-        resp = requests.get(
-            FLICKR_URL_FORMATTER.format(
-                FLICKR_SEARCH_METHOD, FLICKR_API_KEY, search_text, FLICKR_RESPONSE_TYPE
-            )
-        )
-        resp = resp.json()
-        try:
-            top_photos = sorted(
-                [(fuzz.partial_ratio(p['title'], data["title"]), p["server"], p["id"], p["farm"], p["secret"], p["title"])
-                for p in resp["photos"]["photo"]],
-                reverse=True,
-                key=lambda i: i[0])[:TOPN_FLICKR]
-            if len(top_photos) < 1:
-                new_recipe_image = RecipeImage(
-                    recipe=data["pk"],
-                    server_id=1,
-                    photo_id=1,
-                    farm_id=1,
-                    title=search_text,
-                    secret="default",
-                    relevance=-1 
+        continue_search = True
+        attempts = 0
+        possible_searches = list(combinations(words, 2)) + [(i,) for i in words]
+        while continue_search:
+            if attempts > 0:
+                if not possible_searches:
+                    new_recipe_image = RecipeImage(
+                        recipe=data["pk"],
+                        server_id=1,
+                        photo_id=1,
+                        farm_id=1,
+                        title=search_text,
+                        secret="default",
+                        relevance=-1
+                    )
+                    db.session.add(new_recipe_image)
+                    db.session.commit()
+                    db.session.close()
+                    return uwsgi.SPOOL_OK
+                search_text = possible_searches.pop()
+                sleep(1)
+            resp = requests.get(
+                FLICKR_URL_FORMATTER.format(
+                    FLICKR_SEARCH_METHOD, FLICKR_API_KEY, search_text, FLICKR_RESPONSE_TYPE
                 )
-                db.session.add(new_recipe_image)
-                db.session.commit()
-                db.session.close()
-                return uwsgi.SPOOL_OK
-        except KeyError:
-            app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
-                data["pk"], data["title"], search_text
-            ))
-            return uwsgi.SPOOL_OK
+            )
+            resp = resp.json()
+            try:
+                top_photos = sorted(
+                    [(fuzz.partial_ratio(p['title'], data["title"]), p["server"], p["id"], p["farm"], p["secret"], p["title"])
+                    for p in resp["photos"]["photo"]],
+                    reverse=True,
+                    key=lambda i: i[0])[:TOPN_FLICKR]
+                if len(top_photos) < 1:
+                    attempts += 1
+                continue_search = False
+            except KeyError:
+                attempts += 1
+                app.logger.error("FLICKR SPOOLER | Error searching for recipe ({0}): {1}. Words: {2}".format(
+                    data["pk"], data["title"], search_text
+                ))
 
         for photo in top_photos:
             new_recipe_image = RecipeImage(
@@ -97,9 +109,16 @@ def update_flickr_images(data):
 def get_recipes_without_images(*args):
     recipes = Recipe.query.\
         filter(
-            not_(
+            or_(
+                not_(
+                    Recipe.pk.in_(
+                        db.session.query(func.distinct(RecipeImage.recipe))
+                    )
+                ),
                 Recipe.pk.in_(
-                    db.session.query(func.distinct(RecipeImage.recipe))
+                    db.session.query(RecipeImage.recipe).filter(
+                        RecipeImage.secret == 'default'
+                    )
                 )
             )
         ).limit(55).all()

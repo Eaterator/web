@@ -71,3 +71,24 @@ def add_user_favourite_recipe(recipe_id):
     response = jsonify({"message": "OK"})
     response.status_code = 200
     return response
+
+
+@user_blueprint.route('/favourite-recipe/delete/<recipe_id>', methods=["POST"])
+@jwt_required
+def delete_user_favourite_recipe(recipe_id):
+    status_code = BAD_REQUEST_CODE
+    if recipe_id:
+        try:
+            recipe_id = int(recipe_id)
+            recipe_favourite = FavouriteRecipe.query.\
+                filter(FavouriteRecipe.user == get_jwt_identity(),
+                       FavouriteRecipe.recipe == recipe_id).first()
+            if recipe_favourite:
+                db.session.delete(recipe_favourite)
+                db.session.commit()
+                status_code = 200
+        except ValueError:
+            pass
+    resp = jsonify({"message": "delete"})
+    resp.status_code = status_code
+    return resp
