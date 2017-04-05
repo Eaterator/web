@@ -116,6 +116,7 @@ def get_recipes_without_images(*args):
                     db.session.query(func.distinct(RecipeImage.recipe))
                 )
             ),
+            Recipe.title.isnot(None)
         ).limit(55).all()
     if len(recipes) <= 0:
         app.logger.debug("CLICKR CRON | Added reicpes from failed searches")
