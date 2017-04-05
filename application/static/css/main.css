@@ -352,13 +352,17 @@
     font-weight: 600;
 }
 .bootstrap-overrides main .recipe-list{
-    padding-bottom: 50px; 
+    padding-bottom: 100px; 
+    position: relative;
 }
 .bootstrap-overrides main .recipe-list .recipe-snippet{
-    text-align: center;
+/*    text-align: center;*/
     text-transform: capitalize;    
-    padding-bottom: 30px;
+    margin-bottom: 30px;
     height: 510px;
+    text-align:center;
+/*    vertical-align:top;*/
+/*    display: inline-block;*/
 }
 .bootstrap-overrides main .recipe-list .recipe-snippet a{
     text-decoration: none;
@@ -410,28 +414,88 @@
 
 div.stars {
   width: 270px;
-  display: inline-block;
+  display: block;
+  margin: 0 auto;
+  height: 75px;
 }
 
+div.starts:after{
+  content:'';
+  height: 0;
+  clear: both;
+}
 input.star { display: none; }
 
 label.star {
-  float: right;
-  padding: 10px;
-  font-size: 34px;
-  color: #444;
-  transition: all .2s;
+    float: right;
+    padding: 10px;
+    font-size: 34px;
+    color: #444;
+    transition: all .2s;
 }
 
 label.star:before {
-  content: "\f006";
-  font-family: FontAwesome;
+    content: "\f006";
+    font-family: FontAwesome;
 }
 .filled-star:before {
-  color: #FD4;
-  content: "\f005" !important;
-  font-family: FontAwesome;
+    color: #FD4;
+    content: "\f005" !important;
+    font-family: FontAwesome;
 }
 .bootstrap-overrides main .recipe-rating{
 	display: none;
+}
+.bootstrap-overrides .ingredient-list{
+	text-transform: capitalize;
+}
+.bootstrap-overrides .recipe-detail{
+    margin: 10px 0;
+    line-height: 3px;
+    height: 7px;
+}
+.bootstrap-overrides .recipe-detail br{
+    display: block;
+    margin: 5px 0;
+}
+.bootstrap-overrides .recipe-detail .ingredient-description{
+	text-transform: lowercase;
+}
+.bootstrap-overrides .recipe{
+	height: 800px;
+}
+.bootstrap-overrides .activee{
+	height: inherit !important;
+    position: absolute !important;
+    z-index: 1000;
+    background-color: #fff;
+    border-radius: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    width: 50%;
+    border-right: 1px solid black;
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    border-radius: 4px;
+    padding: 20px 0;
+}
+.bootstrap-overrides .activee img{
+    width: 450px !important;
+    height: 450px !important;
+    pointer-events:none;
+}
+
+/*
+.bootstrap-overrides .activee:after{
+    content: '';
+    height: 0;
+    clear: both;
+}
+*/
+.bootstrap-overrides .ingredient-caption{
+	margin: 0 !important;
+    padding-top: 20px;
 }
