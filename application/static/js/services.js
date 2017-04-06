@@ -116,7 +116,7 @@ angular.module('eateratorApp')
         deleteUserFavourite: function(recipePk) {
             return $http({
                 method: "POST",
-                url: '/user/favourite-favourite/delete/' + recipePk
+                url: '/user/favourite-recipe/delete/' + recipePk
             })
         }
     }

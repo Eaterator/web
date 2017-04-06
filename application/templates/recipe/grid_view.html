@@ -1,5 +1,5 @@
 {% raw %}
-    <div ng-model="allRecipes" class="container recipe-list">
+    <div class="container recipe-list">
         <div class="row">
            <div class="recipe-snippet col-md-4 col-sm-4" ng-repeat="recipe in searchedRecipes" ng-class="{'activee': recipe.pk == detailPk && showDetails}"
                      ng-style="{'top': recipe.pk == detailPk && showDetails? offsetY : 0}">
@@ -7,8 +7,8 @@
                <a ng-click="toggleDetails(); doClick($event); getDetailedRecipe(recipe.pk)" class="show-detail">
                    <h3 class="recipe-title">{{ recipe.title }}</h3>
                </a>
-               <button ng-click="addFavourite(recipe.pk)" ng-hide="recipe.favourite">Favourite</button>
-               <button ng-click="removeFavourite(recipe.pk)" ng-hide="!recipe.favourite">Favourite</button>
+               <button ng-click="addFavourite($index, recipe)" ng-hide="recipe.favourite">Favourite</button>
+               <button ng-click="removeFavourite($index, recipe)" ng-hide="!recipe.favourite">Unfavourite</button>
                <p class="recipe-rating">{{ recipe.average_rating }} </p>
                <div class="stars">
                   <form action="" class="rating-form">
@@ -28,8 +28,8 @@
     <!--                           <div class="recipe-detail-wrapper">-->
                <p ng-if="recipe.pk == detailPk && showDetails" class="ingredient-caption">ingredients</p>
                <div class="recipe-detail" ng-repeat="ingredient in searchedDetails" ng-if="recipe.pk == detailPk && showDetails">
-                   <button ng-click="addFavourite(recipe.pk)" ng-hide="recipe.favourite">Favourite</button>
-                   <button ng-click="removeFavourite(recipe.pk)" ng-hide="!recipe.favourite">Favourite</button>
+                   <button ng-click="addFavourite(recipe)" ng-hide="recipe.favourite">Favourite</button>
+                   <button ng-click="removeFavourite(recipe)" ng-hide="!recipe.favourite">Unfavourite</button>
                    <p class="ingredient-description">
                        {{ ingredient | ingredientFormatter }}
                    </p><br>
