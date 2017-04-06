@@ -31,7 +31,6 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
 
         $locationProvider.html5Mode({
           enabled: true,
-          requireBase: false
         });
         $urlRouterProvider.otherwise('/home');
 

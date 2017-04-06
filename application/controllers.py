@@ -5,12 +5,15 @@ from application.exceptions import InvalidAPIRequest
 
 home_blueprint = Blueprint('home', __name__,
                            template_folder='templates')
+UI_ROUTES = ['home', 'contact', 'about', 'user', 'login']
 
 
 # Route to show default pages of Eaterator ('/', 'home', 'contact', etc.)
 @home_blueprint.route('/', defaults={'page': 'index'})
 @home_blueprint.route('/<page>')
 def index(page):
+    if page in UI_ROUTES:
+        page = 'index'
     try:
         return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:
