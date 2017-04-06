@@ -3,7 +3,7 @@
 
 angular.module('eateratorApp')
 
-.factory('authenticationService', function ($http){
+.factory('authenticationService', function ($http, $window){
     var clientId = '647922095392507';
     return {
         getToken: function(){
@@ -24,7 +24,8 @@ angular.module('eateratorApp')
             });
         },
         socialLoginFacebook: function() {
-            window.location.href = "https://api.imgur.com/oauth2/authorize?client_id=" + clientId + "&response_type=token";
+            console.log("made it");
+            $window.location.href = "/auth/authorize/facebook";
         }
     };
 })

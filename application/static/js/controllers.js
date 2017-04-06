@@ -45,6 +45,7 @@ angular.module('eateratorApp')
         // Controller setup
         $scope.showDetails = false;
         $scope.showDescription = false;
+        $scope.ingredients = [];
         $scope.token = $window.localStorage.getItem('id_token');
          
         $scope.searchRecipes = function(ingredients){
@@ -81,7 +82,17 @@ angular.module('eateratorApp')
             var request = recipesFactory.getPopularIngredients();
             request.then(function(response) {
                 $scope.popularIngredients = response.data.ingredients;
+            }).catch(function(){
+                console.log("Error getting popular ingredients")
             })
+       }
+
+       $scope.addPopular = function(idx) {
+            var item = $scope.popularIngredients[idx];
+            $scope.popularIngredients.splice(idx, 1);
+            $scope.ingredients.push({
+                text: item.name
+            });
        }
 
         $scope.toggleDetails = function() {
@@ -113,6 +124,8 @@ angular.module('eateratorApp')
             $scope.searchedRecipes[idx].favourite = false;
             return;
         }
+
+        $scope.getPopularIngredients();
     }
 ])
 .controller('AuthCtrl',
@@ -135,9 +148,13 @@ angular.module('eateratorApp')
             });
         }
 
-        $scope.socialLogin = function() {
-            console.log("success");
-            var request = authenticationService.socialLogin()
+        $scope.socialLogin = function(provider) {
+            if (provider == 'facebook'){
+                var request = authenticationService.socialLoginFacebook()
+            }
+            if (request === null || request === undefined) {
+                return;
+            }
             request.then(function(response){
                 $scope.token = response.data.access_token;
                 $window.localStorage.setItem('id_token', $scope.token);
