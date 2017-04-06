@@ -3,18 +3,26 @@
 
 angular.module('eateratorApp')
 
-
-.factory('localStorageService', function ($http){
-    
-    var getToken = function(){
-    // getting token from url
-         return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"})); 
-        };
+.factory('authenticationService', function ($http){
     return {
-    getToken: getToken
-  };
-    
-        
+        getToken: function(){
+            // getting token from url
+            return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));
+        },
+        registerUser: function(registerPayload){
+            return $http({
+                method: "POST",
+                url: '/auth/register',
+                data: registerPayload
+            });
+        },
+        refreshToken: function(token) {
+            return $http({
+                method: "GET",
+                url: '/auth/refresh',
+            });
+        }
+    };
 })
 
 .factory('AuthInterceptor', function ($window, $q) {
@@ -39,6 +47,7 @@ angular.module('eateratorApp')
 // grab recipes from the server
 .factory('recipesFactory', function($http){
     var allRecipes = [];
+    var defaultImage = "/static/images/default-recipe-pic.jpg";
     return {
         searchRecipes: function(ingredientsPayload, numberOfRecipes){
             console.log(ingredientsPayload);
@@ -70,6 +79,14 @@ angular.module('eateratorApp')
                 method: "GET",
                 url: '/recipe/related_ingredients/' + ingredient + '/' + numberOfRelatedIngredients
             })
+        },
+        setDefaultImageIfEmpty: function(searchRecipes) {
+            for (var i = 0; i < searchRecipes.length; i++) {
+                if (searchRecipes[i]["medium_img"] == '') {
+                    searchRecipes[i]["medium_img"] = defaultImage;
+                }
+            }
+            return searchRecipes;
         }
     }
 })
@@ -84,10 +101,10 @@ angular.module('eateratorApp')
             })
         },
         getUserRecentSearches: function(maximumNumber) {
-            maximumNumber = maxmimumNumber || 15;
+            maximumNumber = maximumNumber || 15;
             return $http({
                 method: "GET",
-                url: '/user/recent-searches/' + maxmimumNumber,
+                url: '/user/recent-searches/' + maximumNumber,
             })
         },
         addUserFavourite: function(recipePk) {
@@ -95,7 +112,46 @@ angular.module('eateratorApp')
                 method: "POST",
                 url: '/user/favourite-recipe/' + recipePk
             })
+        },
+        deleteUserFavourite: function(recipePk) {
+            return $http({
+                method: "POST",
+                url: '/user/favourite-favourite/delete/' + recipePk
+            })
         }
+    }
+})
+
+.factory('adminFactory', function($http){
+    return {
+        newUserAnalytics: function(startDate, groupBy) {
+            // :param startData: date of earliest searches
+            // :param groupBy: group searches by total per DAY || MONTH
+            groupBy = groupBy || 'DAY';
+            return $http({
+                method: "GET",
+                url: "/statistics/search/new-users/" + startDate +"/" + groupBy
+            })
+        },
+        totalUserSearches: function(startDate, groupBy) {
+            // :param startData: date of earliest searches
+            // :param groupBy: group searches by total per DAY || MONTH
+            groupBy = groupBy || 'DAY';
+            return $http({
+                method: "GET",
+                url: "/admin/statistics/" + startDate + "/" + groupBy
+            });
+        },
+        uniqueSearchUsers: function(startDate, groupBy) {
+            // :param startData: date of earliest searches
+            // :param groupBy: group searches by total per DAY || MONTH
+            groupBy = groupBy || 'DAY';
+            return $http({
+                method: "GET",
+                url: "/admin/statistics/search/unique-users/" + startDate + "/" + groupBy
+            });
+        }
+
     }
 })
 

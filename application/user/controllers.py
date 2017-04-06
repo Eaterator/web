@@ -1,5 +1,6 @@
 import os
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template, abort
+from jinja2 import TemplateNotFound
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import FavouriteRecipe, UserSearchData
 from application.recipe.models import Recipe
@@ -18,6 +19,14 @@ MAXIMUM_USER_FAVOURITE_NUMBER = 100
 user_blueprint = Blueprint('user_data', __name__,
                            template_folder=os.path.join('templates', 'user'),
                            url_prefix='/user')
+
+
+@user_blueprint.route('/<page>')
+def get_static_pages(page):
+    try:
+        return render_template('{0}.html'.format(page.split('.')[0]))
+    except TemplateNotFound:
+        abort(404)
 
 
 @user_blueprint.route('/favourite-recipes', methods=["GET"])

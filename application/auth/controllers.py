@@ -2,7 +2,7 @@ import os
 from urllib.request import urlopen
 from abc import ABCMeta, abstractmethod
 from werkzeug.datastructures import MultiDict
-from flask import url_for, redirect, Blueprint, request, render_template
+from flask import url_for, redirect, Blueprint, request, render_template, abort
 from rauth import OAuth2Service
 from application import config
 from application.auth.models import User, UserUtilities
@@ -12,10 +12,20 @@ from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHOR
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
     DuplicateUserEmailUsernameException
 from application.app import db, app
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
                            url_prefix='/auth')
+
+
+@auth_blueprint.route("/<path>", methods=["GET"])
+def get_login_template(path):
+    parsed = path.split('.')[0]
+    if parsed == 'login':
+        return render_template('login.html')
+    else:
+        abort(404)
 
 
 @auth_blueprint.route("/", methods=["POST"])
@@ -59,6 +69,14 @@ def auth_register_user():
             raise InvalidAPIRequest("Bad request, please try again", status_code=BAD_REQUEST_CODE)
     except DuplicateUserEmailUsernameException:
         raise InvalidAPIRequest("Username taken")
+
+
+@auth_blueprint.route('/refresh', methods=["GET"])
+@jwt_required
+def refresh_token():
+    user_id = get_jwt_identity()
+    user = User.query.filter(User.pk == user_id).first()
+    return JWTUtilities.create_access_token_resp(user)
 
 
 @auth_blueprint.route('/authorize/<provider>')

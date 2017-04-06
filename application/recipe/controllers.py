@@ -2,7 +2,8 @@ import os
 import json
 import re
 from itertools import combinations
-from flask import Blueprint, request, jsonify
+from jinja2 import TemplateNotFound
+from flask import Blueprint, request, jsonify, render_template, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, or_, desc, not_, and_
 from application.controllers import _parse_limit_parameter
@@ -36,6 +37,14 @@ FULLTEXT_INDEX_CONFIG = 'english'
 recipe_blueprint = Blueprint('recipe', __name__,
                              template_folder=os.path.join('templates', 'recipe'),
                              url_prefix='/recipe')
+
+
+@recipe_blueprint.route('/<page>')
+def get_static_pages(page):
+    try:
+        return render_template('{0}.html'.format(page.split('.')[0]))
+    except TemplateNotFound:
+        abort(404)
 
 
 @recipe_blueprint.route('/top-ingredients', methods=["POST"])

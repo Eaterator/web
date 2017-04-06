@@ -1,0 +1,41 @@
+{% raw %}
+    <div ng-model="allRecipes" class="container recipe-list">
+        <div class="row">
+           <div class="recipe-snippet col-md-4 col-sm-4" ng-repeat="recipe in searchedRecipes" ng-class="{'activee': recipe.pk == detailPk && showDetails}"
+                     ng-style="{'top': recipe.pk == detailPk && showDetails? offsetY : 0}">
+              <img class="recipe-img in" ng-src="{{ recipe.medium_img }}" alt="recipe-pic">
+               <a ng-click="toggleDetails(); doClick($event); getDetailedRecipe(recipe.pk)" class="show-detail">
+                   <h3 class="recipe-title">{{ recipe.title }}</h3>
+               </a>
+               <button ng-click="addFavourite(recipe.pk)" ng-hide="recipe.favourite">Favourite</button>
+               <button ng-click="removeFavourite(recipe.pk)" ng-hide="!recipe.favourite">Favourite</button>
+               <p class="recipe-rating">{{ recipe.average_rating }} </p>
+               <div class="stars">
+                  <form action="" class="rating-form">
+                    <input class="star star-5" id="star-5" type="radio" name="star"/>
+                    <label class="star star-5" for="star-5"></label>
+                    <input class="star star-4" id="star-4" type="radio" name="star"/>
+                    <label class="star star-4" for="star-4"></label>
+                    <input class="star star-3" id="star-3" type="radio" name="star"/>
+                    <label class="star star-3" for="star-3"></label>
+                    <input class="star star-2" id="star-2" type="radio" name="star"/>
+                    <label class="star star-2" for="star-2"></label>
+                    <input class="star star-1" id="star-1" type="radio" name="star"/>
+                    <label class="star star-1" for="star-1"></label>
+                  </form>
+               </div>
+               <!-- invisible details block -->
+    <!--                           <div class="recipe-detail-wrapper">-->
+               <p ng-if="recipe.pk == detailPk && showDetails" class="ingredient-caption">ingredients</p>
+               <div class="recipe-detail" ng-repeat="ingredient in searchedDetails" ng-if="recipe.pk == detailPk && showDetails">
+                   <button ng-click="addFavourite(recipe.pk)" ng-hide="recipe.favourite">Favourite</button>
+                   <button ng-click="removeFavourite(recipe.pk)" ng-hide="!recipe.favourite">Favourite</button>
+                   <p class="ingredient-description">
+                       {{ ingredient | ingredientFormatter }}
+                   </p><br>
+               </div>
+    <!--                           </div>-->
+           </div>
+        </div>
+    </div>
+{% endraw %}

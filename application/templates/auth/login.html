@@ -1,0 +1,40 @@
+{% raw %}
+    <h1>Welcome to Eaterator</h1>
+    <p>Please sign in or register to continue</p>
+    <!-- Login form remains hidden until the user wants to log into the site -->
+    <div class="login-wrapper">
+       <div class="login-form" ng-hide="isRegistering">
+           <h3>Social Login</h3>
+           <ul>
+               <li>
+                   <a href="/auth/authorize/facebook">
+                       <button>Login/Register with Facebook</button>
+                   </a>
+               </li>
+           </ul>
+           <h3>Account Login</h3>
+           <p>Username: <input ng-model="username"/></p>
+           <p>Password: <input type="password" ng-model="password"></p>
+           <p>{{ errors.login }}</p>
+           <button ng-click="login()">Login</button>
+           <button ng-click="startRegistering()">Register</button>
+       </div>
+       <div ng-hide="!isRegistering" class="register-form">
+           <h3>Make an Account</h3>
+           <p>Username (Email): <input ng-model="registerData.username"></p>
+           <p>{{ errors.register.username }}</p>
+           <p>Password: <input type="password" ng-model="registerData.password"></p>
+           <p>{{ errors.register.password }}</p>
+           <p>Confirm Password: <input type="password" ng-model="registerData.confirm"></p>
+           <p>{{ errors.register.confirm }}</p>
+           <p>Date of Birth: <input ng-model="registerData.date_of_birth"></p>
+           <p>{{ errors.register.date_of_birth }}</p>
+           <p>First Name: <input ng-model="registerData.first_name"></p>
+           <p>{{ errors.register.first_name }}</p>
+           <p>Last Name: <input ng-model="registerData.last_name"></p>
+           <p>{{ errors.register.last_name }}</p>
+           <button ng-click="register()">Register</button>
+           <button ng-click="stopRegistering()">Cancel</button>
+       </div>
+    </div><!-- end of login form -->
+{% endraw %}
