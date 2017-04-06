@@ -16,7 +16,7 @@
            <p>Username: <input ng-model="username"/></p>
            <p>Password: <input type="password" ng-model="password"></p>
            <p>{{ errors.login }}</p>
-           <button ng-click="login()">Login</button>
+           <button style="backgroud-color: blue; height: 250px; width: 250px;" ng-click="login()">Login</button>
            <button ng-click="startRegistering()">Register</button>
        </div>
        <div ng-hide="!isRegistering" class="register-form">
