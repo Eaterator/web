@@ -12,8 +12,7 @@ home_blueprint = Blueprint('home', __name__,
 @home_blueprint.route('/<page>')
 def index(page):
     try:
-        # return render_template('{0}.html'.format(page.split('.')[0]))
-        return render_template('index.html')
+        return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:
         return render_template('404.html')
 
