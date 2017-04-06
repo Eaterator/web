@@ -210,5 +210,5 @@ class FacebookSignIn(OAuthSignIn):
 
     @staticmethod
     def facebook_response_decoder(payload):
-        print(payload)
+        app.logger.debug("oauth decoder: {0}".format(payload))
         return json.loads(str(payload))
