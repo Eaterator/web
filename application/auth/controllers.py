@@ -1,4 +1,5 @@
 import os
+import json
 from urllib.request import urlopen
 from abc import ABCMeta, abstractmethod
 from werkzeug.datastructures import MultiDict
@@ -194,7 +195,8 @@ class FacebookSignIn(OAuthSignIn):
                 'code': request.args['code'],
                 'grant_type': 'authorization_code',
                 'redirect_uri': self.get_callback_url()
-            }
+            },
+            decoder=self.facebook_response_decoder
         )
         me = oauth_session.get('me').json()
         return (
@@ -205,3 +207,7 @@ class FacebookSignIn(OAuthSignIn):
     def verify_token(self, token):
         resp = urlopen("https://graph.facebook.com/me?access_token={0}".format(token))
         return resp.status == 200
+
+    @staticmethod
+    def facebook_response_decoder(payload):
+        return json.loads(str(payload))
