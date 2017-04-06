@@ -9,6 +9,7 @@ from application.auth.models import User, UserUtilities
 from application.auth.auth_utilities import JWTUtilities, PasswordUtilities, PasswordMismatchError,\
     ImproperPasswordError
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
+from application.controllers import cross_domain
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
     DuplicateUserEmailUsernameException
 from application.app import db, app
@@ -80,12 +81,14 @@ def refresh_token():
 
 
 @auth_blueprint.route('/authorize/<provider>')
+@cross_domain(origin='*')
 def oauth_authorize(provider):
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize()
 
 
 @auth_blueprint.route('/callback/<provider>')
+@cross_domain(origin='*')
 def oauth_callback(provider):
     try:
         oauth = OAuthSignIn.get_provider(provider)
@@ -107,8 +110,6 @@ def oauth_callback(provider):
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
     resp = JWTUtilities.create_access_token_resp(user)
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Origin'] = 'www.eaterator.com'
     return resp
 
 
@@ -183,8 +184,6 @@ class FacebookSignIn(OAuthSignIn):
             response_type='code',
             redirect_uri=self.get_callback_url())
         )
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Origin'] = 'www.eaterator.com'
         return resp
 
     def callback(self):
