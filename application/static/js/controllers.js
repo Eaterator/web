@@ -9,11 +9,11 @@ angular.module('eateratorApp')
         $scope.isLoggedIn = function() {
             return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
         }
-
         $scope.refreshToken = function() {
             console.log($scope.isLoggedIn());
             console.log($scope.token);
             if ($scope.isLoggedIn()) {
+                console.log("got here!")
                 var request = authenticationService.refreshToken();
                 request.then(function(response){
                     $scope.token = response.data.access_token;
@@ -24,7 +24,8 @@ angular.module('eateratorApp')
                     $state.go('login');
                 });
             } else {
-                if ($state.current.name != 'about' && $state.current.name != 'contact'){
+                if ($state.current.name != 'about' && $state.current.name != 'contact' && $state.current.name != 'home'){
+                    console.log("redirect")
                     $state.go('login');
                 }
             }
@@ -129,8 +130,12 @@ angular.module('eateratorApp')
     }
 ])
 .controller('AuthCtrl',
-    ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state',
-    function($scope, authenticationService, recipesFactory, $http, $window, $state){
+    ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state', '$stateParams',
+    function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams){
+        $scope.token = $stateParams.accessToken || '';
+        if ($scope.accessToken != ''){
+            $state.go('login');
+        }
         $scope.registerData = {}
         $scope.isRegistering = false;
         $scope.errors = {}
@@ -142,7 +147,7 @@ angular.module('eateratorApp')
             request.then( function(response) {
                 $scope.token = response.data.access_token;
                 $window.localStorage.setItem('id_token', $scope.token);
-                $state.go('home')
+                $state.go('search')
             }).catch( function(){
                 console.log("ebites konem")
             });

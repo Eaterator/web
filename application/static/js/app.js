@@ -32,26 +32,27 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
         $locationProvider.html5Mode({
           enabled: true,
         });
-        $urlRouterProvider.otherwise('/home');
+
+        $urlRouterProvider.otherwise('/search');
 
         $stateProvider
-            .state('home', {
-                url: '/home',
+            .state('search', {
+                url: '/search',
                 views: {
                     '': {
                         controller: 'AppCtrl'
                     },
-                    'header@home': {
+                    'header@search': {
                         templateUrl: 'carousel.html'
                     },
-                    'content@home': {
+                    'content@search': {
                         templateUrl: 'search.html',
                         controller: 'RecipeCtrl'
                     }
                 }
             })
             .state('login', {
-                url: '/login',
+                url: '/login?{accessToken}',
                 views: {
                     '': {
                         controller: 'AppCtrl'
@@ -63,6 +64,22 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                         templateUrl: '/auth/login.html',
                         controller: 'AuthCtrl'
                     }
+                }
+            })
+            .state('oath', {
+                url: '/callback/{provider}?code={accessToken}',
+                controller: function ($scope, $state, $stateParams, $http) {
+                    console.log("got here!");
+                    var request = $http({
+                        method: "POST",
+                        url: '/app/'+$stateParams.provider,
+                        data: {auth_token: $stateParams.accessToken}
+                    }).then(function(response){
+                        $state.go('login', {accessToken: response.data.access_token});
+                    }).catch(function(){
+                        console.log("Error in oauth redirect");
+                        $state.go('login');
+                    })
                 }
             })
             .state('user', {
