@@ -108,7 +108,7 @@ def oauth_callback(provider):
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
     return url_for(
-        'index',
+        'home.index',
         access_token=JWTUtilities.create_access_token(user)
     )
 
