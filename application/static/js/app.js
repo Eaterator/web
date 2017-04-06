@@ -37,7 +37,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
 
         $stateProvider
             .state('search', {
-                url: '/search',
+                url: '/search?access_token={accessToken}',
                 views: {
                     '': {
                         controller: 'AppCtrl'

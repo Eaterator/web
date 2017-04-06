@@ -134,10 +134,7 @@ angular.module('eateratorApp')
     function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams){
         $scope.token = $stateParams.accessToken || '';
         if ($scope.accessToken != ''){
-            $scope.token = document.getElementById('access_token').value;
-            if ($scope.accessToken != ''){
-                $state.go('login');
-            }
+            $state.go('login');
         }
         $scope.registerData = {}
         $scope.isRegistering = false;
