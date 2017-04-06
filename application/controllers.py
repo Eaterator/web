@@ -7,7 +7,7 @@ from application.exceptions import InvalidAPIRequest
 
 home_blueprint = Blueprint('home', __name__,
                            template_folder='templates')
-UI_ROUTES = ['home', 'contact', 'about', 'user', 'login']
+UI_ROUTES = ['home', 'contact', 'about', 'user', 'login', 'search']
 
 
 # Route to show default pages of Eaterator ('/', 'home', 'contact', etc.)

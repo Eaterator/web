@@ -38,10 +38,11 @@ blueprints = [
     admin_blueprint
 ]
 
+TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__))
 for blueprint in blueprints:
     setattr(blueprint, 'template_folder',
             os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
+                TEMPLATE_DIR,
                 blueprint.template_folder
             ))
     app.register_blueprint(blueprint)

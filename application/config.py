@@ -26,6 +26,7 @@ LOG_LEVEL = logging.DEBUG
 #           Flask Configuration          #
 SECRET_KEY = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'supersecretkeytochangeinproduction'
 CONFIG_FILE = 'config.py'
+STATIC_ANGULAR_UI_DIRECTORY = ''
 
 ##########################################
 #         Gevent/uWSGI Settings          #
