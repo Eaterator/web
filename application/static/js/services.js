@@ -21,6 +21,13 @@ angular.module('eateratorApp')
                 method: "GET",
                 url: '/auth/refresh',
             });
+        },
+        socialLogin: function(provider) {
+            provider = provider || 'facebook';
+            return $http({
+                method: "GET",
+                url: '/auth/authorize/' + provider
+            })
         }
     };
 })

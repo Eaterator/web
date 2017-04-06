@@ -81,7 +81,6 @@ def refresh_token():
 
 @auth_blueprint.route('/authorize/<provider>')
 def oauth_authorize(provider):
-    app.logger.debug("Called /authorize/<{0}>".format(provider))
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize()
 

@@ -21,7 +21,7 @@ angular.module('eateratorApp')
                 }).catch(function(){
                     $scope.token = '';
                     $window.localStorage.removeItem('id_token');
-                    $state.go('login')
+                    $state.go('login');
                 });
             } else {
                 if ($state.current.name != 'about' && $state.current.name != 'contact'){
@@ -121,12 +121,24 @@ angular.module('eateratorApp')
             var request = authenticationService.getToken()
             request.then( function(response) {
                 $scope.token = response.data.access_token;
-                $window.localStorage.setItem('id_token', $scope.token), $scope.token;
-                $scope.hideLoginDisplay = true;
+                $window.localStorage.setItem('id_token', $scope.token);
                 $state.go('home')
             }).catch( function(){
                 console.log("ebites konem")
             });
+        }
+
+        $scope.socialLogin = function() {
+            console.log("success");
+            var request = authenticationService.socialLogin()
+            request.then(function(response){
+                $scope.token = response.data.access_token;
+                $window.localStorage.setItem('id_token', $scope.token);
+                $state.go('home');
+            }).catch(function(error){
+                console.log("social error");
+                console.log(error);
+            })
         }
 
         $scope.startRegistering = function() {
