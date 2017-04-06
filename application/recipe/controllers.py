@@ -17,6 +17,7 @@ from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
 INTERNAL_INGREDIENT_SPACE_PATTERN = re.compile(r'\s+')
+TAG_WORD_DELIMITER = '-'
 # SEARCH RESULT SIZE
 DEFAULT_SEARCH_RESULT_SIZE = 20
 REGULAR_MAX_SEARCH_SIZE = 100
@@ -238,6 +239,8 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     :param limit: number of recipes to return
     :return: List<Recipe>
     """
+    ingredients = list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s), ingredients))
+    ingredients = list(map(lambda s: s.replace(TAG_WORD_DELIMITER, '&'), ingredients))
     return db.session.query(Recipe). \
         join(IngredientRecipe). \
         join(Ingredient). \
@@ -280,7 +283,6 @@ def _apply_dynamic_fulltext_filers(ingredients):
     :param ingredients: List<string>: ["onion", "chicken", "pork tenderloin"]
     :return:
     """
-    ingredients = list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s), ingredients))
     dynamic_filters = []
     for ingredient in ingredients:
         dynamic_filters.append(
@@ -297,41 +299,6 @@ def _apply_dynamic_fulltext_filers(ingredients):
             )
         )
     return dynamic_filters
-
-
-def create_fulltext_search_query(ingredients, raw_search, limit=DEFAULT_SEARCH_RESULT_SIZE):
-    """
-    :param ingredients: List of primary ingredients
-    :param raw_search: raw user search words
-    :param limit: number of searches to return
-    :return:
-    """
-    # TODO add modifiers when the database structure is fixed!
-    ingredients = list(map(lambda s: s.replace('&', ''), ingredients))
-    return db.session.query(Recipe).filter(
-            func.to_tsquery(
-                minimum_ingredients_combinations_filter(ingredients)
-            ).op('@@')(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text)
-            )
-        ).order_by(desc(
-            func.ts_rank(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
-                func.to_tsquery('&'.join(ingredients))
-            ) * ALL_MATCHING_INGREDIENTS +
-            # func.ts_rank_cd(
-            #     func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
-            #     func.to_tsquery('|'.join(raw_search))
-            # ) * INCLUDES_INGREDIENT +
-            func.ts_rank(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_modifier_text),
-                func.to_tsquery('&'.join(raw_search))
-            ) * INCLUDES_MODIFIER +
-            func.ts_rank(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery('&'.join(raw_search))
-            ) * INCLUDES_TITLE
-        )).limit(limit).all()
 
 
 def minimum_ingredients_combinations_filter(ingredients):
