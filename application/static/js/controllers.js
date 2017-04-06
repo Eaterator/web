@@ -77,6 +77,13 @@ angular.module('eateratorApp')
             })
        }
 
+       $scope.getPopularIngredients = function() {
+            var request = recipesFactory.getPopularIngredients();
+            request.then(function(response) {
+                $scope.popularIngredients = response.data.ingredients;
+            })
+       }
+
         $scope.toggleDetails = function() {
             $scope.showDetails = !$scope.showDetails;
             console.log($scope.showDetails);

@@ -22,11 +22,9 @@
                 </div>
             </div>
             <div class="col-md-6 col-md-offset-3 sample-products-list">
-                <span>potatoes</span>
-                <span>pepper</span>
-                <span>salt</span>
-                <span>tomatoes</span>
-                <span>cucumbers</span>
+                <span ng-repeat="ingredient in popularIngredients" ng-click="addPopular($index)">
+                    {{ ingredient.name }}
+                </span>
             </div>
         </div>
     </div>

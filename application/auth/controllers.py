@@ -9,7 +9,6 @@ from application.auth.models import User, UserUtilities
 from application.auth.auth_utilities import JWTUtilities, PasswordUtilities, PasswordMismatchError,\
     ImproperPasswordError
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
-from application.controllers import cross_domain
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
     DuplicateUserEmailUsernameException
 from application.app import db, app
@@ -81,14 +80,12 @@ def refresh_token():
 
 
 @auth_blueprint.route('/authorize/<provider>')
-@cross_domain(origin='*')
 def oauth_authorize(provider):
     oauth = OAuthSignIn.get_provider(provider)
     return oauth.authorize()
 
 
 @auth_blueprint.route('/callback/<provider>')
-@cross_domain(origin='*')
 def oauth_callback(provider):
     try:
         oauth = OAuthSignIn.get_provider(provider)
@@ -133,6 +130,7 @@ def app_oauth_login(provider):
         return JWTUtilities.create_access_token_resp(user)
 
 
+# TODO will need to fix this like so maybe: http://blog.shea.io/facebook-authentication-for-flask-apps/
 # https://blog.miguelgrinberg.com/post/oauth-authentication-with-flask
 class OAuthSignIn:
     __metaclass__ = ABCMeta

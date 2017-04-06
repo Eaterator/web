@@ -4,6 +4,7 @@
 angular.module('eateratorApp')
 
 .factory('authenticationService', function ($http){
+    var clientId = '647922095392507';
     return {
         getToken: function(){
             // getting token from url
@@ -22,12 +23,8 @@ angular.module('eateratorApp')
                 url: '/auth/refresh',
             });
         },
-        socialLogin: function(provider) {
-            provider = provider || 'facebook';
-            return $http({
-                method: "GET",
-                url: '/auth/authorize/' + provider
-            })
+        socialLoginFacebook: function() {
+            window.location.href = "https://api.imgur.com/oauth2/authorize?client_id=" + clientId + "&response_type=token";
         }
     };
 })
@@ -85,6 +82,12 @@ angular.module('eateratorApp')
             return $http({
                 method: "GET",
                 url: '/recipe/related_ingredients/' + ingredient + '/' + numberOfRelatedIngredients
+            })
+        },
+        getPopularIngredients: function() {
+            return $http({
+                method: "POST",
+                url: '/recipe/top-ingredients'
             })
         },
         setDefaultImageIfEmpty: function(searchRecipes) {
