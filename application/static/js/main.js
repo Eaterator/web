@@ -27,39 +27,32 @@ $(function() {
     
 	// evaluate rating
     $(document).on("mouseup", ".btn-search",
-    function() {
-        setTimeout(function() {
-//        $('.star').attr('data-content', '\f006');
-            $('.recipe-rating').each(function(){
-                if (0.5 < $(this).html() && $(this).html() <= 1.5) {
-                     $(this).next().find('.rating-form').find('label.star-1').addClass('filled-star');
-                }
-                if (1.5 < $(this).html() && $(this).html() <= 2.5) {
-                    $(this).next().find('.rating-form').find('label.star-1, label.star-2').addClass('filled-star');
-                }
-                if (2.5 < $(this).html() && $(this).html() <= 3.5) {
-                    $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3').addClass('filled-star');
-                }
-                if (3.5 < $(this).html() && $(this).html() <= 4.5) {
-                    $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3, label.star-4').addClass('filled-star');
-                }
-                if (4.5 < $(this).html() && $(this).html() <= 5) {
-                    $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3,label.star-4, label.star-5').addClass('filled-star');
-                }
-            })
-        }, 100);
-    }
+        function() {
+            setTimeout(function() {
+            // $('.star').attr('data-content', '\f006');
+                $('.recipe-rating').each(function(){
+                    if (0.5 < $(this).html() && $(this).html() <= 1.5) {
+                         $(this).next().find('.rating-form').find('label.star-1').addClass('filled-star');
+                    }
+                    if (1.5 < $(this).html() && $(this).html() <= 2.5) {
+                        $(this).next().find('.rating-form').find('label.star-1, label.star-2').addClass('filled-star');
+                    }
+                    if (2.5 < $(this).html() && $(this).html() <= 3.5) {
+                        $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3').addClass('filled-star');
+                    }
+                    if (3.5 < $(this).html() && $(this).html() <= 4.5) {
+                        $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3, label.star-4').addClass('filled-star');
+                    }
+                    if (4.5 < $(this).html() && $(this).html() <= 5) {
+                        $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3,label.star-4, label.star-5').addClass('filled-star');
+                    }
+                })
+            }, 100);
+        }
     );
-    
     //div appear near clicked area
     //$('.show-detail').bind('click', function () {
     //    $(".activee").css( {position:"absolute", top:event.pageY});
     //})
-    
-    
-    
-     
-    
-    
-    
+
 });

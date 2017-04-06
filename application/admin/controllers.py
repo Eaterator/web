@@ -6,6 +6,7 @@ from sqlalchemy import func
 from application.auth.controllers import JWTUtilities
 from application.config import ADMIN_ROLE_TYPE
 from application.user.models import UserSearchData
+from application.auth.models import User
 from application.app import db
 from application.exceptions import InvalidAPIRequest
 
@@ -77,6 +78,36 @@ def unique_search_users(start_date, time_group_by):
             group_by(func.month(UserSearchData.created_at)).\
             order_by(func.year(UserSearchData.created_at)).\
             order_by(func.month(UserSearchData.created_at))
+    else:
+        raise InvalidAPIRequest("Could not group by: {0}. not valid. Only DAY and MONTH supported".format(
+            time_group_by))
+    return jsonify(aggregate_searches)
+
+
+@admin_blueprint.route("/statistics/search/new-users/<start_date>/<time_group_by>")
+@jwt_required
+@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+def new_users(start_date, time_group_by):
+    """
+    Returns the new users that have signed up for accounts
+    :param start_date: the first
+    :param time_group_by:
+    :return:
+    """
+    start_date, time_group_by = _parse_input_args(start_date, time_group_by)
+    if time_group_by.upper() == 'DAY':
+        aggregate_searches = db.session.query(
+            func.to_date(User.created_at), func.count(func.distinct(User.pk))).\
+            filter(func.to_date(User.created_at) <= start_date).\
+            group_by(func.to_date(User.created_at)).\
+            order_by(func.to_date(User.created_at))
+    elif time_group_by.upper() == 'MONTH':
+        aggregate_searches = db.session.query(
+            func.month(User.created_at), func.count(func.distinct(User.pk))).\
+            filter(func.to_date(User.created_at) <= start_date).\
+            group_by(func.month(User.created_at)).\
+            order_by(func.year(User.created_at)).\
+            order_by(func.month(User.created_at))
     else:
         raise InvalidAPIRequest("Could not group by: {0}. not valid. Only DAY and MONTH supported".format(
             time_group_by))

@@ -2,7 +2,7 @@ import os
 from urllib.request import urlopen
 from abc import ABCMeta, abstractmethod
 from werkzeug.datastructures import MultiDict
-from flask import url_for, redirect, Blueprint, request, render_template
+from flask import url_for, redirect, Blueprint, request, render_template, abort
 from rauth import OAuth2Service
 from application import config
 from application.auth.models import User, UserUtilities
@@ -17,6 +17,15 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
                            url_prefix='/auth')
+
+
+@auth_blueprint.route("/<path>", methods=["GET"])
+def get_login_template(path):
+    parsed = path.split('.')[0]
+    if parsed == 'login':
+        return render_template('login.html')
+    else:
+        abort(404)
 
 
 @auth_blueprint.route("/", methods=["POST"])

@@ -1,0 +1,24 @@
+{% include 'head.html' %}
+<body class="bootstrap-overrides" ng-app="eateratorApp">
+    <div ui-view="">
+        <header>
+            {% include 'navigation.html' %}
+            <div ui-view="header">
+                <!-- ui-view to include carousel header -->
+            </div>
+        </header> <!-- end header-->
+       {% raw %}
+       <!-- need this tag so jinja2 templating doesn't try to replace {{ }} angular tags -->
+       <main>   <!-- ng-view-->
+            <div ui-view="optional">
+                <!-- include search bar view -->
+            </div>
+            <div ui-view="content">
+                <!-- include search results in grid format -->
+            </div>
+       </main><!-- end main-->
+       {% endraw %}
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

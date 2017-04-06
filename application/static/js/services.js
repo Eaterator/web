@@ -101,10 +101,10 @@ angular.module('eateratorApp')
             })
         },
         getUserRecentSearches: function(maximumNumber) {
-            maximumNumber = maxmimumNumber || 15;
+            maximumNumber = maximumNumber || 15;
             return $http({
                 method: "GET",
-                url: '/user/recent-searches/' + maxmimumNumber,
+                url: '/user/recent-searches/' + maximumNumber,
             })
         },
         addUserFavourite: function(recipePk) {
@@ -119,6 +119,39 @@ angular.module('eateratorApp')
                 url: '/user/favourite-favourite/delete/' + recipePk
             })
         }
+    }
+})
+
+.factory('adminFactory', function($http){
+    return {
+        newUserAnalytics: function(startDate, groupBy) {
+            // :param startData: date of earliest searches
+            // :param groupBy: group searches by total per DAY || MONTH
+            groupBy = groupBy || 'DAY';
+            return $http({
+                method: "GET",
+                url: "/statistics/search/new-users/" + startDate +"/" + groupBy
+            })
+        },
+        totalUserSearches: function(startDate, groupBy) {
+            // :param startData: date of earliest searches
+            // :param groupBy: group searches by total per DAY || MONTH
+            groupBy = groupBy || 'DAY';
+            return $http({
+                method: "GET",
+                url: "/admin/statistics/" + startDate + "/" + groupBy
+            });
+        },
+        uniqueSearchUsers: function(startDate, groupBy) {
+            // :param startData: date of earliest searches
+            // :param groupBy: group searches by total per DAY || MONTH
+            groupBy = groupBy || 'DAY';
+            return $http({
+                method: "GET",
+                url: "/admin/statistics/search/unique-users/" + startDate + "/" + groupBy
+            });
+        }
+
     }
 })
 

@@ -1,0 +1,14 @@
+{% raw %}
+    <h2>My Searches</h2>
+    <div class="user-searches">
+        <div ng-repeat="search in userSearches">
+            <ul>
+                <li ng-repeat="ingredient in search">{{ ingredient }}</li>
+            </ul>
+        </div>
+    </div>
+{% endraw %}
+<h2>My Favourites</h2>
+<div class="user-favourites">
+    {% include 'recipe/grid_view.html' %}
+</div>
