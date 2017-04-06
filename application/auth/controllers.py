@@ -175,11 +175,14 @@ class FacebookSignIn(OAuthSignIn):
         )
 
     def authorize(self):
-        return redirect(self.service.get_authorize_url(
+        resp = redirect(self.service.get_authorize_url(
             scope='email',
             response_type='code',
             redirect_uri=self.get_callback_url())
         )
+
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        return resp
 
     def callback(self):
         app.logger.debug("Running OAuth callback")
