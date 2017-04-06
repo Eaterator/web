@@ -33,9 +33,16 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
           enabled: true,
         });
 
-        $urlRouterProvider.otherwise('/search');
+        $urlRouterProvider.otherwise('/login');
 
         $stateProvider
+            .state('index', {
+                url: '/?access_token={accessToken}',
+                controller: function($scope, $state) {
+                    console.log($state.params);
+                    $state.go('search', {'access_token': $state.params.access_token})
+                }
+            })
             .state('search', {
                 url: '/search?access_token={accessToken}',
                 views: {
@@ -49,7 +56,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                         templateUrl: 'search.html',
                         controller: 'RecipeCtrl'
                     }
-                }
+                },
             })
             .state('login', {
                 url: '/login',

@@ -2,10 +2,17 @@
 
 angular.module('eateratorApp')
 .controller('AppCtrl',
-    ['$scope', 'authenticationService', '$http', '$window', '$state',
-    function($scope, authenticationService, $http, $window, $state){
-        $scope.token = $window.localStorage.getItem("id_token");
-        console.log($state);
+    ['$scope', 'authenticationService', '$http', '$window', '$state', '$stateParams',
+    function($scope, authenticationService, $http, $window, $state, $stateParams){
+        $scope.token = $window.localStorage.getItem("id_token") || '';
+        if ($scope.token == '') {
+            console.log($state.params);
+            $scope.token = $state.params.access_token || '';
+            if ($scope.token != '') {
+                $window.localStorage.setItem('id_token', $scope.token);
+                $state.go('search');
+            }
+        }
         $scope.isLoggedIn = function() {
             return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
         }
@@ -13,11 +20,11 @@ angular.module('eateratorApp')
             console.log($scope.isLoggedIn());
             console.log($scope.token);
             if ($scope.isLoggedIn()) {
-                console.log("got here!")
                 var request = authenticationService.refreshToken();
                 request.then(function(response){
                     $scope.token = response.data.access_token;
                     $window.localStorage.setItem("id_token", $scope.token);
+                    $state.go('search')
                 }).catch(function(){
                     $scope.token = '';
                     $window.localStorage.removeItem('id_token');
@@ -25,7 +32,6 @@ angular.module('eateratorApp')
                 });
             } else {
                 if ($state.current.name != 'about' && $state.current.name != 'contact' && $state.current.name != 'home'){
-                    console.log("redirect")
                     $state.go('login');
                 }
             }
@@ -61,8 +67,6 @@ angular.module('eateratorApp')
             var request = recipesFactory.searchRecipes($scope.ingredientsPayload);
             request.then(function(response) {
                 // response.data is already parsed into a JSON object, contains recipe format from documentation
-                console.log(response.data);
-                console.log(response.data.recipes);
                 var searchedRecipes = response.data.recipes || [];
                 searchedRecipes = recipesFactory.setDefaultImageIfEmpty(searchedRecipes);
                 $scope.searchedRecipes = searchedRecipes;
@@ -132,9 +136,7 @@ angular.module('eateratorApp')
 .controller('AuthCtrl',
     ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state', '$stateParams',
     function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams){
-        $scope.token = $stateParams.params.accessToken || '';
-        console.log($stateParams);
-        console.log($stateParams.params);
+
         if ($scope.accessToken != ''){
             $state.go('login');
         }
