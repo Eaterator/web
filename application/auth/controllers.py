@@ -106,7 +106,9 @@ def oauth_callback(provider):
             db.session.commit()
         except Exception as e:
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
-    return JWTUtilities.create_access_token_resp(user)
+    resp = JWTUtilities.create_access_token_resp(user)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 
 @auth_blueprint.route('/app/<provider>', methods=["POST"])
