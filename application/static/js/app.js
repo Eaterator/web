@@ -52,7 +52,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                 }
             })
             .state('login', {
-                url: '/login?{accessToken}',
+                url: '/login',
                 views: {
                     '': {
                         controller: 'AppCtrl'

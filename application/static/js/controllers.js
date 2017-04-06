@@ -132,7 +132,9 @@ angular.module('eateratorApp')
 .controller('AuthCtrl',
     ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state', '$stateParams',
     function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams){
-        $scope.token = $stateParams.accessToken || '';
+        $scope.token = $stateParams.params.accessToken || '';
+        console.log($stateParams);
+        console.log($stateParams.params);
         if ($scope.accessToken != ''){
             $state.go('login');
         }
