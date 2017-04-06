@@ -17,14 +17,14 @@ angular.module('eateratorApp')
             return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
         }
         $scope.refreshToken = function() {
-            console.log($scope.isLoggedIn());
-            console.log($scope.token);
             if ($scope.isLoggedIn()) {
                 var request = authenticationService.refreshToken();
                 request.then(function(response){
                     $scope.token = response.data.access_token;
                     $window.localStorage.setItem("id_token", $scope.token);
-                    $state.go('search')
+                    if ($state.current.name == 'login') {
+                        $state.go('search');
+                    }
                 }).catch(function(){
                     $scope.token = '';
                     $window.localStorage.removeItem('id_token');
