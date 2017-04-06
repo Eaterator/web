@@ -24,7 +24,7 @@ angular.module('eateratorApp')
             });
         },
         socialLoginFacebook: function() {
-            var response = $window.location.href = "/auth/authorize/facebook";
+            $window.location.href = "/auth/authorize/facebook";
             console.log(response);
         }
     };

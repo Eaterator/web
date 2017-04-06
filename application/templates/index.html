@@ -1,5 +1,6 @@
 {% include 'head.html' %}
 <body class="bootstrap-overrides" ng-app="eateratorApp">
+    <input type="hidden" value="{{ access_token }}" id="access_token"/>
     <div ui-view="">
         <header>
             {% include 'navigation.html' %}

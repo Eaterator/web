@@ -66,22 +66,6 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                     }
                 }
             })
-            .state('oath', {
-                url: '/auth/callback/{provider}?code={accessToken}',
-                controller: function ($scope, $state, $stateParams, $http) {
-                    console.log("got here!");
-                    var request = $http({
-                        method: "POST",
-                        url: '/app/'+$stateParams.provider,
-                        data: {auth_token: $stateParams.accessToken}
-                    }).then(function(response){
-                        $state.go('login', {accessToken: response.data.access_token});
-                    }).catch(function(){
-                        console.log("Error in oauth redirect");
-                        $state.go('login');
-                    })
-                }
-            })
             .state('user', {
                 url: '/user',
                 views: {

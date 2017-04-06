@@ -13,11 +13,13 @@ UI_ROUTES = ['home', 'contact', 'about', 'user', 'login']
 # Route to show default pages of Eaterator ('/', 'home', 'contact', etc.)
 @home_blueprint.route('/', defaults={'page': 'index'})
 @home_blueprint.route('/<page>')
-def index(page):
-    if page in UI_ROUTES:
-        page = 'index'
+@home_blueprint.route('/<page>/<access_token>', defaults={'page': 'index', 'access_token': ''})
+def index(page, access_token=''):
     try:
-        return render_template('{0}.html'.format(page.split('.')[0]))
+        if page in UI_ROUTES:
+            return render_template('index.html', access_token=access_token)
+        else:
+            return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:
         return render_template('404.html')
 

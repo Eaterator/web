@@ -18,6 +18,10 @@ ACCESS_TOKEN_HEADER = "access_token"
 class JWTUtilities:
 
     @staticmethod
+    def create_access_token(user):
+        return create_access_token(identity=user)
+
+    @staticmethod
     def create_access_token_resp(user):
         return jsonify({
             ACCESS_TOKEN_HEADER: create_access_token(identity=user)
