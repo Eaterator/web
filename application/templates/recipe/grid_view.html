@@ -28,8 +28,6 @@
     <!--                           <div class="recipe-detail-wrapper">-->
                <p ng-if="recipe.pk == detailPk && showDetails" class="ingredient-caption">ingredients</p>
                <div class="recipe-detail" ng-repeat="ingredient in searchedDetails" ng-if="recipe.pk == detailPk && showDetails">
-                   <button ng-click="addFavourite(recipe)" ng-hide="recipe.favourite">Favourite</button>
-                   <button ng-click="removeFavourite(recipe)" ng-hide="!recipe.favourite">Unfavourite</button>
                    <p class="ingredient-description">
                        {{ ingredient | ingredientFormatter }}
                    </p><br>
