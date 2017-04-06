@@ -67,7 +67,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                 }
             })
             .state('oath', {
-                url: '/callback/{provider}?code={accessToken}',
+                url: '/auth/callback/{provider}?code={accessToken}',
                 controller: function ($scope, $state, $stateParams, $http) {
                     console.log("got here!");
                     var request = $http({
