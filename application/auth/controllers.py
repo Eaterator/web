@@ -108,6 +108,7 @@ def oauth_callback(provider):
             app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
     resp = JWTUtilities.create_access_token_resp(user)
     resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Origin'] = 'www.eaterator.com'
     return resp
 
 
@@ -182,8 +183,8 @@ class FacebookSignIn(OAuthSignIn):
             response_type='code',
             redirect_uri=self.get_callback_url())
         )
-
         resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Origin'] = 'www.eaterator.com'
         return resp
 
     def callback(self):
