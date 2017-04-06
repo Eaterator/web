@@ -25,7 +25,6 @@ angular.module('eateratorApp')
         },
         socialLoginFacebook: function() {
             $window.location.href = "/auth/authorize/facebook";
-            console.log(response);
         }
     };
 })
