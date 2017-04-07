@@ -52,10 +52,11 @@ def _bundler_minifier(bundle, minifier=js_minify):
     for b in bundle:
         _file = os.path.join(config.DEV_STATIC_FILE_DIRECTORY, *b)
         with open(_file, 'r') as f:
-            minified_content.append(
-                minifier(f.read())
-            )
-    return ''.join(minified_content)
+            if '.min' not in _file:
+            	minified_content.append(minifier(f.read()))
+            else:
+                minified_content.append(f.read())
+    return '\n'.join(minified_content)
 
 
 def _render_ui_router_views():

@@ -55,40 +55,40 @@ angular.module('eateratorApp')
     return {
         searchRecipes: function(ingredientsPayload, numberOfRecipes){
             console.log(ingredientsPayload);
-            numberOfRecipes = numberOfRecipes || 20
+            numberOfRecipes = numberOfRecipes || 20;
             return $http({
                 method: 'POST',
                 url: '/recipe/v2/search/' + numberOfRecipes,
                 data: ingredientsPayload
-             })
+             });
         },
         getDetailedRecipe: function(recipePk) {
             return $http({
                 method: "GET",
                 url: '/recipe/recipe/' + recipePk
-            })
+            });
         },
         getTopIngredients: function(numberOfTopIngredients) {
             numberOfTopIngredients = numberOfTopIngredients || 15;
             return $http({
                 method: "GET",
                 url: '/recipe/top-ingredients/' + numberOfTopIngredients
-            })
+            });
         },
         getRelatedIngredient: function(ingredient, numberOfRelatedIngredients){
             numberOfRelatedIngredients = numberOfRelatedIngredients || 10;
             // encodeURIComponent just replaces spaces with %20 for making valid url, allows inclusion of spaces in ingredient
-            ingredient = encodeURIComponent(ingredient.trim())
+            ingredient = encodeURIComponent(ingredient.trim());
             return $http({
                 method: "GET",
                 url: '/recipe/related_ingredients/' + ingredient + '/' + numberOfRelatedIngredients
-            })
+            });
         },
         getPopularIngredients: function() {
             return $http({
                 method: "POST",
                 url: '/recipe/top-ingredients'
-            })
+            });
         },
         setDefaultImageIfEmpty: function(searchRecipes) {
             for (var i = 0; i < searchRecipes.length; i++) {
@@ -108,26 +108,26 @@ angular.module('eateratorApp')
             return $http({
                 method: "GET",
                 url: '/user/favourite-recipes/' + maximumNumber,
-            })
+            });
         },
         getUserRecentSearches: function(maximumNumber) {
             maximumNumber = maximumNumber || 15;
             return $http({
                 method: "GET",
                 url: '/user/recent-searches/' + maximumNumber,
-            })
+            });
         },
         addUserFavourite: function(recipePk) {
             return $http({
                 method: "POST",
                 url: '/user/favourite-recipe/' + recipePk
-            })
+            });
         },
         deleteUserFavourite: function(recipePk) {
             return $http({
                 method: "POST",
                 url: '/user/favourite-recipe/delete/' + recipePk
-            })
+            });
         }
     }
 })
@@ -141,7 +141,7 @@ angular.module('eateratorApp')
             return $http({
                 method: "GET",
                 url: "/statistics/search/new-users/" + startDate +"/" + groupBy
-            })
+            });
         },
         totalUserSearches: function(startDate, groupBy) {
             // :param startData: date of earliest searches

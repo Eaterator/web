@@ -12,10 +12,10 @@ angular.module('eateratorApp')
                 $window.localStorage.setItem('id_token', $scope.token);
                 $state.go('search');
             }
-        }
+        };
         $scope.isLoggedIn = function() {
             return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
-        }
+        };
         $scope.refreshToken = function() {
             if ($scope.isLoggedIn()) {
                 var request = authenticationService.refreshToken();
@@ -35,13 +35,13 @@ angular.module('eateratorApp')
                     $state.go('login');
                 }
             }
-        }
+        };
 
         $scope.logout = function() {
             $window.localStorage.removeItem('id_token');
             $scope.token = '';
             $state.go('login')
-        }
+        };
 
         $scope.refreshToken();
     }
@@ -62,7 +62,7 @@ angular.module('eateratorApp')
             }
             $scope.ingredientsPayload = {
                 'ingredients': payload
-            }
+            };
             console.log($scope.ingredientsPayload);
             var request = recipesFactory.searchRecipes($scope.ingredientsPayload);
             request.then(function(response) {
@@ -72,7 +72,7 @@ angular.module('eateratorApp')
                 $scope.searchedRecipes = searchedRecipes;
                 return;
             })
-       }
+       };
 
        $scope.getDetailedRecipe = function(pk){
            var requestDetails = recipesFactory.getDetailedRecipe(pk);
@@ -81,7 +81,7 @@ angular.module('eateratorApp')
                 return $scope.searchedDetails = response.data.recipe.ingredients || [],
                     $scope.detailPk = response.data.recipe.recipe.pk;
             })
-       }
+       };
 
        $scope.getPopularIngredients = function() {
             var request = recipesFactory.getPopularIngredients();
@@ -90,7 +90,7 @@ angular.module('eateratorApp')
             }).catch(function(){
                 console.log("Error getting popular ingredients")
             })
-       }
+       };
 
        $scope.addPopular = function(idx) {
             var item = $scope.popularIngredients[idx];
@@ -98,7 +98,7 @@ angular.module('eateratorApp')
             $scope.ingredients.push({
                 text: item.name
             });
-       }
+       };
 
         $scope.toggleDetails = function() {
             $scope.showDetails = !$scope.showDetails;
@@ -116,19 +116,19 @@ angular.module('eateratorApp')
         // Auth & login functions //
         $scope.isLoggedIn = function() {
             return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
-        }
+        };
 
         $scope.addFavourite = function(idx, recipe) {
             var request = userFactory.addUserFavourite(recipe.pk);
             $scope.searchedRecipes[idx].favourite = true;
             return;
-        }
+        };
 
         $scope.removeFavourite = function(idx, recipe) {
             var _ = userFactory.deleteUserFavourite(recipe.pk);
             $scope.searchedRecipes[idx].favourite = false;
             return;
-        }
+        };
 
         $scope.getPopularIngredients();
     }
@@ -140,26 +140,26 @@ angular.module('eateratorApp')
         if ($scope.accessToken != ''){
             $state.go('login');
         }
-        $scope.registerData = {}
+        $scope.registerData = {};
         $scope.isRegistering = false;
-        $scope.errors = {}
+        $scope.errors = {};
         $scope.username = '';
         $scope.password = '';
 
         $scope.login = function() {
-            var request = authenticationService.getToken()
+            var request = authenticationService.getToken();
             request.then( function(response) {
                 $scope.token = response.data.access_token;
                 $window.localStorage.setItem('id_token', $scope.token);
-                $state.go('search')
+                $state.go('search');
             }).catch( function(){
-                console.log("ebites konem")
+                console.log("ebites konem");
             });
-        }
+        };
 
         $scope.socialLogin = function(provider) {
             if (provider == 'facebook'){
-                var request = authenticationService.socialLoginFacebook()
+                var request = authenticationService.socialLoginFacebook();
             }
             if (request === null || request === undefined) {
                 return;
@@ -172,26 +172,26 @@ angular.module('eateratorApp')
                 console.log("social error");
                 console.log(error);
             })
-        }
+        };
 
         $scope.startRegistering = function() {
             $scope.isRegistering = true;
-        }
+        };
 
         $scope.stopRegistering = function() {
             $scope.isRegistering = false;
-        }
+        };
 
         $scope.register = function() {
-            console.log($scope.registerData)
+            console.log($scope.registerData);
             var request = authenticationService.registerUser($scope.registerData);
             request.then(function(response){
                 $scope.token = response.access_token;
                 $window.localStorage.setItem("id_token", $scope.token);
-                $state.go('home')
+                $state.go('home');
             }).catch(function(response){
                 $scope.errors.register = response.data;
-            })
+            });
         }
     }
 ])
@@ -207,7 +207,7 @@ angular.module('eateratorApp')
             }).catch(function() {
                 $scope.userSearches = [];
             });
-        }
+        };
 
         $scope.getUserFavouriteRecipes = function(number) {
             number = number || 20;
@@ -223,7 +223,7 @@ angular.module('eateratorApp')
             }).catch(function() {
                 $scope.searchedRecipes = [];
             })
-        }
+        };
 
         $scope.repeatSearch = function(search) {
             var request = recipesFactory.searchRecipes(search);
@@ -232,8 +232,7 @@ angular.module('eateratorApp')
             }).catch(function() {
                 $scope.searchRecipes = [];
             })
-        }
-
+        };
 
         $scope.getUserFavouriteRecipes();
         $scope.getUserRecentSearches();
@@ -251,7 +250,7 @@ angular.module('eateratorApp')
                     return $scope.searchedDetails = response.data.recipe.ingredients || [],
                         $scope.detailPk = response.data.recipe.recipe.pk;
                 })
-       }
+       };
 
         $scope.toggleDetails = function() {
             $scope.showDetails = !$scope.showDetails;
@@ -267,15 +266,14 @@ angular.module('eateratorApp')
         };
 
         $scope.removeFavourite = function (idx, recipe) {
-            var request = userFactory.deleteUserFavourite(recipe.pk)
+            var request = userFactory.deleteUserFavourite(recipe.pk);
             request.then(function(response){
                 $scope.searchedRecipes.splice(idx, 1);
                 console.log("Success!");
             }).catch(function() {
                 console.log("Error!");
             });
-        }
-
+        };
     }
 ])
 .controller('AdminCtrl',
