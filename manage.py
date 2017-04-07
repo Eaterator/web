@@ -44,6 +44,11 @@ def create_fulltext_fields():
     management_commands.create_indexes(db)
 
 
+@manager.command
+def collect_static():
+    management_commands.collect_static()
+
+
 @manager.option('-d', '--delete', dest='delete', default=None)
 def create_indexes(delete):
     drop_indexes = True if delete else False

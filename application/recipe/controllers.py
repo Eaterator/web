@@ -301,7 +301,7 @@ def _apply_dynamic_fulltext_filers(ingredients):
     return dynamic_filters
 
 
-def minimum_ingredients_combinations_filter(ingredients):
+def _minimum_ingredients_combinations_filter(ingredients):
     minimum_ingredients = int(len(ingredients)/2) + 1
     return '|'.join(
         '(' + '&'.join(i) + ')' for i in list(
@@ -465,4 +465,16 @@ LIMIT 20;
         HAVING COUNT(ingredient) > 2
         ORDER BY c
         LIMIT 10;
+"""
+
+"""
+Top ingredients search: working long running query which will probably be good to cache
+SELECT i.name, COUNT(ir.ingredient) * AVG(ir.percent_amount)
+FROM recipe_ingredient i, ingredient_recipe ir
+WHERE i.pk = ir.ingredient
+  AND to_tsvector('english', (SELECT string_agg(sq.word, ' ') FROM (SELECT word FROM ts_stat($$SELECT to_tsvector('english', name)
+    FROM recipe_ingredient$$) ORDER BY nentry DESC LIMIT 100) as sq))
+  @@ to_tsquery('english', regexp_replace(i.name, E'\\s+', '&', 'g'))
+GROUP BY i.name
+ORDER BY COUNT(ir.ingredient) * AVG(ir.percent_amount) DESC LIMIT 100;
 """

@@ -1,7 +1,12 @@
 import os
+import gzip
 from jinja2 import Environment, FileSystemLoader
+from distutils.dir_util import copy_tree
+from css_html_js_minify import css_minify, js_minify, html_minify
 from application import config
 from application.app import TEMPLATE_DIR
+
+DEV_TEMPLATE_DIR = os.path.join(TEMPLATE_DIR, 'templates')
 
 UI_ROUTER_VIEWS = [
     'auth/login.html',
@@ -16,8 +21,8 @@ UI_ROUTER_VIEWS = [
 ]
 
 JS_BUNDLES = {
-    'ui-app-bundle': [
-        ['bower_components', 'jquery', 'dist', 'jqueyr.min.js'],
+    'app-bundle.min.js': [
+        ['bower_components', 'jquery', 'dist', 'jquery.min.js'],
         ['bower_components', 'angular', 'angular.min.js'],
         ['bower_components', 'bootstrap', 'dist', 'js', 'bootstrap.min.js'],
         ['bower_components', 'angular-ui-router', 'angular-ui-router.min.js'],
@@ -30,9 +35,9 @@ JS_BUNDLES = {
 }
 
 CSS_BUNDLES = {
-    'ui-app-bundle': [
-        ['bower_components', 'bootstrap', 'dist',],
-        ['bower_components', 'bootstrap', 'dist',],
+    'app-bundle.min.css': [
+        ['bower_components', 'bootstrap', 'dist', 'css', 'bootstrap.min.css'],
+        ['bower_components', 'bootstrap', 'dist', 'css', 'bootstrap.min.css'],
         ['bower_components', 'font-awesome', 'css', 'font-awesome.min.css'],
         ['css', 'ng-tags-input.bootstrap.min.css'],
         ['css', 'ng-tags-input.min.css'],
@@ -42,27 +47,76 @@ CSS_BUNDLES = {
 }
 
 
-def _bundle_minify_js():
-    pass
-
-
-def _bundle_minify_css():
-    pass
+def _bundler_minifier(bundle, minifier=js_minify):
+    minified_content = []
+    for b in bundle:
+        _file = os.path.join(config.DEV_STATIC_FILE_DIRECTORY, *b)
+        with open(_file, 'r') as f:
+            minified_content.append(
+                minifier(f.read())
+            )
+    return ''.join(minified_content)
 
 
 def _render_ui_router_views():
-    # TODO think about a way to replace all the script/link tags in the head/footer templates to use bundles
-    env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), trim_blocks=True)
+    env = Environment(loader=FileSystemLoader(DEV_TEMPLATE_DIR), trim_blocks=True)
     for view in UI_ROUTER_VIEWS:
-        template = env.get_template(view).render()
-        output_file = os.path.join(config.STATIC_FILE_DIRECTORY, view)
-        with open(output_file, 'w') as f:
-            f.write(str(template))
+        template = env.get_template(view).render(production=True)
+        output_file = os.path.join(config.PROD_STATIC_FILE_DIRECTORY, view)
+        with open(output_file, 'w+') as f:
+            f.write(
+                html_minify(str(template))
+            )
 
 
-def collect_static():
-    # TODO look here for minifier
-    # https://github.com/juancarlospaco/css-html-js-minify
-    pass
+def _migrate_images():
+    copy_tree(
+        os.path.join(config.DEV_STATIC_FILE_DIRECTORY, 'images'),
+        os.path.join(config.PROD_STATIC_FILE_DIRECTORY, 'images')
+    )
 
 
+def _make_production_static_dirs():
+    try:
+        #root static dir
+        os.mkdir(config.PROD_STATIC_FILE_DIRECTORY)
+    except OSError:
+        pass
+    # dirs for js, css
+    dirs = ['js', 'css']
+    for _dir in dirs:
+        try:
+            os.mkdir(os.path.join(config.PROD_STATIC_FILE_DIRECTORY, _dir))
+        except OSError:
+            pass
+    # dirs for templates
+    for _dir in os.listdir(DEV_TEMPLATE_DIR):
+        if os.path.isdir(os.path.join(DEV_TEMPLATE_DIR, _dir)):
+            try:
+                os.mkdir(os.path.join(config.PROD_STATIC_FILE_DIRECTORY, _dir))
+            except OSError:
+                pass
+
+
+def collect_static(use_gzip=True):
+    opener = gzip.open if use_gzip else open
+    open_mode = 'wb' if use_gzip else 'w+'
+    decoder = lambda s: s.encode('utf-8') if use_gzip else s
+    # make production static file directories
+    _make_production_static_dirs()
+    # minify the js
+    for bundle_name, bundle in JS_BUNDLES.items():
+        minified = _bundler_minifier(bundle, minifier=js_minify)
+        _file = os.path.join(config.PROD_STATIC_FILE_DIRECTORY, 'js', bundle_name)
+        with opener(_file, open_mode) as f:
+            f.write(decoder(minified))
+    # minify the css
+    for bundle_name, bundle in CSS_BUNDLES.items():
+        minified = _bundler_minifier(bundle, minifier=css_minify)
+        _file = os.path.join(config.PROD_STATIC_FILE_DIRECTORY, 'css', bundle_name)
+        with opener(_file, open_mode) as f:
+            f.write(decoder(minified))
+    #minify the html
+    _render_ui_router_views()
+    # migrate media
+    _migrate_images()
