@@ -5,6 +5,7 @@ angular.module('eateratorApp')
     ['$scope', 'authenticationService', '$http', '$window', '$state', '$stateParams',
     function($scope, authenticationService, $http, $window, $state, $stateParams){
         $scope.token = $window.localStorage.getItem("id_token") || '';
+        console.log("AppCtrl initiated");
         if ($scope.token == '') {
             console.log($state.params);
             $scope.token = $state.params.access_token || '';
@@ -136,7 +137,6 @@ angular.module('eateratorApp')
 .controller('AuthCtrl',
     ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state', '$stateParams',
     function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams){
-
         if ($scope.accessToken != ''){
             $state.go('login');
         }
