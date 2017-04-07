@@ -16,7 +16,7 @@ from application.recipe.utilities import RecipeIngredientFormatter
 from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
-INTERNAL_INGREDIENT_SPACE_PATTERN = re.compile(r'\s+')
+INTERNAL_INGREDIENT_SPACE_PATTERN = re.compile(r'\s+|\-')
 TAG_WORD_DELIMITER = '-'
 # SEARCH RESULT SIZE
 DEFAULT_SEARCH_RESULT_SIZE = 20
@@ -120,7 +120,6 @@ def fulltext_search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     try:
         register_user_search(user_pk, payload)
-        # recipes = create_fulltext_search_query(ingredients, raw_search, limit=limit)
         recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search], limit=limit)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
@@ -239,8 +238,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     :param limit: number of recipes to return
     :return: List<Recipe>
     """
-    ingredients = list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s), ingredients))
-    ingredients = list(map(lambda s: s.replace(TAG_WORD_DELIMITER, '&'), ingredients))
+    ingredients = _clean_and_stringify_ingredients_query(ingredients)
     return db.session.query(Recipe). \
         join(IngredientRecipe). \
         join(Ingredient). \
@@ -301,13 +299,19 @@ def _apply_dynamic_fulltext_filers(ingredients):
     return dynamic_filters
 
 
-def minimum_ingredients_combinations_filter(ingredients):
+def _minimum_ingredients_combinations_filter(ingredients):
     minimum_ingredients = int(len(ingredients)/2) + 1
     return '|'.join(
         '(' + '&'.join(i) + ')' for i in list(
             combinations(ingredients, minimum_ingredients)
         )
     )
+
+
+def _clean_and_stringify_ingredients_query(ingredients):
+    return list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s.strip()), ingredients))
+
+
 
 """
 v1 search query:
@@ -465,4 +469,16 @@ LIMIT 20;
         HAVING COUNT(ingredient) > 2
         ORDER BY c
         LIMIT 10;
+"""
+
+"""
+Top ingredients search: working long running query which will probably be good to cache
+SELECT i.name, COUNT(ir.ingredient) * AVG(ir.percent_amount)
+FROM recipe_ingredient i, ingredient_recipe ir
+WHERE i.pk = ir.ingredient
+  AND to_tsvector('english', (SELECT string_agg(sq.word, ' ') FROM (SELECT word FROM ts_stat($$SELECT to_tsvector('english', name)
+    FROM recipe_ingredient$$) ORDER BY nentry DESC LIMIT 100) as sq))
+  @@ to_tsquery('english', regexp_replace(i.name, E'\\s+', '&', 'g'))
+GROUP BY i.name
+ORDER BY COUNT(ir.ingredient) * AVG(ir.percent_amount) DESC LIMIT 100;
 """

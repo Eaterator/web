@@ -2,6 +2,7 @@ from management_commands.create_super_user import create_super_user
 from management_commands.insert_base_data import insert_role_data, insert_source_data
 from management_commands.insert_update_recipe_data import insert_scraper_data, clean_recipe_data, \
     create_fulltext_recipe_fields
+from management_commands.collect_static import collect_static
 
 
 def create_indexes(db, drop_index=False):

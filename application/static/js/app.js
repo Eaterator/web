@@ -33,7 +33,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
           enabled: true,
         });
 
-        $urlRouterProvider.otherwise('/login');
+        $urlRouterProvider.otherwise('/search');
 
         $stateProvider
             .state('index', {

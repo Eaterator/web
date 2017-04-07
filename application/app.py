@@ -51,6 +51,7 @@ for blueprint in blueprints:
 # Initialize general API Error handler function
 @app.errorhandler(Exception)
 def handle_api_error(error):
+    db.session.remove()
     if isinstance(error, InvalidAPIRequest):
         if error.status_code != 404:
             if error.status_code == 500 and config.DEBUG:
@@ -61,3 +62,8 @@ def handle_api_error(error):
         return render_template('404.html')
     else:
         app.logger.error("Unknown error: {0}. Stacktrace: {1}".format(str(error), get_traceback()))
+
+
+@app.teardown_appcontext
+def remove_session(exception=None):
+    db.session.remove()

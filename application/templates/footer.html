@@ -26,19 +26,21 @@
             </div>
         </div>
     </footer><!-- end footer-->
-
-    <script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../static/bower_components/angular/angular.min.js"></script>
-    <script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="../static/bower_components/angular-ui-router/angular-ui-router.min.js"></script>
-    <!--<script src="../bower_components/angular-resource/angular-resource.min.js"></script>-->
-    <script src="../static/js/app.js"></script>
-    <script src="../static/js/controllers.js"></script>
-    <script src="../static/js/directives.js"></script>
-    <script src="../static/js/services.js"></script>
-    <!--<script src="../static/js/main.js"></script>
-    <script src="../static/js/bootstrap-tagsinput.min.js"></script>
-    <script src="../static/js/bootstrap-tagsinput-angular.min.js"></script>-->
-    <script src="../static/bower_components/ng-tags-input/ng-tags-input.min.js"></script>
-    
+    {% if not production %} <!-- these tags allow for rendering of static files with bundled css/js -->
+        <script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="../static/bower_components/angular/angular.min.js"></script>
+        <script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="../static/bower_components/angular-ui-router/angular-ui-router.min.js"></script>
+        <!--<script src="../bower_components/angular-resource/angular-resource.min.js"></script>-->
+        <script src="../static/js/app.js"></script>
+        <script src="../static/js/controllers.js"></script>
+        <script src="../static/js/directives.js"></script>
+        <script src="../static/js/services.js"></script>
+        <!--<script src="../static/js/main.js"></script>
+        <script src="../static/js/bootstrap-tagsinput.min.js"></script>
+        <script src="../static/js/bootstrap-tagsinput-angular.min.js"></script>-->
+        <script src="../static/bower_components/ng-tags-input/ng-tags-input.min.js"></script>
+    {% else %}
+        <script src="/static/js/app-bundle.min.js"></script>
+    {% endif %}
     
