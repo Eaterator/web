@@ -10,7 +10,7 @@ from application.controllers import _parse_limit_parameter
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
-from application.app import db, cache
+from application.app import app, db, cache
 from application.redis_cache_utlits import RedisUtilities, _clean_and_stringify_ingredients_query
 from application.auth.auth_utilities import JWTUtilities
 from application.recipe.utilities import RecipeIngredientFormatter
@@ -93,7 +93,7 @@ def get_related_ingredients(ingredient, limit=None):
 @recipe_blueprint.route('/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('consumer')
-@cache.cached(timeout=60*60)
+@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
 def search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -105,14 +105,13 @@ def search_recipe(limit=None):
     recipes = create_recipe_search_query(ingredients, limit=limit)
     register_user_search(user_pk, payload)
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
-search_recipe.make_cache_key = RedisUtilities.make_search_cache_key
 
 
 @recipe_blueprint.route('/v2/search', methods=["POST"])
 @recipe_blueprint.route('/v2/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('consumer')
-@cache.cached(timeout=60*60)
+@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
 def fulltext_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -128,7 +127,6 @@ def fulltext_search_recipe(limit=None):
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
-fulltext_search_recipe.make_cache_key = RedisUtilities.make_search_cache_key
 
 
 @recipe_blueprint.route('/search/business', methods=["POST"])

@@ -6,7 +6,7 @@ import re
 
 def _primes_to(n):
     return reduce(
-        (lambda r, x: r-set(range(x**2, n, x)) if (x in r) else r), range(2, n), set(range(2, n))
+        (lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), range(2, n), set(range(2, n))
     )
 
 
@@ -17,7 +17,7 @@ INTERNAL_INGREDIENT_SPACE_PATTERN = re.compile(r'\s+|\-')
 
 
 def _clean_and_stringify_ingredients_query(ingredients):
-    return list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s.strip()), ingredients))
+    return list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s.strip().lower()), ingredients))
 
 
 class RedisUtilities:
@@ -25,7 +25,7 @@ class RedisUtilities:
     @staticmethod
     def make_search_cache_key(*args, **kwargs):
         payload = request.get_json()
-        ingredients = _clean_and_stringify_ingredients_query(payload["ingredients"])
+        ingredients = ''.join(_clean_and_stringify_ingredients_query(payload["ingredients"]))
         return str(sum(PRIMES_MAP[ord(char)] for char in ingredients))
 
 
