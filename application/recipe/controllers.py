@@ -10,13 +10,13 @@ from application.controllers import _parse_limit_parameter
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
-from application.app import db
+from application.app import db, cache
+from application.redis_cache_utlits import RedisUtilities, _clean_and_stringify_ingredients_query
 from application.auth.auth_utilities import JWTUtilities
 from application.recipe.utilities import RecipeIngredientFormatter
 from recipe_parser.ingredient_parser import IngredientParser
 
 PARSER = IngredientParser.get_parser()
-INTERNAL_INGREDIENT_SPACE_PATTERN = re.compile(r'\s+|\-')
 TAG_WORD_DELIMITER = '-'
 # SEARCH RESULT SIZE
 DEFAULT_SEARCH_RESULT_SIZE = 20
@@ -51,6 +51,7 @@ def get_static_pages(page):
 @recipe_blueprint.route('/top-ingredients', methods=["POST"])
 @recipe_blueprint.route('/top-ingredients/<limit>', methods=["POST"])
 @jwt_required
+@cache.cached(timeout=60*60*24)
 def get_top_ingredients(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_TOP_INGREDIENTS, MAX_TOP_INGREDIENTS)
     ingredients = db.session.query(Ingredient.pk, Ingredient.name).\
@@ -92,6 +93,7 @@ def get_related_ingredients(ingredient, limit=None):
 @recipe_blueprint.route('/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('consumer')
+@cache.cached(timeout=60*60)
 def search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -103,12 +105,14 @@ def search_recipe(limit=None):
     recipes = create_recipe_search_query(ingredients, limit=limit)
     register_user_search(user_pk, payload)
     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
+search_recipe.make_cache_key = RedisUtilities.make_search_cache_key
 
 
 @recipe_blueprint.route('/v2/search', methods=["POST"])
 @recipe_blueprint.route('/v2/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required('consumer')
+@cache.cached(timeout=60*60)
 def fulltext_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -124,6 +128,7 @@ def fulltext_search_recipe(limit=None):
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
+fulltext_search_recipe.make_cache_key = RedisUtilities.make_search_cache_key
 
 
 @recipe_blueprint.route('/search/business', methods=["POST"])
@@ -170,6 +175,7 @@ def business_batch_search(limit=None):
 @recipe_blueprint.route('/recipe/<pk>')
 @jwt_required
 @JWTUtilities.user_role_required(["consumer", "business"])
+@cache.cached(timeout=60*60)
 def recipe_information(pk):
     try:
         recipe = Recipe.query.filter(Recipe.pk == int(pk)).first()
@@ -306,11 +312,6 @@ def _minimum_ingredients_combinations_filter(ingredients):
             combinations(ingredients, minimum_ingredients)
         )
     )
-
-
-def _clean_and_stringify_ingredients_query(ingredients):
-    return list(map(lambda s: re.sub(INTERNAL_INGREDIENT_SPACE_PATTERN, '&', s.strip()), ingredients))
-
 
 
 """

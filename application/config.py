@@ -65,6 +65,16 @@ BUSINESS_ROLE_TYPE = 'business'
 CONSUMER_ROLE_TYPE = 'regular'
 ROLES = [ADMIN_ROLE_TYPE, BUSINESS_ROLE_TYPE, CONSUMER_ROLE_TYPE]
 
+##########################################
+#             REDIS SETTING              #
+USE_REDIS = True
+REDIS_CONFIG = {
+    'CACHE_TYPE': 'redis',
+    'CACHE_KEY_PREFIX': 'eaterator',
+    'CACHE_REDIS_HOST': 'localhost',
+    'CACHE_REDIS_POST': '6379',
+    'CACHE_REDIS_URL': 'redis://localhost:6379'
+}
 
 ##########################################
 #             SSL Settings               #
