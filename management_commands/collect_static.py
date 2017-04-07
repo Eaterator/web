@@ -46,6 +46,11 @@ CSS_BUNDLES = {
     ]
 }
 
+FONTS = [
+    ['bower_components', 'bootstrap', 'fonts'],
+    ['bower_components', 'font-awesome', 'fonts']
+]
+
 
 def _bundler_minifier(bundle, minifier=js_minify):
     minified_content = []
@@ -77,6 +82,18 @@ def _migrate_images():
     )
 
 
+def _migrate_fonts():
+    for font_package in FONTS:
+        dev_font_dir = os.path.join(config.DEV_STATIC_FILE_DIRECTORY, *font_package)
+        for _file in os.listdir(dev_font_dir):
+            fullname = os.path.join(dev_font_dir, _file)
+            outfile = os.path.join(config.PROD_STATIC_FILE_DIRECTORY, 'fonts', _file)
+            with open(fullname, 'rb') as f:
+                data = f.read()
+            with gzip.open(outfile, 'wb') as f:
+                f.write(data)
+
+
 def _make_production_static_dirs():
     try:
         #root static dir
@@ -84,7 +101,7 @@ def _make_production_static_dirs():
     except OSError:
         pass
     # dirs for js, css
-    dirs = ['js', 'css']
+    dirs = ['js', 'css', 'fonts']
     for _dir in dirs:
         try:
             os.mkdir(os.path.join(config.PROD_STATIC_FILE_DIRECTORY, _dir))
@@ -121,3 +138,6 @@ def collect_static(use_gzip=True):
     _render_ui_router_views()
     # migrate media
     _migrate_images()
+    # migrate and compress fonts
+    _migrate_fonts()
+

@@ -6,6 +6,7 @@ angular.module('eateratorApp')
     function($scope, authenticationService, $http, $window, $state, $stateParams){
         $scope.token = $window.localStorage.getItem("id_token") || '';
         console.log("AppCtrl initiated");
+        console.log($state.current.name);
         if ($scope.token == '') {
             console.log($state.params);
             $scope.token = $state.params.access_token || '';
