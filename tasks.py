@@ -107,6 +107,10 @@ def update_flickr_images(data):
         return uwsgi.SPOOL_OK
     except:
         app.logger.error("FLICKR | Unknown error, exited spooler: {0}".format(traceback.format_exc()))
+        try:
+            db.session.close()
+        except:
+            db.session.close()
         return uwsgi.SPOOL_OK
 
 
@@ -141,5 +145,6 @@ def get_recipes_without_images(*args):
                 b'default': str(default).encode('utf-8')
             })
     db.session.close()
+    return
 
 uwsgi.spooler = update_flickr_images
