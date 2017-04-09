@@ -21,8 +21,8 @@ admin_blueprint = Blueprint('admin', __name__,
 
 
 @admin_blueprint.route("/<page>", methods=["GET"])
-# @jwt_required
-# @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+@jwt_required
+@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
 @cache.cached(timeout=int(60*60/2), key_prefix=RedisUtilities.cache_by_static_page)
 def admin_dashboard(page):
     try:
@@ -35,8 +35,8 @@ def admin_dashboard(page):
 
 
 @admin_blueprint.route("/statistics/search/<start_date>/<time_group_by>")
-# @jwt_required
-# @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+@jwt_required
+@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
 @cache.cached(timeout=60*60)
 def user_search_statistics(start_date, time_group_by):
     """
@@ -76,8 +76,8 @@ def user_search_statistics(start_date, time_group_by):
 
 
 @admin_blueprint.route("/statistics/search/unique-users/<start_date>/<time_group_by>")
-# @jwt_required
-# @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+@jwt_required
+@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
 @cache.cached(timeout=60*60)
 def unique_search_users(start_date, time_group_by):
     """
@@ -119,8 +119,8 @@ def unique_search_users(start_date, time_group_by):
 
 
 @admin_blueprint.route("/statistics/search/new-users/<start_date>/<time_group_by>")
-# @jwt_required
-# @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+@jwt_required
+@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
 @cache.cached(timeout=60*60, key_prefix='admin_')
 def new_users(start_date, time_group_by):
     """
@@ -159,8 +159,8 @@ def new_users(start_date, time_group_by):
 
 
 @admin_blueprint.route("/statistics/search/popular-ingredients")
-# @jwt_required
-# @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+@jwt_required
+@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
 @cache.cached(timeout=60*60, key_prefix='admin_')
 def popular_ingredients():
     searches = UserSearchData.query\
