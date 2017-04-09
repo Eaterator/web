@@ -121,7 +121,7 @@ def unique_search_users(start_date, time_group_by):
 @admin_blueprint.route("/statistics/search/new-users/<start_date>/<time_group_by>")
 @jwt_required
 @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
-@cache.cached(timeout=60*60, key_prefix='admin_')
+@cache.cached(timeout=60*60)
 def new_users(start_date, time_group_by):
     """
     Returns the new users that have signed up for accounts
@@ -161,7 +161,7 @@ def new_users(start_date, time_group_by):
 @admin_blueprint.route("/statistics/search/popular-ingredients")
 @jwt_required
 @JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
-@cache.cached(timeout=60*60, key_prefix='admin_')
+@cache.cached(timeout=60*60)
 def popular_ingredients():
     searches = UserSearchData.query\
         .filter(UserSearchData.search.isnot(None)).\
