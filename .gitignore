@@ -1,6 +1,5 @@
 # Project files
-nginx_report.html
-uwsgi_report.html
+*_report.html
 *.save
 erd_diagrams/
 config_dev.py

@@ -5,12 +5,12 @@
 d3.custom = {};
 
 d3.custom.barChart = function module() {
-    var margin = {top: 20, right: 40, bottom: 50, left: 100},
-        width = 600,
-        height = 1000,
-        axisPadding = 5, // padding in pixel
-        gap = 0,
-        ease = 'cubic-in-out';
+    var margin = {top: 20, right: 40, bottom: 50, left: 100};
+    var width = 600;
+    var height = 1000;
+    var axisPadding = 5;
+    var gap = 0;
+    var ease = 'cubic-in-out';
     var svg, duration = 500;
 
     var dispatch = d3.dispatch('customHover');
@@ -32,7 +32,7 @@ d3.custom.barChart = function module() {
 
             var y = d3.scale.ordinal()
                 .domain(_data.map(function(d){
-                    return d.name
+                    return d.name;;
                 }))
                 .rangePoints([chartH, 0]);
 
@@ -48,13 +48,14 @@ d3.custom.barChart = function module() {
                 svg = d3.select(this)
                     .append('svg')
                     .classed('chart', true);
+
                 var container = svg.append('g').classed('container-group', true);
                 container.append('g').classed('chart-group', true);
                 container.append('g').classed('x-axis-group axis', true);
                 container.append('g').classed('y-axis-group axis', true);
             }
 
-            svg.transition().duration(duration).attr({width: width, height: height})
+            svg.transition().duration(duration).attr({width: width, height: height});;
             svg.select('.container-group')
                 .attr({transform: 'translate(' + margin.left + ',' + margin.top + ')'});
 
@@ -69,8 +70,8 @@ d3.custom.barChart = function module() {
                 .transition()
                 .duration(duration)
                 .ease(ease)
-                //.attr({transform: 'translate(0,' + (barW / 2 + axisPadding * 2) + ')'})
                 .call(yAxis);
+                //.attr({transform: 'translate(0,' + (barW / 2 + axisPadding * 2) + ')'})
 
             var bars = svg.select('.chart-group')
                 .selectAll('.bar')
@@ -78,7 +79,6 @@ d3.custom.barChart = function module() {
 
             bars.enter().append('rect')
                 .classed('bar', true)
-                // set width and height of bars
                 .attr("y", function(d, i){
                     return y(d.name) - barW / 2 ;
                 })
@@ -93,11 +93,9 @@ d3.custom.barChart = function module() {
 
             bars.enter().append('text')
                 .attr("class", "label")
-                // position y label vertically
                 .attr('y', function(d, i){
-                    return y(d.name) + barW / 4 ;//y.rangeBand() / 2 + 4;
+                    return y(d.name) + barW / 4 ;
                 })
-                // position x to the left of the bar
                 .attr('x', function(d) {
                     return x(d.value) + axisPadding;
                 })
@@ -141,31 +139,32 @@ d3.custom.barChart = function module() {
 };
 
 d3.custom.lineChart = function module() {
-    var margin = {top: 20, right: 20, bottom: 50, left: 40},
-        width = 500,
-        height = 500,
-        gap = 0,
-        ease = 'cubic-in-out';
+    var margin = {top: 20, right: 20, bottom: 50, left: 40};
+    var width = 500;
+    var height = 500;
+    var gap = 0;
+    var ease = 'cubic-in-out';
     var svg, duration = 500;
 
     var dispatch = d3.dispatch('customHover');
     function exports(_selection) {
         _selection.each(function(_data, title) {
             console.log(_data);
-            var parseDate = d3.time.format("%y-%m-%d").parse
+            var parseDate = d3.time.format("%y-%m-%d").parse;
 
-            var chartW = width - margin.left - margin.right,
-                chartH = height - margin.top - margin.bottom;
+            var chartW = width - margin.left - margin.right;
+            var chartH = height - margin.top - margin.bottom;
 
-            var x = d3.time.scale()// d3.scale.scaleTime()
-                // .domain(_data.map(function(d, i){ return parseDate(d.date); }))
+            // d3.scale.scaleTime()
+            var x = d3.time.scale()
                 .domain(d3.extent(_data, function(d, i) {
                     return parseDate(d.date);
                 }))
                 .range([margin.left, chartW]);
+
             var yExtent = d3.extent(_data, function(d, i) { return d.value});
             if ((yExtent[1] - yExtent[0]) < 5) {
-                yExtent[1] = yExtent[0] + 5
+                yExtent[1] = yExtent[0] + 5;
             }
             var y = d3.scale.linear()
                 .domain(yExtent)
@@ -185,13 +184,14 @@ d3.custom.lineChart = function module() {
                 svg = d3.select(this)
                     .append('svg')
                     .classed('chart', true);
+
                 var container = svg.append('g').classed('container-group', true);
                 container.append('g').classed('chart-group', true);
                 container.append('g').classed('x-axis-group axis', true);
                 container.append('g').classed('y-axis-group axis', true);
             }
 
-            svg.transition().duration(duration).attr({width: width, height: height})
+            svg.transition().duration(duration).attr({width: width, height: height});
             svg.select('.container-group')
                 .attr({transform: 'translate(' + margin.left + ',' + margin.top + ')'});
 
