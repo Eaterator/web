@@ -5,26 +5,30 @@
 d3.custom = {};
 
 d3.custom.barChart = function module() {
-    var margin = {top: 0, right: 0, bottom: 0, left: 0},
-        width = 500,
+    var margin = {top: 20, right: 40, bottom: 50, left: 100},
+        width = 600,
         height = 1000,
-        chartAreaBuffer = 0.95;
+        axisPadding = 5, // padding in pixel
         gap = 0,
         ease = 'cubic-in-out';
     var svg, duration = 500;
 
     var dispatch = d3.dispatch('customHover');
     function exports(_selection) {
-        _selection.each(function(_data) {
-            console.log('d3 here');
-            console.log(_data);
+        _selection.each(function(_data, _title) {
+            _data.reverse();
             var chartW = width - margin.left - margin.right,
                 chartH = height - margin.top - margin.bottom;
-            var x = d3.scale.linear()
+
+            var barW = chartH / _data.length;
+
+            var x = d3.scale.sqrt()
                 .domain(d3.extent(_data, function(d) {
                     return d.value;
                 }))
                 .range([0, chartW]);
+
+            var colorScale = d3.scale.category20c();
 
             var y = d3.scale.ordinal()
                 .domain(_data.map(function(d){
@@ -39,8 +43,6 @@ d3.custom.barChart = function module() {
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient('left');
-
-            var barW = chartH / (_data.length * 1.1);
 
             if(!svg) {
                 svg = d3.select(this)
@@ -60,14 +62,14 @@ d3.custom.barChart = function module() {
                 .transition()
                 .duration(duration)
                 .ease(ease)
-                .attr({transform: 'translate(0,' + (chartH) + ')'})
+                .attr({transform: 'translate(0,' + chartH + ')'})
                 .call(xAxis);
 
             svg.select('.y-axis-group.axis')
                 .transition()
                 .duration(duration)
                 .ease(ease)
-                .attr({transform: 'translate(0,' + barW / 2 + ')'})
+                //.attr({transform: 'translate(0,' + (barW / 2 + axisPadding * 2) + ')'})
                 .call(yAxis);
 
             var bars = svg.select('.chart-group')
@@ -78,27 +80,39 @@ d3.custom.barChart = function module() {
                 .classed('bar', true)
                 // set width and height of bars
                 .attr("y", function(d, i){
-                    return y(d.name);
+                    return y(d.name) - barW / 2 ;
                 })
                 .attr('height',  barW)
                 .attr('x', 0)
                 .attr("width", function(d) {
                     return x(d.value)
+                })
+                .style("fill", function(d, i) {
+                    return colorScale(i);
                 });
 
             bars.enter().append('text')
                 .attr("class", "label")
                 // position y label vertically
                 .attr('y', function(d, i){
-                    return y(d.name) + barW /2 ;//y.rangeBand() / 2 + 4;
+                    return y(d.name) + barW / 4 ;//y.rangeBand() / 2 + 4;
                 })
                 // position x to the left of the bar
                 .attr('x', function(d) {
-                    return x(d.value);
+                    return x(d.value) + axisPadding;
                 })
                 .text(function (d) {
                     return d.value;
                 });
+
+            // add title
+            svg.append("text")
+                .attr("x", (chartW / 2))
+                .attr("y", 0 - (margin.top / 2))
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .style("text-decoration", "underline")
+                .text(_title);
         });
     }
     exports.width = function(_x) {
@@ -127,7 +141,7 @@ d3.custom.barChart = function module() {
 };
 
 d3.custom.lineChart = function module() {
-    var margin = {top: 20, right: 20, bottom: 40, left: 40},
+    var margin = {top: 20, right: 20, bottom: 50, left: 40},
         width = 500,
         height = 500,
         gap = 0,
@@ -136,28 +150,36 @@ d3.custom.lineChart = function module() {
 
     var dispatch = d3.dispatch('customHover');
     function exports(_selection) {
-        _selection.each(function(_data) {
-            var formatDate = d3.time.format("%d-%b-%y");
-            var parseTime = formatDate.parse;// d3.timeParse('%y-%m-%d');
+        _selection.each(function(_data, title) {
+            console.log(_data);
+            var parseDate = d3.time.format("%y-%m-%d").parse
 
             var chartW = width - margin.left - margin.right,
                 chartH = height - margin.top - margin.bottom;
 
             var x = d3.time.scale()// d3.scale.scaleTime()
-                .domain(_data.map(function(d, i){ return d.date; }))
-                // .rangeRoundBands([0, chartW], .1);
-
-            var y = d3.scale.ordinal()
-                .domain([0, d3.max(_data, function(d, i){ return d.value; })])
+                // .domain(_data.map(function(d, i){ return parseDate(d.date); }))
+                .domain(d3.extent(_data, function(d, i) {
+                    return parseDate(d.date);
+                }))
+                .range([margin.left, chartW]);
+            var yExtent = d3.extent(_data, function(d, i) { return d.value});
+            if ((yExtent[1] - yExtent[0]) < 5) {
+                yExtent[1] = yExtent[0] + 5
+            }
+            var y = d3.scale.linear()
+                .domain(yExtent)
                 .range([chartH, 0]);
 
             var xAxis = d3.svg.axis()
                 .scale(x)
+                .tickFormat(d3.time.format("%m-%d"))
                 .orient('bottom');
 
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient('left');
+
 
             if(!svg) {
                 svg = d3.select(this)
@@ -177,30 +199,49 @@ d3.custom.lineChart = function module() {
                 .transition()
                 .duration(duration)
                 .ease(ease)
-                .attr({transform: 'translate(0,' + (chartH) + ')'})
-                .call(xAxis);
+                .attr({transform: 'translate(' + -margin.left + ',' + (chartH) + ')'})
+                .call(xAxis)
+                .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-45)" );
 
             svg.select('.y-axis-group.axis')
                 .transition()
                 .duration(duration)
                 .ease(ease)
+                .attr({transform: 'translate(' - margin.left + ', 0)' })
                 .call(yAxis);
 
-            var line = d3.svg.line()
-                .x(function(d, i) {
-                    return x(parseTime(d.date));
-                })
-                .y(function(d, i) {
-                    return y(d.value);
-                });
-
-           var lines = svg.select('.chart-group')
+            var lines = svg.select('.chart-group')
                 .selectAll('.line')
                 .data(_data);
 
-           lines.enter().append('path')
-                .classed('line', true)
-                .attr('d', line);
+            var line = d3.svg.line()
+                .x(function(d, i) {
+                    return x(parseDate(d.date));
+                })
+                .y(function(d, i) {
+                    return y(d.value);
+                })
+                .interpolate('monotone');
+
+            svg.append('svg:path')
+                .attr('d', line(_data))
+                .attr('stroke', 'blue')
+                .attr('stroke-width', 2)
+                .attr('fill', 'none');
+
+            // add title
+            svg.append("text")
+                .attr("x", (chartW / 2))
+                .attr("y", 0 - (margin.top / 2))
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .style("text-decoration", "underline")
+                .text(title);
+
         });
     }
     exports.width = function(_x) {

@@ -299,8 +299,6 @@ angular.module('eateratorApp')
         $scope.getNewUsers = function() {
             var request = adminFactory.getNewUsers();
             request.then(function(response){
-                console.log('new users');
-                console.log(response);
                 $scope.newUsers = response.data.statistics;
                 if ($scope.newUsers == undefined || $scope.newUsers.length < 1){
                     return;
@@ -318,16 +316,15 @@ angular.module('eateratorApp')
                         value: sum
                      });
                 }
-                console.log($scope.newUsers);
-                console.log($scope.newUsersCumulative);
             });
         }
 
         $scope.getUniqueUserSearches = function() {
             var request = adminFactory.getUniqueUserSearches();
             request.then(function(response) {
-                console.log('unqie users');
                 $scope.uniqueUserSearches = response.data.statistics;
+                console.log(response);
+                console.log("unique");
                 console.log($scope.uniqueUserSearches);
             });
         }
@@ -335,25 +332,19 @@ angular.module('eateratorApp')
         $scope.getTotalSearches = function() {
             var request = adminFactory.getTotalUserSearches();
             request.then(function(response) {
-                console.log('total searches');
                 $scope.totalUserSearches = response.data.statistics;
-                console.log($scope.totalUserSearches);
             });
         }
 
         $scope.getPopularIngredients = function() {
             var request = adminFactory.getPopularIngredients();
             request.then(function(response) {
-                console.log('ingredients');
                 $scope.ingredientSearches = response.data.most_popular;
-                console.log($scope.ingredientSearches);
             });
         }
 
         $scope.showGraph = function(data) {
-            console.log("ng-if!!");
-            console.log(data);
-            return !(data != [] || data != undefined);
+            return (typeof data == 'object' && data.length > 0);
         }
 
         $scope.getNewUsers();

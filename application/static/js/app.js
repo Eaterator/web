@@ -153,16 +153,18 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
     }]
 )
 .directive('lineChart', function() {
-    var chart = d3.custom.lineChart();
     return {
         restrict: 'E',
         replace: true,
-        template: '<div class="admin-chart"></div>',
+        template: '<div class="chart"><h1>{{ title }}</h1></div>',
         scope: {
-            data: '=data'
+            data: '=data',
+            title: '=title'
         },
         link: function(scope, element, attrs) {
+            var chart = d3.custom.lineChart();
             var chartEl = d3.select(element[0]);
+            element.addClass('admin-chart-left');
             scope.$watch('data', function(newVal, oldVal){
                 chartEl.datum(newVal).call(chart);
             });
@@ -170,17 +172,18 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
     }
 })
 .directive('ingredientBarChart', function() {
-    var chart = d3.custom.barChart();
     return {
         restrict: 'E',
         replace: true,
-        template: '<div class=admin-chart"></div>',
+        template: '<div class="chart"><h1>{{ title }}</h1></div>',
         scope: {
-            data: '=data'
+            data: '=data',
+            title: '=title'
         },
         link: function(scope, element, attrs) {
             var chartEl = d3.select(element[0]);
-            //scope.$watch.datum(newVal).call(chart);
+            var chart = d3.custom.barChart();
+            element.addClass('admin-chart-right');
             scope.$watch('data', function(newVal, oldVal){
                 chartEl.datum(newVal).call(chart);
             });

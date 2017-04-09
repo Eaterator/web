@@ -92,9 +92,12 @@ def unique_search_users(start_date, time_group_by):
                 func.date(UserSearchData.created_at).label('date'),
                 func.count(func.distinct(UserSearchData.user)).label('value')
             ).\
-            filter(func.date(UserSearchData.created_at) <= start_date).\
-            group_by(func.date(UserSearchData.created_at)).\
-            order_by(func.date(UserSearchData.created_at))
+            filter(func.date(UserSearchData.created_at) >= start_date).\
+            group_by(
+                func.date(UserSearchData.created_at),
+                UserSearchData.user
+            ).\
+            order_by(func.date(UserSearchData.created_at)).all()
     elif time_group_by.upper() == 'MONTH':
         aggregate_searches = db.session.query(
                 func.max(func.date(UserSearchData.created_at)).label('date'),
@@ -163,10 +166,11 @@ def popular_ingredients():
     searches = UserSearchData.query\
         .filter(UserSearchData.search.isnot(None)).\
         order_by(UserSearchData.created_at.desc()).limit(5000)
+    cleaner = lambda s: s.strip().rstrip('s')
     most_popular = sorted(
         Counter(
-            chain(*[json.loads(s.search)['ingredients'] if isinstance(s.search, str)
-                    else s.search['ingredients'] for s in searches])
+            chain(*[map(cleaner, json.loads(s.search)['ingredients']) if isinstance(s.search, str)
+                    else map(cleaner, s.search['ingredients']) for s in searches])
         ).most_common(25),
         reverse=True, key=lambda i: i[1]
     )
