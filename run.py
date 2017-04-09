@@ -12,6 +12,7 @@ if config.USE_GEVENT:
     patch_psycopg()
     # modify db for gevent
     db.engine.pool._use_threadlocal = True
+    db.engine.pool.use_threadlocal = True
 
 # development and testing
 if __name__ == '__main__':

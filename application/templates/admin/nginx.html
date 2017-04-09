@@ -1,0 +1,55 @@
+<div class="admin-container">
+    {{ include_raw('/admin/nginx_report.html') }}
+</div>
+<style>
+    .admin-container {
+        position: absolute;
+        overflow: auto;
+        width: calc(100% - 260px);
+    }
+
+    @media (max-width:767px) {
+        .admin-container {
+            margin-left: 2%;
+            margin-right: 2%;
+            position: absolute;
+            overflow: auto;
+            width: 100%;
+        }
+    }
+
+    footer {
+        background-color: #000 !important;
+        padding: 30px 0 80px 0 !important;
+        height: 200px !important;
+        width: 100% !important;
+        position: fixed !important;
+        bottom: 0px !important;
+    }
+
+    #menu2 {
+        -webkit-overflow-scroll: touch;
+        -webkit-transition: left 0.75s, -webkit-transform 0.75s;
+        background: #242424;    border-right: 1px solid #3E444C;
+        bottom: 0;
+        box-shadow: inset 0 0 90px #000;
+        left: 225px;
+        margin-left: -225px;
+        outline: 1px solid #101214;
+        overflow-y: auto;
+        position: fixed;
+        text-shadow: 0px -1px 0px #000;
+        top: 0;    transition: left 0.75s, -webkit-transform 0.75s, transform 0.75s;
+        width: 225px;
+        z-index: 1000;
+    }
+
+    footer {
+        display: none !important;
+    }
+
+    #menu {
+        display: none !important;
+    }
+
+</style>

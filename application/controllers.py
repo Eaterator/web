@@ -15,9 +15,10 @@ UI_ROUTES = ['home', 'contact', 'about', 'user', 'login', 'search']
 @home_blueprint.route('/<page>')
 @home_blueprint.route('/<page>/<access_token>', defaults={'page': 'index', 'access_token': ''})
 def index(page, access_token=''):
+    print("Page normal: {0}".format(page))
     try:
         if page in UI_ROUTES:
-            return render_template('index.html', access_token=access_token)
+            return render_template('dashboard.html', access_token=access_token)
         else:
             return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:

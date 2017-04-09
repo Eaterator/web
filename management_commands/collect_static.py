@@ -15,9 +15,9 @@ UI_ROUTER_VIEWS = [
     'carousel.html',
     'search.html',
     'user/dashboard.html',
-    'admin/index.html',
+    'admin/dashboard.html',
     '404.html',
-    'index.html'
+    'dashboard.html'
 ]
 
 JS_BUNDLES = {
