@@ -12,7 +12,7 @@ DATABASE = os.environ['DATABASE'] if 'DATABASE' in os.environ else ''
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = 'migrations'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_POOL_SIZE = 20
+SQLALCHEMY_POOL_SIZE = 25
 SQLALCHEMY_MAX_OVERFLOW = 10
 
 ##########################################
