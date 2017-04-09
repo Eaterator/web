@@ -92,8 +92,9 @@ def get_related_ingredients(ingredient, limit=None):
 @recipe_blueprint.route('/search', methods=["POST"])
 @recipe_blueprint.route('/search/<limit>', methods=["POST"])
 @jwt_required
-@JWTUtilities.user_role_required('consumer')
-@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
+@JWTUtilities.user_role_required(['consumer', 'admin'])
+@cache.cached(timeout=60*60,
+              key_prefix=lambda *args, **kwargs: 'ns_' + RedisUtilities.make_search_cache_key(*args, **kwargs))
 def search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -110,7 +111,7 @@ def search_recipe(limit=None):
 @recipe_blueprint.route('/v2/search', methods=["POST"])
 @recipe_blueprint.route('/v2/search/<limit>', methods=["POST"])
 @jwt_required
-@JWTUtilities.user_role_required('consumer')
+@JWTUtilities.user_role_required(['consumer', 'admin'])
 @cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
 def fulltext_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
@@ -132,7 +133,8 @@ def fulltext_search_recipe(limit=None):
 @recipe_blueprint.route('/search/business', methods=["POST"])
 @recipe_blueprint.route('/search/business/<limit>', methods=["POST"])
 @jwt_required
-@JWTUtilities.user_role_required('business')
+@JWTUtilities.user_role_required(['business', 'admin'])
+@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
 def business_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -149,7 +151,7 @@ def business_search_recipe(limit=None):
 @recipe_blueprint.route('/search/business/batch', methods=["POST"])
 @recipe_blueprint.route('/search/business/batch/<limit>', methods=["POST"])
 @jwt_required
-@JWTUtilities.user_role_required('business')
+@JWTUtilities.user_role_required(['business', 'admin'])
 def business_batch_search(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -172,7 +174,6 @@ def business_batch_search(limit=None):
 
 @recipe_blueprint.route('/recipe/<pk>')
 @jwt_required
-@JWTUtilities.user_role_required(["consumer", "business"])
 @cache.cached(timeout=60*60)
 def recipe_information(pk):
     try:
