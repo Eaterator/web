@@ -32,7 +32,7 @@ angular.module('eateratorApp')
                 claims = JSON.parse(decodeJWT(token));
             }
         return claims;
-    }
+    };
 
     return {
         getToken: function(){
@@ -64,7 +64,6 @@ angular.module('eateratorApp')
             // return true if token will expire in 1 week (7 days);
             return (new Date(claims.exp * 1000) - new Date().getTime()) <= 1000*60*60*24*7;
         }
-
     };
 })
 

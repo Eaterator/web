@@ -294,7 +294,7 @@ angular.module('eateratorApp')
         $scope.newUsersCumulative = [];
         $scope.uniqueUserSearches = [];
         $scope.totalUserSearches = [];
-        $scope.ingredientSearches = []
+        $scope.ingredientSearches = [];
 
         $scope.getNewUsers = function() {
             var request = adminFactory.getNewUsers();
@@ -317,7 +317,7 @@ angular.module('eateratorApp')
                      });
                 }
             });
-        }
+        };
 
         $scope.getUniqueUserSearches = function() {
             var request = adminFactory.getUniqueUserSearches();
@@ -327,25 +327,25 @@ angular.module('eateratorApp')
                 console.log("unique");
                 console.log($scope.uniqueUserSearches);
             });
-        }
+        };
 
         $scope.getTotalSearches = function() {
             var request = adminFactory.getTotalUserSearches();
             request.then(function(response) {
                 $scope.totalUserSearches = response.data.statistics;
             });
-        }
+        };
 
         $scope.getPopularIngredients = function() {
             var request = adminFactory.getPopularIngredients();
             request.then(function(response) {
                 $scope.ingredientSearches = response.data.most_popular;
             });
-        }
+        };
 
         $scope.showGraph = function(data) {
             return (typeof data == 'object' && data.length > 0);
-        }
+        };
 
         $scope.getNewUsers();
         $scope.getUniqueUserSearches();
@@ -353,4 +353,4 @@ angular.module('eateratorApp')
         $scope.getPopularIngredients();
     }
 ]);
-    
+
