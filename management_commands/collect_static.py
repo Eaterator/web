@@ -17,7 +17,7 @@ UI_ROUTER_VIEWS = [
     'user/dashboard.html',
     # 'admin/dashboard.html',
     '404.html',
-    'dashboard.html'
+    #'dashboard.html'
 ]
 
 JS_BUNDLES = {
@@ -121,10 +121,10 @@ def _make_production_static_dirs():
 def _migrate_admin_css():
     copy_tree(
         os.path.join(
-            config.DEV_STATIC_FILE_DIRECTORY, 'css', 'admin.css'
+            config.DEV_STATIC_FILE_DIRECTORY, 'css',
         ),
         os.path.join(
-            config.PROD_STATIC_FILE_DIRECTORY, 'css', 'admin.css'
+            config.PROD_STATIC_FILE_DIRECTORY, 'css'
         )
     )
 
