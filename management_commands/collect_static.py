@@ -15,7 +15,7 @@ UI_ROUTER_VIEWS = [
     'carousel.html',
     'search.html',
     'user/dashboard.html',
-    'admin/dashboard.html',
+    # 'admin/dashboard.html',
     '404.html',
     'dashboard.html'
 ]
@@ -26,6 +26,8 @@ JS_BUNDLES = {
         ['bower_components', 'angular', 'angular.min.js'],
         ['bower_components', 'bootstrap', 'dist', 'js', 'bootstrap.min.js'],
         ['bower_components', 'angular-ui-router', 'angular-ui-router.min.js'],
+        ['bower_components', 'd3', 'd3.v3.min.js'],
+        ['js', 'admin-charts.js'],
         ['js', 'app.js'],
         ['js', 'controllers.js'],
         ['js', 'directives.js'],
@@ -58,7 +60,7 @@ def _bundler_minifier(bundle, minifier=js_minify):
         _file = os.path.join(config.DEV_STATIC_FILE_DIRECTORY, *b)
         with open(_file, 'r') as f:
             if '.min' not in _file:
-            	minified_content.append(minifier(f.read()))
+                minified_content.append(minifier(f.read()))
             else:
                 minified_content.append(f.read())
     return '\n'.join(minified_content)
@@ -116,6 +118,17 @@ def _make_production_static_dirs():
                 pass
 
 
+def _migrate_admin_css():
+    copy_tree(
+        os.path.join(
+            config.DEV_STATIC_FILE_DIRECTORY, 'css', 'admin.css'
+        ),
+        os.path.join(
+            config.PROD_STATIC_FILE_DIRECTORY, 'css', 'admin.css'
+        )
+    )
+
+
 def collect_static(use_gzip=True):
     opener = gzip.open if use_gzip else open
     open_mode = 'wb' if use_gzip else 'w+'
@@ -140,4 +153,6 @@ def collect_static(use_gzip=True):
     _migrate_images()
     # migrate and compress fonts
     _migrate_fonts()
+    # TODO look at a better method than the admin.css hack
+    _migrate_admin_css()
 

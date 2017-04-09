@@ -42,12 +42,12 @@ if __name__ == '__main__':
         num_requests = 5
 
     # Fetch the URL that blocks with a `time.sleep`
-    t0 = time_fetch_urls("http://localhost:5000/user/sleep/python/", num_requests)
+    t0 = time_fetch_urls("https://www.eaterator.com/user/sleep/python/", num_requests)
 
     # Fetch the URL that blocks with a `pg_sleep`
-    t1 = time_fetch_urls("http://localhost:5000/user/sleep/postgres/", num_requests)
+    t1 = time_fetch_urls("https://www.eaterator.com/user/sleep/postgres/", num_requests)
 
     print("------------------------------------------")
     print("time url no gevent = %.2fs" % t0)
-    print("time url with gevent = %.2fs" %t1)
+    print("time url with gevent = %.2fs" % t1)
     print("SUM TOTAL = %.2fs" % (t0 + t1))
