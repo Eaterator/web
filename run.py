@@ -1,18 +1,19 @@
-from application import config
-from application.app import app, db
 import os
-
+from application import config
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
     from gevent.pywsgi import WSGIServer
-    from gevent.monkey import patch_all
-    patch_all()
+    import gevent.monkey
+    gevent.monkey.patch_all()
     # patch database driver to be non blocking
-    from psycogreen.gevent import patch_psycopg
-    patch_psycopg()
-    # modify db for gevent
-    db.engine.pool._use_threadlocal = True
-    db.engine.pool.use_threadlocal = True
+    import psycogreen.gevent
+    psycogreen.gevent.patch_psycopg()
+
+
+# modify db for gevent
+from application.app import app, db
+db.engine.pool._use_threadlocal = True
+db.engine.pool.use_threadlocal = True
 
 # development and testing
 if __name__ == '__main__':
@@ -26,6 +27,8 @@ if __name__ == '__main__':
         app.run(debug=True)
 
 # production
+# may need to revist this
+# https://bitbucket.org/zzzeek/green_sqla/src/2732bb7ea9d06b9d4a61e8cd587a95148ce2599b?at=default
 elif config.USE_UWSGI and config.USE_GEVENT:
     from logging.handlers import RotatingFileHandler
     with open('/home/ubuntu/eaterator/logging/test_log.txt', 'w') as f:
@@ -39,6 +42,4 @@ elif config.USE_UWSGI and config.USE_GEVENT:
     app.logger.addHandler(handler)
     app.logger.setLevel(config.LOG_LEVEL)
     app.logger.info("Starting up app with uwsgi")
-    app.logger.info("Environment variables: {0}".format(str(os.environ)))
     application = app
-    # examples at: https://github.com/zeekay/flask-uwsgi-websocket
