@@ -5,6 +5,35 @@ angular.module('eateratorApp')
 
 .factory('authenticationService', function ($http, $window){
     var clientId = '647922095392507';
+
+    var decodeJWT = function(token) {
+        // decodes from base 64 string
+        var token = $window.localStorage.getItem('id_token');
+        var encoded = token.split('.')[1];
+        var output = encoded.replace('-', '+').replace('_', '/');
+        switch (output.length % 4) {
+           case 0:
+               break;
+           case 2:
+               output += '==';
+               break;
+           case 3:
+               output += '=';
+               break;
+           default:
+               throw 'Illegal base64url string!';
+        }
+        return window.atob(output);
+    };
+
+    var getTokenClaims = function(token) {
+        var claims = {};
+            if (typeof token != 'undefined') {
+                claims = JSON.parse(decodeJWT(token));
+            }
+        return claims;
+    };
+
     return {
         getToken: function(){
             // getting token from url
@@ -25,6 +54,15 @@ angular.module('eateratorApp')
         },
         socialLoginFacebook: function() {
             $window.location.href = "/auth/authorize/facebook";
+        },
+        isAdmin: function(token) {
+            var claims = getTokenClaims(token);
+            return claims.user_claims.role == 'admin';
+        },
+        tokenNeedsRefresh: function(token){
+            var claims = getTokenClaims(token);
+            // return true if token will expire in 1 week (7 days);
+            return (new Date(claims.exp * 1000) - new Date().getTime()) <= 1000*60*60*24*7;
         }
     };
 })
@@ -133,36 +171,51 @@ angular.module('eateratorApp')
 })
 
 .factory('adminFactory', function($http){
+
+    var getDateNDaysAgo = function(N) {
+        var today = new Date();
+        var priorDate = new Date(new Date().setDate(today.getDate()-N));
+        return priorDate.toISOString().split('T')[0];
+    };
+
     return {
-        newUserAnalytics: function(startDate, groupBy) {
+        getNewUsers: function(startDate, groupBy) {
             // :param startData: date of earliest searches
             // :param groupBy: group searches by total per DAY || MONTH
+            startDate = startDate || getDateNDaysAgo(30);
             groupBy = groupBy || 'DAY';
             return $http({
                 method: "GET",
-                url: "/statistics/search/new-users/" + startDate +"/" + groupBy
+                url: "/admin/statistics/search/new-users/" + startDate +"/" + groupBy
             });
         },
-        totalUserSearches: function(startDate, groupBy) {
+        getTotalUserSearches: function(startDate, groupBy) {
             // :param startData: date of earliest searches
             // :param groupBy: group searches by total per DAY || MONTH
+            startDate = startDate || getDateNDaysAgo(30);
             groupBy = groupBy || 'DAY';
             return $http({
                 method: "GET",
-                url: "/admin/statistics/" + startDate + "/" + groupBy
+                url: "/admin/statistics/search/" + startDate + "/" + groupBy
             });
         },
-        uniqueSearchUsers: function(startDate, groupBy) {
+        getUniqueUserSearches: function(startDate, groupBy) {
             // :param startData: date of earliest searches
             // :param groupBy: group searches by total per DAY || MONTH
+            startDate = startDate || getDateNDaysAgo(30);
             groupBy = groupBy || 'DAY';
             return $http({
                 method: "GET",
                 url: "/admin/statistics/search/unique-users/" + startDate + "/" + groupBy
             });
+        },
+        getPopularIngredients: function() {
+            return $http({
+                method: "GET",
+                url: '/admin/statistics/search/popular-ingredients'
+            });
         }
-
-    }
+    };
 })
 
 // Register the previously created AuthInterceptor.

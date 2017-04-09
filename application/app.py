@@ -1,15 +1,22 @@
 import os
+from jinja2 import Markup
 from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from flask_cache import Cache
 from application import config
 from application.exceptions import InvalidAPIRequest, get_traceback
 from application.auth.auth_utilities import JWTUtilities
 
-# Initialize application and DB
+# Initialize application, DB, and cache
 app = Flask(__name__)
 app.config.from_pyfile(config.CONFIG_FILE)
 db = SQLAlchemy(app, session_options={'expire_on_commit': False})
+if not config.USE_REDIS:
+    cache = Cache(config={'CACHE_TYPE': 'simple'})
+else:
+    cache = Cache(config=config.REDIS_CONFIG)
+cache.init_app(app)
 
 # Initialize JWT handler
 jwt = JWTManager(app)
@@ -48,6 +55,9 @@ for blueprint in blueprints:
     app.register_blueprint(blueprint)
 
 
+# for serving static admin pages
+app.jinja_env.globals['include_raw'] = lambda filename : Markup(app.jinja_loader.get_source(app.jinja_env, filename)[0])
+
 # Initialize general API Error handler function
 @app.errorhandler(Exception)
 def handle_api_error(error):
@@ -64,6 +74,7 @@ def handle_api_error(error):
         app.logger.error("Unknown error: {0}. Stacktrace: {1}".format(str(error), get_traceback()))
 
 
+# Teardown to close/dremove db sessions after requests
 @app.teardown_appcontext
 def remove_session(exception=None):
     db.session.remove()

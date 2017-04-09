@@ -91,9 +91,40 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                     '': {
                         controller: "AppCtrl"
                     },
+                    'header@admin': {
+                        templateUrl: '/admin/sidebar-nav-nginx.html'
+                    },
                     'content@admin': {
-                        templateUrl: '/admin/index.html',
+                        templateUrl: '/admin/dashboard.html',
                         controller: 'AdminCtrl'
+                    }
+                }
+            })
+            .state('admin-nginx', {
+                url:'/admin/request-statistics',
+                views: {
+                    '': {
+                        controller: "AppCtrl"
+                    },
+                    'header@admin-nginx': {
+                        templateUrl: '/admin/sidebar-nav-nginx.html'
+                    },
+                    'content@admin-nginx': {
+                        templateUrl: '/admin/nginx.html'
+                    }
+                }
+            })
+            .state('admin-uwsgi', {
+                url: '/admin/api-statistics',
+                views: {
+                    '': {
+                        controller: "AppCtrl"
+                    },
+                    'header@admin-uwsgi': {
+                        templateUrl: '/admin/sidebar-nav-nginx.html'
+                    },
+                    'content@admin-uwsgi': {
+                        templateUrl: '/admin/uwsgi.html'
                     }
                 }
             })
@@ -120,7 +151,45 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
                 }
             })
     }]
-);
+)
+.directive('lineChart', function() {
+    return {
+        restrict: 'E',
+        replace: true,
+        template: '<div class="chart"><h1>{{ title }}</h1></div>',
+        scope: {
+            data: '=data',
+            title: '=title'
+        },
+        link: function(scope, element, attrs) {
+            var chart = d3.custom.lineChart();
+            var chartEl = d3.select(element[0]);
+            element.addClass('admin-chart-left');
+            scope.$watch('data', function(newVal, oldVal){
+                chartEl.datum(newVal).call(chart);
+            });
+        }
+    }
+})
+.directive('ingredientBarChart', function() {
+    return {
+        restrict: 'E',
+        replace: true,
+        template: '<div class="chart"><h1>{{ title }}</h1></div>',
+        scope: {
+            data: '=data',
+            title: '=title'
+        },
+        link: function(scope, element, attrs) {
+            var chartEl = d3.select(element[0]);
+            var chart = d3.custom.barChart();
+            element.addClass('admin-chart-right');
+            scope.$watch('data', function(newVal, oldVal){
+                chartEl.datum(newVal).call(chart);
+            });
+        }
+    }
+});
 
 //app.config(['$qProvider', function ($qProvider) {
 //    $qProvider.errorOnUnhandledRejections(false);

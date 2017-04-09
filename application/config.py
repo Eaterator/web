@@ -12,7 +12,7 @@ DATABASE = os.environ['DATABASE'] if 'DATABASE' in os.environ else ''
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = 'migrations'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_POOL_SIZE = 20
+SQLALCHEMY_POOL_SIZE = 25
 SQLALCHEMY_MAX_OVERFLOW = 10
 
 ##########################################
@@ -26,10 +26,13 @@ LOG_LEVEL = logging.DEBUG
 #           Flask Configuration          #
 SECRET_KEY = os.environ['SECRET_KEY'] if 'SECRET_KEY' in os.environ else 'supersecretkeytochangeinproduction'
 CONFIG_FILE = 'config.py'
+TEMPLATE_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 'templates'
+)
 DEV_STATIC_FILE_DIRECTORY = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), 'static'
 )
-PROD_STATIC_FILE_DIRECTORY = os.environ['PROD_STATIC_FILES_DIR']
+PROD_STATIC_FILE_DIRECTORY = os.environ['PROD_STATIC_FILES_DIR'] if os.environ.get('PROD_STATIC_FILES_DIR') else ''
 
 ##########################################
 #         Gevent/uWSGI Settings          #
@@ -65,6 +68,16 @@ BUSINESS_ROLE_TYPE = 'business'
 CONSUMER_ROLE_TYPE = 'regular'
 ROLES = [ADMIN_ROLE_TYPE, BUSINESS_ROLE_TYPE, CONSUMER_ROLE_TYPE]
 
+##########################################
+#             REDIS SETTING              #
+USE_REDIS = True
+REDIS_CONFIG = {
+    'CACHE_TYPE': 'redis',
+    'CACHE_KEY_PREFIX': 'eaterator',
+    'CACHE_REDIS_HOST': 'localhost',
+    'CACHE_REDIS_POST': '6379',
+    'CACHE_REDIS_URL': 'redis://localhost:6379'
+}
 
 ##########################################
 #             SSL Settings               #

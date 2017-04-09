@@ -1,0 +1,11 @@
+<div class="dashboard-wrapper">
+    <h1>Eaterator Dashboard</h1>
+    <!-- TODO add D3 graphs and finish api calls here, include some CSS as well, add CSS to minification pipeline -->
+    <div class="user-search-container">
+        <ingredient-bar-chart height="1000" width="600" title="'Popular Search Ingredients'" data="ingredientSearches" ng-if="showGraph(ingredientSearches)"></ingredient-bar-chart>
+        <line-chart data="newUsers" ng-if="showGraph(newUsers)"></line-chart>
+        <line-chart data="newUsersCumulative" ng-if="showGraph(newUsersCumulative)"></line-chart>
+        <line-chart data="uniqueUserSearches" title="'Unique Search Users'" ng-if="showGraph(uniqueUserSearches)"></line-chart>
+        <line-chart data="totalUserSearches" title="'TotalUserSearches'" ng-if="showGraph(totalUserSearches)"></line-chart>
+    </div>
+</div>

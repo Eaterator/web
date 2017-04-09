@@ -1,4 +1,5 @@
 # Project files
+*_report.html
 *.save
 erd_diagrams/
 config_dev.py

@@ -1,0 +1,94 @@
+<!--<link href="/static/css/admin.css" rel="stylesheet">-->
+<style>
+    {{ include_raw('admin/admin.css') }}
+</style>
+<div class="" id="sidebar-wrapper">
+	<nav id="spy">
+		<ul class="sidebar-nav nav">
+			<!-- Standard menu items -->
+			<li class="sidebar-brand active">
+				<a class="" ui-sref="admin"><span class="fa fa-home solo">Site Nav</span></a>
+			</li>
+			<li id="current">
+				<a ui-sref="search">Search</a>
+			</li>
+			<li>
+				<a ui-sref="about">About Us</a>
+			</li>
+			<li>
+				<a ui-sref="contact">Contact</a>
+			</li>
+			<li>
+				<a ui-sref="user">My Recipes</a>
+			</li>
+			<li ng-hide="isLoggedIn()">
+				<a ui-sref="login">Login</a>
+			</li>
+			<li ng-hide="!isLoggedIn()">
+				<a ng-click="logout()">Logout</a>
+			</li>
+			<li ng-hide="!isAdmin()">
+				<a ui-sref="admin">Admin</a>
+			</li>
+
+
+			<!-- Standard Admin Menu -->
+			<li class="menu-item-divided"></li>
+			<li class="sidebar-brand active">
+				<a class="" ui-sref="admin"><span class="fa fa-home solo">Admin</span></a>
+			</li>
+			<li class="">
+				<a class="" data-scroll="" ui-sref="admin" ui-sref-opts="{reload: true}"><span class="fa fa-anchor solo">User Data</span></a>
+			</li>
+			<li class="">
+				<a class="" data-scroll="" ui-sref="admin-uwsgi"><span class="fa fa-anchor solo">API Logs (uWSGI)</span></a>
+			</li>
+			<li class="menu-item-divided"></li>
+
+			<!-- NGINX menu items here (All requests logs) -->
+			<li class="">
+				<a class="" ui-sref="admin-nginx"><span class="fa fa-anchor solo">Request Longs (NGINX)</span></a>
+			</li>
+			<li class="sub-list" >
+				<a href="/admin/request-statistics#"><span class="fa fa-anchor solo">Overall</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#visitors"><span class="fa fa-anchor solo">Unique visitors</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#requests"><span class="fa fa-anchor solo">Requested files</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#static_requests"><span class="fa fa-anchor solo">Requested static files</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#not_found"><span class="fa fa-anchor solo">Not found URLs</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#hosts"><span class="fa fa-anchor solo">Hosts</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#os"><span class="fa fa-anchor solo">Operating Systems</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#browsers"><span class="fa fa-anchor solo">Browsers</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#visit_time"><span class="fa fa-anchor solo">Time Distribution</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#referrers"><span class="fa fa-anchor solo">Referrers URLs</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#referring_sites"><span class="fa fa-anchor solo">Referring sites</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#geolocation"><span class="fa fa-anchor solo">Geo Location</span></a>
+			</li>
+			<li class="sub-list">
+				<a href="/admin/request-statistics#status_codes"><span class="fa fa-anchor solo">Status codes</span></a>
+			</li>
+			<li class="menu-item-divided"></li>
+		</ul>
+	</nav>
+</div>

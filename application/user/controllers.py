@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, render_template, abort
 from jinja2 import TemplateNotFound
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .models import FavouriteRecipe, UserSearchData
+from sqlalchemy import func
 from application.recipe.models import Recipe
 from application.controllers import _parse_limit_parameter
 from application.recipe.utilities import RecipeIngredientFormatter
@@ -27,6 +28,19 @@ def get_static_pages(page):
         return render_template('{0}.html'.format(page.split('.')[0]))
     except TemplateNotFound:
         abort(404)
+
+
+@user_blueprint.route('/sleep/postgres/')
+def test_blocking():
+    x = db.session.execute('SELECT pg_sleep(5)')
+    return jsonify(FavouriteRecipe.query.limit(10).all())
+
+
+@user_blueprint.route('/sleep/python/')
+def test_blocking_python():
+    import time
+    time.sleep(5)
+    return jsonify(FavouriteRecipe.query.limit(10).all())
 
 
 @user_blueprint.route('/favourite-recipes', methods=["GET"])

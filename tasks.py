@@ -115,7 +115,7 @@ def update_flickr_images(data):
 
 
 # run every hour at *:30
-@cron(-1, -1, -1, -1, -1)
+# @cron(-1, -1, -1, -1, -1)
 def get_recipes_without_images(*args):
     default = -1
     recipes = Recipe.query.\
