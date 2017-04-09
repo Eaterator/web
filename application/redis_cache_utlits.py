@@ -28,4 +28,8 @@ class RedisUtilities:
         ingredients = ''.join(_clean_and_stringify_ingredients_query(payload["ingredients"]))
         return str(sum(PRIMES_MAP[ord(char)] for char in ingredients))
 
+    @staticmethod
+    def cache_by_static_page(*args, **kwargs):
+        return request.path.split('/')[-1]
+
 

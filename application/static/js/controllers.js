@@ -18,8 +18,17 @@ angular.module('eateratorApp')
         $scope.isLoggedIn = function() {
             return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
         };
+        $scope.isAdmin = function() {
+            if ($scope.isLoggedIn()){
+                return authenticationService.isAdmin($window.localStorage.getItem('id_token'));
+            }
+        };
         $scope.refreshToken = function() {
             if ($scope.isLoggedIn()) {
+                var token = $window.localStorage.getItem('id_token');
+                if (!authenticationService.tokenNeedsRefresh(token)){
+                    return;
+                }
                 var request = authenticationService.refreshToken();
                 request.then(function(response){
                     $scope.token = response.data.access_token;
@@ -280,6 +289,68 @@ angular.module('eateratorApp')
 .controller('AdminCtrl',
     ['$scope', 'authenticationService', 'adminFactory', '$http', '$window', '$filter',
     function($scope, authenticationService, adminFactory, $http, $window, $filter){
+
+        $scope.newUsers = [];
+        $scope.newUsersCumulative = [];
+        $scope.uniqueUserSearches = [];
+        $scope.totalUserSearches = [];
+        $scope.ingredientSearches = []
+
+        $scope.getNewUsers = function() {
+            var request = adminFactory.getNewUsers();
+            request.then(function(response){
+                $scope.newUsers = response.data.statistics;
+                if ($scope.newUsers == undefined || $scope.newUsers.length < 1){
+                    return;
+                }
+                // Populate cummulative users
+                var sum = $scope.newUsers[0].value;
+                $scope.newUsersCumulative.push({
+                    date: $scope.newUsers[0].date,
+                    value: sum
+                });
+                for (var i = 1; i < $scope.newUsers.length; i++){
+                    sum += $scope.newUsers[i].value;
+                    $scope.newUsersCumulative.push({
+                        date: $scope.newUsers[0].date,
+                        value: sum
+                     });
+                }
+            });
+        }
+
+        $scope.getUniqueUserSearches = function() {
+            var request = adminFactory.getUniqueUserSearches();
+            request.then(function(response) {
+                $scope.uniqueUserSearches = response.data.statistics;
+                console.log(response);
+                console.log("unique");
+                console.log($scope.uniqueUserSearches);
+            });
+        }
+
+        $scope.getTotalSearches = function() {
+            var request = adminFactory.getTotalUserSearches();
+            request.then(function(response) {
+                $scope.totalUserSearches = response.data.statistics;
+            });
+        }
+
+        $scope.getPopularIngredients = function() {
+            var request = adminFactory.getPopularIngredients();
+            request.then(function(response) {
+                $scope.ingredientSearches = response.data.most_popular;
+            });
+        }
+
+        $scope.showGraph = function(data) {
+            return (typeof data == 'object' && data.length > 0);
+        }
+
+        $scope.getNewUsers();
+        $scope.getUniqueUserSearches();
+        $scope.getTotalSearches();
+        $scope.getPopularIngredients();
     }
 ]);
     

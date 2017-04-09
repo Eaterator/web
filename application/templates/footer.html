@@ -1,46 +1,48 @@
 
-    <footer class="footer">
-        <div class="container">
-           <div class="row">
-               <div class="col-md-8" id="about-section"> 
-                    <h3>about</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod provident fuga, perspiciatis beatae id molestias tenetur ea nulla ad dolorum.
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Incidunt, facere.
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex ea, ipsam omnis iusto porro voluptatem.
-                    </p>
-                    <p class="copyright">@ 2017 All Rights Reserved. Eaterator.com</p>
-                </div>
-               <div class="col-md-4" id="social">
-                    <h3>connect</h3>
-                    <p>Check us out on social media!</p>
-                    <a class="btn btn-social-icon btn-lg btn-twitter">
-                        <span class="fa fa-twitter"></span>
-                    </a>
-                    <a class="btn btn-social-icon btn-lg btn-github">
-                        <span class="fa fa-github"></span>
-                    </a>
-                    <a class="btn btn-social-icon btn-lg btn-google">
-                        <span class="fa fa-google"></span>
-                    </a>
-               </div>
+<footer class="footer">
+    <div class="container">
+       <div class="row">
+           <div class="col-md-8" id="about-section">
+                <h3>about</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod provident fuga, perspiciatis beatae id molestias tenetur ea nulla ad dolorum.
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Incidunt, facere.
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex ea, ipsam omnis iusto porro voluptatem.
+                </p>
+                <p class="copyright">@ 2017 All Rights Reserved. Eaterator.com</p>
             </div>
+           <div class="col-md-4" id="social">
+                <h3>connect</h3>
+                <p>Check us out on social media!</p>
+                <a class="btn btn-social-icon btn-lg btn-twitter">
+                    <span class="fa fa-twitter"></span>
+                </a>
+                <a class="btn btn-social-icon btn-lg btn-github">
+                    <span class="fa fa-github"></span>
+                </a>
+                <a class="btn btn-social-icon btn-lg btn-google">
+                    <span class="fa fa-google"></span>
+                </a>
+           </div>
         </div>
-    </footer><!-- end footer-->
-    {% if not production %} <!-- these tags allow for rendering of static files with bundled css/js -->
-        <script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
-        <script src="../static/bower_components/angular/angular.min.js"></script>
-        <script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-        <script src="../static/bower_components/angular-ui-router/angular-ui-router.min.js"></script>
-        <!--<script src="../bower_components/angular-resource/angular-resource.min.js"></script>-->
-        <script src="../static/js/app.js"></script>
-        <script src="../static/js/controllers.js"></script>
-        <script src="../static/js/directives.js"></script>
-        <script src="../static/js/services.js"></script>
-        <!--<script src="../static/js/main.js"></script>
-        <script src="../static/js/bootstrap-tagsinput.min.js"></script>
-        <script src="../static/js/bootstrap-tagsinput-angular.min.js"></script>-->
-        <script src="../static/bower_components/ng-tags-input/ng-tags-input.min.js"></script>
-    {% else %}
-        <script src="/static/js/app-bundle.min.js"></script>
-    {% endif %}
+    </div>
+</footer><!-- end footer-->
+{% if not production %} <!-- these tags allow for rendering of static files with bundled css/js -->
+    <script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../static/bower_components/angular/angular.min.js"></script>
+    <script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="../static/bower_components/angular-ui-router/angular-ui-router.min.js"></script>
+    <!--<script src="../bower_components/angular-resource/angular-resource.min.js"></script>-->
+    <script src="/static/bower_components/d3/d3.v3.min.js"></script>
+    <script src="/static/js/admin-charts.js"></script>
+    <script src="../static/js/app.js"></script>
+    <script src="../static/js/controllers.js"></script>
+    <!--<script src="../static/js/directives.js"></script>-->
+    <script src="../static/js/services.js"></script>
+    <!--<script src="../static/js/main.js"></script>
+    <script src="../static/js/bootstrap-tagsinput.min.js"></script>
+    <script src="../static/js/bootstrap-tagsinput-angular.min.js"></script>-->
+    <script src="../static/bower_components/ng-tags-input/ng-tags-input.min.js"></script>
+{% else %}
+    <script src="/static/js/app-bundle.min.js"></script>
+{% endif %}
     
