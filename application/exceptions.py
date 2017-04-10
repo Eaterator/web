@@ -1,4 +1,3 @@
-import sys
 import traceback
 
 BAD_REQUEST_CODE = 400
