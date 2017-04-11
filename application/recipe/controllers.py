@@ -125,7 +125,7 @@ def get_related_ingredients(ingredient, limit=None):
 @recipe_blueprint.route('/v2/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required(['consumer', 'admin'])
-# @cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
+@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
 def fulltext_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()

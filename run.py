@@ -24,7 +24,10 @@ db.engine.pool.use_threadlocal = True
 if __name__ == '__main__':
     if config.USE_GEVENT and config.DEBUG:
         app.config['DEBUG'] = config.DEBUG
-        server = WSGIServer(('', config.GEVENT_PORT), app)
+        if config.GEVENT_REQUEST_LOGGING:
+            server = WSGIServer(('', config.GEVENT_PORT), app)
+        else:
+            server= WSGIServer(('', config.GEVENT_PORT), app, log=None)
         print('Serving dev (gevent WSGI server) application on localhost:{0}'.format(config.GEVENT_PORT))
         server.serve_forever()
     elif config.DEBUG or not config.USE_GEVENT:
