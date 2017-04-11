@@ -36,10 +36,11 @@ PROD_STATIC_FILE_DIRECTORY = os.environ['PROD_STATIC_FILES_DIR'] if os.environ.g
 
 ##########################################
 #            PYPY Settings               #
-USE_PYPY = True
+USE_PYPY = False
+
 ##########################################
 #         Gevent/uWSGI Settings          #
-USE_GEVENT = True  # Set to True if windows environment to avoid gevent use
+USE_GEVENT = False  # Set to True if windows environment to avoid gevent use
 GEVENT_PORT = 80
 USE_UWSGI = True   # For production with uWSGI only, set to false in local dev in config_dev.py
 

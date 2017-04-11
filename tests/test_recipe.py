@@ -94,3 +94,13 @@ class TestRecipeControllers(BaseTempDBTestCase):
 
 if __name__ == '__main__':
     run_tests()
+
+
+# requests.post('http://localhost:5000/recipe/v2/search/50',
+#               data='{"ingredients": ["chicken", "rice", "beans"]}',
+#               headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTQ0Nzc2NzcsImlhdCI6MTQ5MTg4NTY3NywibmJmIjoxNDkxODg1Njc3LCJqdGkiOiJjNTdjZGZiOC1kYzJjLTQ5MDktOTUxOS1jY2VkODZjZTU1NDEiLCJpZGVudGl0eSI6MiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsicm9sZSI6ImFkbWluIn19.MBARu4_B4yIrgPL08hwdf5Wvq-zsI2EYmQ0qdiy9s2Q",
+#                        "Content-Type": "application/json"})
+#
+# requests.post('http://localhost:5000/auth/',
+#               data={"username": "msalii@ukr.net", "password": "mSalii123!"},
+#               headers={"Content-Type": "application/json"})
