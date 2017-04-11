@@ -1,5 +1,10 @@
 import os
 from application import config
+
+if config.USE_PYPY:
+    from psycopg2cffi import compat
+    compat.register()
+
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
     from gevent.pywsgi import WSGIServer

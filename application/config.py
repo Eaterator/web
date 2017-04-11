@@ -35,6 +35,9 @@ DEV_STATIC_FILE_DIRECTORY = os.path.join(
 PROD_STATIC_FILE_DIRECTORY = os.environ['PROD_STATIC_FILES_DIR'] if os.environ.get('PROD_STATIC_FILES_DIR') else ''
 
 ##########################################
+#            PYPY Settings               #
+USE_PYPY = True
+##########################################
 #         Gevent/uWSGI Settings          #
 USE_GEVENT = True  # Set to True if windows environment to avoid gevent use
 GEVENT_PORT = 80
