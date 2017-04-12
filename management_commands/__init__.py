@@ -8,8 +8,8 @@ from management_commands.collect_static import collect_static
 def create_indexes(db, drop_index=False):
     """
     Creates all indexes on models in project if they do not exists already. Assumes all models
-    inherit from RequiredFields class, otherwise will need to adjust search for subclasses.
-    Also
+    inherit from RequiredFields class, otherwise will need to adjust search for subclasses. If the index
+    exists SQLAlchemy throws an error and we assume everything is ok.
     :param db: The app db object, acts as the engine param for the Index.create()
     :param drop_index: specifies whether the indexes should be dropped or created
     :return:
