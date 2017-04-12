@@ -1,47 +1,114 @@
 /* CSS for charts */
 .dashboard-wrapper {
     position: relative;
-    width: calc(100% - 250px);
+    width: calc(100% - 250px + 40px);
     align-content: center;
     height: 100%;
+    margin: 0 -20px;
 }
 
 .dashboard-wrapper h1 {
     margin: 0 auto;
     text-align: center;
+    color: steelblue;
+    margin-bottom: 25px;
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 3em;
 }
+
+.chart h1 {
+    font-wight: normal;
+    font-size: 1.5em;
+}
+
 .user-search-container {
     position: relative;
     width: 100%;
-    align-content: center;
+    /* align-content: center; */
     height: auto;
     height: 100%;
     overflow: auto;
+    padding: 10px;
+    border: 20px solid #9DC209;
+    margin: auto;
 }
 
-.admin-chart-right {
-    overflow: auto;
-    float: right;
-    min-width: 600px;
-    width: auto;
+body {
+    border: 20px solid #9DC209;
+    padding: 0;
+    box-sizing: border-box;
     height: auto;
-    margin: 0 auto;
-    padding: 25px;
+    overflow: auto;
 }
 
-.admin-chart-left {
+.admin-chart {
+    margin: 0 auto;
     overflow: auto;
-    float: left;
+    /* display: inline-block; */
     min-width: 500px;
-    width: auto;
+    width: 80%;
     height: auto;
-    margin: 0 auto;
     padding: 25px;
+    border: 3px solid black;
+}
+
+.chart {
+    background-color: #e6ffb3; /*lightgreen*/
+    margin-top: 15px;
+    margin-bottom: 15px;
+    z-index: -1;
+}
+
+.right-col {
+    position: relative;
+    width: 50%;
+    border-sizing: border-box;
+    float: right;
+}
+
+.left-col {
+    position: relative;
+    width: 50%;
+    border-sizing: border-box;
+    float: left;
+}
+
+@media (max-width:1200px) {
+    .left-col, .right-col {
+        position: relative;
+        width: 100%;
+        border-sizing: border-box;
+        display: inline-block;
+    }
+
+
 }
 
 footer {
     display: none !important;
 }
+
+/* end of css for chart div */
+
+/* CSS for D# graphs/SVG */
+path {
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.area {
+    fill: lightblue;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1
+    shape-rendering: crispEdges;
+}
+/* End of CSS for graphs/D3 */
 
 /* CSS for admin nav menu */
 .sub-list {
@@ -166,6 +233,7 @@ footer {
  padding: 20px;
 }
 
+/*
 @media (max-width:767px) {
 
    #wrapper {
@@ -194,5 +262,5 @@ footer {
    .inset {
      padding: 15px;
    }
-
+*/
 }

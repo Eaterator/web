@@ -164,7 +164,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
         link: function(scope, element, attrs) {
             var chart = d3.custom.lineChart();
             var chartEl = d3.select(element[0]);
-            element.addClass('admin-chart-left');
+            element.addClass('admin-chart');
             scope.$watch('data', function(newVal, oldVal){
                 chartEl.datum(newVal).call(chart);
             });
@@ -183,7 +183,7 @@ var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
         link: function(scope, element, attrs) {
             var chartEl = d3.select(element[0]);
             var chart = d3.custom.barChart();
-            element.addClass('admin-chart-right');
+            element.addClass('admin-chart');
             scope.$watch('data', function(newVal, oldVal){
                 chartEl.datum(newVal).call(chart);
             });
