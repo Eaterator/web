@@ -75,8 +75,13 @@ class TestRecipeControllers(TestCase, BaseTempDBTestCase):
     #     pass
 
     def test_top_ingredients_search(self):
-        # TODO implement test
-        pass
+        test_regular_user = self.create_regular_user()
+        token, _ = self.get_jwt_token(test_regular_user)
+        resp = self.app.post("/recipe/top-ingredients",
+                             content_type='application/json',
+                             headers={"Authorization": "Bearer {0}".format(token)})
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotEqual(json.loads(resp.data.decode('utf-8'))["ingredients"], 0)
 
     # def test_related_ingredients_search(self):
     #     # TODO implement test
