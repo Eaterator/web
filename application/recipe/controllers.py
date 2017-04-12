@@ -14,9 +14,9 @@ from application.app import app, db, cache
 from application.redis_cache_utlits import RedisUtilities, _clean_and_stringify_ingredients_query
 from application.auth.auth_utilities import JWTUtilities
 from application.recipe.utilities import RecipeIngredientFormatter
-# from recipe_parser.ingredient_parser import IngredientParser
+from recipe_parser.ingredient_parser import IngredientParser
 
-# PARSER = IngredientParser.get_parser()
+PARSER = IngredientParser.get_parser()
 TAG_WORD_DELIMITER = '-'
 # SEARCH RESULT SIZE
 DEFAULT_SEARCH_RESULT_SIZE = 20
@@ -102,23 +102,23 @@ def get_related_ingredients(ingredient, limit=None):
     return jsonify(RecipeIngredientFormatter.ingredients_to_dict(related_ingredients))
 
 
-# @recipe_blueprint.route('/search', methods=["POST"])
-# @recipe_blueprint.route('/search/<limit>', methods=["POST"])
-# @jwt_required
-# @JWTUtilities.user_role_required(['consumer', 'admin'])
-# @cache.cached(timeout=60*60,
-#               key_prefix=lambda *args, **kwargs: 'ns_' + RedisUtilities.make_search_cache_key(*args, **kwargs))
-# def search_recipe(limit=None):
-#     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
-#     user_pk = get_jwt_identity()
-#     try:
-#         payload = request.get_json()
-#         ingredients = parse_ingredients(payload)
-#     except (TypeError, KeyError):
-#         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
-#     recipes = create_recipe_search_query(ingredients, limit=limit)
-#     register_user_search(user_pk, payload)
-#     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
+@recipe_blueprint.route('/search', methods=["POST"])
+@recipe_blueprint.route('/search/<limit>', methods=["POST"])
+@jwt_required
+@JWTUtilities.user_role_required(['consumer', 'admin'])
+@cache.cached(timeout=60*60,
+              key_prefix=lambda *args, **kwargs: 'ns_' + RedisUtilities.make_search_cache_key(*args, **kwargs))
+def search_recipe(limit=None):
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
+    user_pk = get_jwt_identity()
+    try:
+        payload = request.get_json()
+        ingredients = parse_ingredients(payload)
+    except (TypeError, KeyError):
+        raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
+    recipes = create_recipe_search_query(ingredients, limit=limit)
+    register_user_search(user_pk, payload)
+    return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
 @recipe_blueprint.route('/v2/search', methods=["POST"])
@@ -146,46 +146,46 @@ def fulltext_search_recipe(limit=None):
         raise InvalidAPIRequest(str(e), status_code=500)
 
 
-# @recipe_blueprint.route('/search/business', methods=["POST"])
-# @recipe_blueprint.route('/search/business/<limit>', methods=["POST"])
-# @jwt_required
-# @JWTUtilities.user_role_required(['business', 'admin'])
-# @cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
-# def business_search_recipe(limit=None):
-#     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
-#     user_pk = get_jwt_identity()
-#     try:
-#         payload = request.get_json()
-#         ingredients = parse_ingredients(payload)
-#     except (TypeError, KeyError):
-#         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
-#     register_user_search(user_pk, payload)
-#     recipes = create_recipe_search_query(ingredients, limit=limit)
-#     return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
+@recipe_blueprint.route('/search/business', methods=["POST"])
+@recipe_blueprint.route('/search/business/<limit>', methods=["POST"])
+@jwt_required
+@JWTUtilities.user_role_required(['business', 'admin'])
+@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
+def business_search_recipe(limit=None):
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
+    user_pk = get_jwt_identity()
+    try:
+        payload = request.get_json()
+        ingredients = parse_ingredients(payload)
+    except (TypeError, KeyError):
+        raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
+    register_user_search(user_pk, payload)
+    recipes = create_recipe_search_query(ingredients, limit=limit)
+    return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
 
 
-# @recipe_blueprint.route('/search/business/batch', methods=["POST"])
-# @recipe_blueprint.route('/search/business/batch/<limit>', methods=["POST"])
-# @jwt_required
-# @JWTUtilities.user_role_required(['business', 'admin'])
-# def business_batch_search(limit=None):
-#     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
-#     user_pk = get_jwt_identity()
-#     payload = request.get_json()
-#     recipes = {}
-#     search_num = 1
-#     for _, search in payload['searches'].items():
-#         register_user_search(user_pk, search)
-#         try:
-#             ingredients = parse_ingredients(search["ingredients"])
-#         except (TypeError, KeyError):
-#             raise InvalidAPIRequest("Error parsing request", status_code=BAD_REQUEST_CODE)
-#         recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
-#     return jsonify(
-#         {"searches": [
-#             RecipeIngredientFormatter.recipes_to_dict(recipe_lst) for recipe_lst in recipes
-#             ]}
-#     )
+@recipe_blueprint.route('/search/business/batch', methods=["POST"])
+@recipe_blueprint.route('/search/business/batch/<limit>', methods=["POST"])
+@jwt_required
+@JWTUtilities.user_role_required(['business', 'admin'])
+def business_batch_search(limit=None):
+    limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, BUSINESS_MAX_SEARCH_SIZE)
+    user_pk = get_jwt_identity()
+    payload = request.get_json()
+    recipes = {}
+    search_num = 1
+    for _, search in payload['searches'].items():
+        register_user_search(user_pk, search)
+        try:
+            ingredients = parse_ingredients(search["ingredients"])
+        except (TypeError, KeyError):
+            raise InvalidAPIRequest("Error parsing request", status_code=BAD_REQUEST_CODE)
+        recipes[search_num] = create_recipe_search_query(ingredients, limit=limit)
+    return jsonify(
+        {"searches": [
+            RecipeIngredientFormatter.recipes_to_dict(recipe_lst) for recipe_lst in recipes
+            ]}
+    )
 
 
 @recipe_blueprint.route('/recipe/<pk>')
@@ -207,25 +207,25 @@ def register_user_search(user_pk, json_data):
     db.session.commit()
 
 
-# def parse_ingredients(payload):
-#     return [pi.ingredient.primary if pi.ingredient and pi.ingredient.primary else None for pi in
-#             [PARSER(ingredient) for ingredient in payload["ingredients"]]]
+def parse_ingredients(payload):
+    return [pi.ingredient.primary if pi.ingredient and pi.ingredient.primary else None for pi in
+            [PARSER(ingredient) for ingredient in payload["ingredients"]]]
 
 
-# def parse_ingredients_with_modifiers(payload):
-#     return (
-#         [pi.ingredient.primary for pi in
-#          [PARSER(ingredient) for ingredient in payload["ingredients"]]
-#          if pi.ingredient and pi.ingredient.primary],
-#         [pi.ingredient.modifier for pi in
-#          [PARSER(ingredient) for ingredient in payload["ingredients"]]
-#          if pi.ingredient and pi.ingredient.modifier]
-#     )
+def parse_ingredients_with_modifiers(payload):
+    return (
+        [pi.ingredient.primary for pi in
+         [PARSER(ingredient) for ingredient in payload["ingredients"]]
+         if pi.ingredient and pi.ingredient.primary],
+        [pi.ingredient.modifier for pi in
+         [PARSER(ingredient) for ingredient in payload["ingredients"]]
+         if pi.ingredient and pi.ingredient.modifier]
+    )
 
 
 def create_recipe_search_query(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE):
-    if len(ingredients) < 3:
-        raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
+    # if len(ingredients) < 3:
+    #    raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
     return db.session.query(Recipe).\
         join(IngredientRecipe).\
         join(Ingredient).\

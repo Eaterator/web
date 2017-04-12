@@ -22,8 +22,8 @@ admin_blueprint = Blueprint('admin', __name__,
 
 @admin_blueprint.route("/<page>", methods=["GET"])
 @jwt_required
-@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
-# @cache.cached(timeout=int(60*60/2), key_prefix=RedisUtilities.cache_by_static_page)
+@JWTUtilities.user_role_required([ADMIN_ROLE_TYPE])
+@cache.cached(timeout=int(60*60/2), key_prefix=RedisUtilities.cache_by_static_page)
 def admin_dashboard(page):
     try:
         return render_template("admin/{0}.html".format(page.split('.')[0]))

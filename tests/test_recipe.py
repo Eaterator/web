@@ -1,10 +1,13 @@
-from unittest import main as run_tests
+from unittest import TestCase, main as run_tests
 from tests.base_test_case import BaseTempDBTestCase
 from application.recipe.models import Recipe, Ingredient, IngredientRecipe
 import json
 
 
-class TestRecipeModels(BaseTempDBTestCase):
+class TestRecipeModels(TestCase, BaseTempDBTestCase):
+
+    def setUp(self):
+        self.setUpDB()
 
     def test_recipe_model(self):
         self.create_recipes()
@@ -20,11 +23,14 @@ class TestRecipeModels(BaseTempDBTestCase):
         self.create_recipe_ingredients()
         self.assertNotEqual(len(IngredientRecipe.query.all()), 0)
 
+    def tearDown(self):
+        self.tearDownDB()
 
-class TestRecipeControllers(BaseTempDBTestCase):
+
+class TestRecipeControllers(TestCase, BaseTempDBTestCase):
 
     def setUp(self):
-        super().setUp()
+        self.setUpDB()
         self.create_recipes()
         self.create_ingredients()
         self.create_recipe_ingredients()
@@ -64,17 +70,17 @@ class TestRecipeControllers(BaseTempDBTestCase):
                                        token)
         self.assertNotEqual(resp.status_code, 200)
 
-    def test_business_batch_search(self):
-        # TODO later, not a priority
-        pass
+    # def test_business_batch_search(self):
+    #     # TODO later, not a priority
+    #     pass
 
     def test_top_ingredients_search(self):
         # TODO implement test
         pass
 
-    def test_related_ingredients_search(self):
-        # TODO implement test
-        pass
+    # def test_related_ingredients_search(self):
+    #     # TODO implement test
+    #     pass
 
     def search_ingredients(self, ingredients, endpoint, token):
         return self.app.post(endpoint,
@@ -91,16 +97,9 @@ class TestRecipeControllers(BaseTempDBTestCase):
         recipes = json.loads(resp.data.decode('utf-8'))
         self.assertEqual(len(recipes["recipes"]), length)
 
+    def tearDown(self):
+        self.tearDownDB()
+
 
 if __name__ == '__main__':
     run_tests()
-
-
-# requests.post('http://localhost:5000/recipe/v2/search/50',
-#               data='{"ingredients": ["chicken", "rice", "beans"]}',
-#               headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0OTQ0Nzc2NzcsImlhdCI6MTQ5MTg4NTY3NywibmJmIjoxNDkxODg1Njc3LCJqdGkiOiJjNTdjZGZiOC1kYzJjLTQ5MDktOTUxOS1jY2VkODZjZTU1NDEiLCJpZGVudGl0eSI6MiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsicm9sZSI6ImFkbWluIn19.MBARu4_B4yIrgPL08hwdf5Wvq-zsI2EYmQ0qdiy9s2Q",
-#                        "Content-Type": "application/json"})
-#
-# requests.post('http://localhost:5000/auth/',
-#               data={"username": "msalii@ukr.net", "password": "mSalii123!"},
-#               headers={"Content-Type": "application/json"})
