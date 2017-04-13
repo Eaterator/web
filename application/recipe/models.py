@@ -1,4 +1,4 @@
-from application.app import db
+from application.base_models import db
 from application.base_models import RequiredFields
 
 
@@ -156,3 +156,14 @@ class IngredientRecipe(RequiredFields):
                                  lazy="subquery")
     IngredientModifier = db.relationship("IngredientModifier", backref="recipe_ingredientmodifier",
                                          lazy='joined')
+
+    __table_args__ = (
+        db.Index(
+            'idx_ingredient_recipe_ingredientpk_recipepk',
+            ingredient, recipe, unique=True
+        ),
+        db.Index(
+            'idx_ingredient_recipe_recipepx_ingredientpk',
+            recipe, ingredient, unique=True
+        ),
+    )

@@ -16,9 +16,8 @@ if config.USE_GEVENT:
 
 
 # modify db for gevent
-from application.app import app, db
-db.engine.pool._use_threadlocal = True
-db.engine.pool.use_threadlocal = True
+from application.app import create_app
+app = create_app()
 
 # development and testing
 if __name__ == '__main__':
@@ -27,7 +26,7 @@ if __name__ == '__main__':
         if config.GEVENT_REQUEST_LOGGING:
             server = WSGIServer(('', config.GEVENT_PORT), app)
         else:
-            server= WSGIServer(('', config.GEVENT_PORT), app, log=None)
+            server = WSGIServer(('', config.GEVENT_PORT), app, log=None)
         print('Serving dev (gevent WSGI server) application on localhost:{0}'.format(config.GEVENT_PORT))
         server.serve_forever()
     elif config.DEBUG or not config.USE_GEVENT:
@@ -39,8 +38,6 @@ if __name__ == '__main__':
 # https://bitbucket.org/zzzeek/green_sqla/src/2732bb7ea9d06b9d4a61e8cd587a95148ce2599b?at=default
 elif config.USE_UWSGI and config.USE_GEVENT:
     from logging.handlers import RotatingFileHandler
-    with open('/home/ubuntu/eaterator/logging/test_log.txt', 'w') as f:
-        f.write(os.path.join(config.LOG_DIR, 'app.log'))
     handler = RotatingFileHandler(
         os.path.join(config.LOG_DIR, 'app.log'),
         maxBytes=10*1024*1024,

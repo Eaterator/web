@@ -3,14 +3,15 @@ import json
 import re
 from itertools import combinations
 from jinja2 import TemplateNotFound
-from flask import Blueprint, request, jsonify, render_template, abort
+from flask import Blueprint, request, jsonify, render_template, abort, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, or_, desc, not_, and_
 from application.controllers import _parse_limit_parameter
 from application.user.controllers import UserSearchData
 from application.recipe.models import Ingredient, Recipe, IngredientRecipe
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE
-from application.app import app, db, cache
+from application.base_models import db
+from application.app import cache
 from application.redis_cache_utlits import RedisUtilities, _clean_and_stringify_ingredients_query
 from application.auth.auth_utilities import JWTUtilities
 from application.recipe.utilities import RecipeIngredientFormatter
@@ -125,7 +126,7 @@ def search_recipe(limit=None):
 @recipe_blueprint.route('/v2/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required(['consumer', 'admin'])
-@cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
+# @cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
 def fulltext_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
@@ -249,7 +250,7 @@ def _apply_dynamic_filters(ingredients):
     return dynamic_filters
 
 
-def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE, op=and_, order_by=func.count(Ingredient.pk)):
+def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE, op = None, order_by=func.count(Ingredient.pk)):
     """
     Function to create a fulltext query to filter out all recipes not containing <min_ingredients> ingredients. Ranks by
     recipe that contains the most ingredients, and then ranks by match of ingredients list to the title. This could
@@ -257,7 +258,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     create_fulltext_search_query.
     :param ingredients: List<string> ["onion", "chicken", "peppers"]
     :param limit: number of recipes to return
-    :param op: the operation (and_ or or_ from which filter from subqueries on the searches.
+    :param order_by: the operation/func with which to order searches
     :return: List<Recipe>
     """
     ingredients = _clean_and_stringify_ingredients_query(ingredients)
@@ -265,7 +266,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         join(IngredientRecipe). \
         join(Ingredient). \
         filter(
-            op(
+            and_(
                 *_apply_dynamic_fulltext_filers(ingredients)
             )
         ). \
@@ -296,7 +297,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         )).limit(limit).all()
 
 
-def _apply_dynamic_fulltext_filers(ingredients):
+def _apply_dynamic_fulltext_filers(ingredients, backup_search=False):
     """
     Applies full text filters similar to v1 but uses full text search approach for lexemes and speed up with
     index usage. N.B. that spaces in ingredient names will be replaced with '&'

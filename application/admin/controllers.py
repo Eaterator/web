@@ -3,14 +3,15 @@ import json
 from datetime import datetime, timedelta
 from collections import Counter
 from itertools import chain
-from flask import Blueprint, jsonify, render_template, abort, send_from_directory
+from flask import Blueprint, jsonify, render_template, abort, current_app
 from flask_jwt_extended import jwt_required
 from sqlalchemy import func
 from application.auth.controllers import JWTUtilities
 from application.config import ADMIN_ROLE_TYPE
 from application.user.models import UserSearchData
 from application.auth.models import User
-from application.app import app, db, cache
+from application.app import cache
+from application.base_models import db
 from application.exceptions import InvalidAPIRequest
 from application.redis_cache_utlits import RedisUtilities
 
@@ -29,8 +30,8 @@ def admin_dashboard(page):
         return render_template("admin/{0}.html".format(page.split('.')[0]))
     except Exception as e:
         import traceback
-        app.logger.error("ADMIN | static error: {0}".format(traceback.format_exc()))
-        app.logger.error("ADMIN | error logging admin template, check format. Error: {0}".format(str(e)))
+        current_app.logger.error("ADMIN | static error: {0}".format(traceback.format_exc()))
+        current_app.logger.error("ADMIN | error logging admin template, check format. Error: {0}".format(str(e)))
         abort(404)
 
 

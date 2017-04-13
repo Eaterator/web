@@ -12,9 +12,8 @@ try:
 except ImportError as e:
     warnings.warn("Dependency packages not setup (scraper and parser). "
                   "Inserting data tools/commands data will not be possible")
-
 from application.recipe.models import Source, Recipe, IngredientRecipe, Ingredient, Review, IngredientModifier
-from application.app import app, db
+from application.base_models import db
 
 MAX_INGREDIENT_LENGTH = 50
 INGREDIENT_SPLITTING_PATTERN = re.compile(r'\band\b\W+\bor\b')
@@ -70,7 +69,6 @@ class IngredientParserPipeline:
                             )
                     self._insert_ingredient_recipe(recipe, ingredients, parsed_ingredients)
                 except DuplicateRecipeException:
-                    app.logger.error("RECIPE INSERT | Recipe Error: {0}".format(traceback.format_exc()))
                     pass
 
     @staticmethod
@@ -92,7 +90,6 @@ class IngredientParserPipeline:
         if not recipe:
             source = Source.query.filter(Source.base_url == self._find_base_url(data['url'])).first()
             if not source:
-                app.logger.error("RECIPE SOURCE ERROR | Recipe Error: {0}".format(traceback.format_exc()))
                 print("Error with url: {0}".format(data['url']))
                 return
             ratings_data = self._get_recipe_ratings(data)
@@ -188,9 +185,15 @@ class IngredientParserPipeline:
         :return: None
         """
         recipe_ingredients = []
+        ingredient_pks = []
         for ingredient, parsed_ingredient in zip(ingredients, parsed_ingredients):
-            if not ingredient:
+            if not ingredient or ingredient.pk in ingredient_pks:
+                # also skips duplicated ingredients in a recipe to ensure ingredient_recipe
+                # table can have a unique index
+                # how to fix:
+                # http://stackoverflow.com/questions/24993111/remove-duplicate-rows-on-many-to-many-table-mysql
                 continue
+            ingredient_pks.append(ingredient.pk)
             modifier = self._insert_if_new_ingredient_modifier(parsed_ingredient.ingredient.modifier)
             amount = float(parsed_ingredient.amount.value) \
                 if parsed_ingredient.amount and parsed_ingredient.amount.value else None

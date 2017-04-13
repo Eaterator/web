@@ -3,7 +3,8 @@ import json
 from urllib.request import urlopen
 from abc import ABCMeta, abstractmethod
 from werkzeug.datastructures import MultiDict
-from flask import url_for, redirect, Blueprint, request, render_template, abort
+from flask import url_for, redirect, Blueprint, request, render_template, abort, current_app
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from rauth import OAuth2Service
 from application import config
 from application.auth.models import User, UserUtilities
@@ -12,8 +13,7 @@ from application.auth.auth_utilities import JWTUtilities, PasswordUtilities, Pas
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
 from application.auth.forms import AppRegistrationForm, StandardRegistrationForm, StandardLoginForm, \
     DuplicateUserEmailUsernameException
-from application.app import db, app
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from application.base_models import db
 
 auth_blueprint = Blueprint('auth', __name__,
                            template_folder=os.path.join('templates', 'auth'),
@@ -91,12 +91,12 @@ def oauth_callback(provider):
     try:
         oauth = OAuthSignIn.get_provider(provider)
     except KeyError:
-        app.logger.error("Failed authentication with <{0}>, not listed as a provider".format(provider))
+        current_app.logger.error("Failed authentication with <{0}>, not listed as a provider".format(provider))
         raise InvalidAPIRequest("Could not authenticate with the given provider", status_code=BAD_REQUEST_CODE)
     social_id, email = oauth.callback()
-    app.logger.debug("Data: | {0} | {1}".format(social_id, email))
+    current_app.logger.debug("Data: | {0} | {1}".format(social_id, email))
     if not social_id:
-        app.logger.error("OAuth did not return valid data. <{0}>".format(provider))
+        current_app.logger.error("OAuth did not return valid data. <{0}>".format(provider))
         raise InvalidAPIRequest('OAuth authentication error', status_code=UNAUTHORIZED_CODE)
     user = User.query.filter_by(social_id=social_id).first()
     if not user:
@@ -106,7 +106,7 @@ def oauth_callback(provider):
             db.session.add(user)
             db.session.commit()
         except Exception as e:
-            app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
+            current_app.logger.error("Could not create a user in the database. Error: {0}".format(str(e)))
     return redirect(url_for(
         'home.index',
         access_token=JWTUtilities.create_access_token(user)
@@ -188,10 +188,10 @@ class FacebookSignIn(OAuthSignIn):
         return resp
 
     def callback(self):
-        app.logger.debug("Running OAuth callback")
+        current_app.logger.debug("Running OAuth callback")
         if 'code' not in request.args:
             pass
-            app.logger.debug("No code in request")
+            current_app.logger.debug("No code in request")
         oauth_session = self.service.get_auth_session(
             data={
                 'code': request.args['code'],

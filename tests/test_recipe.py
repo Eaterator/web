@@ -77,9 +77,9 @@ class TestRecipeControllers(TestCase, BaseTempDBTestCase):
     def test_top_ingredients_search(self):
         test_regular_user = self.create_regular_user()
         token, _ = self.get_jwt_token(test_regular_user)
-        resp = self.app.post("/recipe/top-ingredients",
-                             content_type='application/json',
-                             headers={"Authorization": "Bearer {0}".format(token)})
+        resp = self.test_client.post("/recipe/top-ingredients",
+                                     content_type='application/json',
+                                     headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 200)
         self.assertNotEqual(json.loads(resp.data.decode('utf-8'))["ingredients"], 0)
 
@@ -88,10 +88,10 @@ class TestRecipeControllers(TestCase, BaseTempDBTestCase):
     #     pass
 
     def search_ingredients(self, ingredients, endpoint, token):
-        return self.app.post(endpoint,
-                             data=json.dumps({"ingredients": ingredients}),
-                             content_type='application/json',
-                             headers={"Authorization": "Bearer {0}".format(token)})
+        return self.test_client.post(endpoint,
+                                     data=json.dumps({"ingredients": ingredients}),
+                                     content_type='application/json',
+                                     headers={"Authorization": "Bearer {0}".format(token)})
 
     def assert_search_not_empty(self, resp):
         recipes = json.loads(resp.data.decode('utf-8'))

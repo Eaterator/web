@@ -1,4 +1,4 @@
-from application.app import db
+from application.base_models import db
 from application.base_models import RequiredFields
 
 
@@ -7,7 +7,6 @@ class UserSearchData(RequiredFields):
 
     pk = db.Column(db.Integer, primary_key=True)
     search = db.Column(db.JSON)
-    # search = db.Column(db.Text)  ## windows
     user = db.Column(db.Integer, db.ForeignKey('auth_user.pk'))
     User = db.relationship("User", backref="user_searchdata")
 

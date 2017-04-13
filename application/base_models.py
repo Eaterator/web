@@ -3,7 +3,6 @@ from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.orm as orm
 from flask_sqlalchemy import _BoundDeclarativeMeta, Model as BaseModel, _QueryProperty
 from inspect import getmembers
-from application.app import db
 from application import config
 
 
@@ -44,6 +43,8 @@ class SQLiteAdaptor(_BoundDeclarativeMeta):
         return new_class
 
 
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy(session_options={'expire_on_commit': False})
 Model = declarative_base(cls=BaseModel, name='Model', metaclass=SQLiteAdaptor)
 Model.query = _QueryProperty(db)
 db.Model = Model
