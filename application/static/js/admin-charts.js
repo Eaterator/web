@@ -227,11 +227,24 @@ d3.custom.lineChart = function module() {
                 })
                 .interpolate('monotone');
 
+            var area = d3.svg.area()
+                .x(function(d) {
+                    return x(parseDate(d.date));
+                })
+                .y0(chartH)
+                .y1(function(d) {
+                    return y(d.value);
+                })
+
             svg.append('svg:path')
                 .attr('d', line(_data))
                 .attr('stroke', 'blue')
                 .attr('stroke-width', 2)
                 .attr('fill', 'none');
+
+            svg.append('svg:path')
+                .attr("class", "area")
+                .attr("d", area(_data));
 
             // add title
             svg.append("text")

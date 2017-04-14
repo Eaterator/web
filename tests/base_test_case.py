@@ -1,9 +1,8 @@
-from unittest import TestCase
-from tempfile import TemporaryDirectory
 from datetime import datetime
-import os
 import json
 import random
+from application import config
+config.DATABASE_ENGINE = 'sqlite'  # needed to apply base_model MetaClass to remove non sqlite friendly stuff
 from application.app import app, db
 from application.auth.models import Role, User
 from application.auth.auth_utilities import PasswordUtilities, ACCESS_TOKEN_HEADER
@@ -13,24 +12,25 @@ from application.auth.roles import ROLES
 random.seed(1000)
 
 
-class BaseTempDBTestCase(TestCase):
+class BaseTempDBTestCase:
     """
     Creates helper functions to create fresh DB instance between tests, and helper function to populate
     necessary data for tests to avoid mock responses to try to imitate real responses in production.
     """
 
-    def setUp(self):
+    def setUpDB(self):
         self.app = app
         self.app.config['TESTING'] = True
-        self.tmp_dir = TemporaryDirectory()
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(self.tmp_dir.name, 'tmp.db')
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
         self.db = db
-        # testing tweaks, also work for SQLite/window. Need to figure out a way to avoid making table indexes/full
         self.db.app.config.update(
             SQLALCHEMY_MAX_OVERFLOW=None,
             SQLALCHEMY_POOL_SIZE=None
         )
         self.app = app.test_client()
+        self.db.session.remove()
+        self.db.session.close()
+        self.db.drop_all()
         self.db.create_all()
         self.roles = self.ingredients = self.recipes = None
 
@@ -102,11 +102,10 @@ class BaseTempDBTestCase(TestCase):
                              )
         return json.loads(resp.data.decode('utf-8')).get(ACCESS_TOKEN_HEADER), resp
 
-    def tearDown(self):
+    def tearDownDB(self):
         self.db.session.remove()
         self.db.session.close()
         self.db.drop_all()
-        del self.tmp_dir
 
 
 INGREDIENTS = ["chicken", "potato", "pepper", "onion"]

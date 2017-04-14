@@ -208,8 +208,8 @@ def parse_ingredients_with_modifiers(payload):
 
 
 def create_recipe_search_query(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE):
-    if len(ingredients) < 3:
-        raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
+    # if len(ingredients) < 3:
+    #    raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
     return db.session.query(Recipe).\
         join(IngredientRecipe).\
         join(Ingredient).\

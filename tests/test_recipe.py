@@ -1,10 +1,13 @@
-from unittest import main as run_tests
+from unittest import TestCase, main as run_tests
 from tests.base_test_case import BaseTempDBTestCase
 from application.recipe.models import Recipe, Ingredient, IngredientRecipe
 import json
 
 
-class TestRecipeModels(BaseTempDBTestCase):
+class TestRecipeModels(TestCase, BaseTempDBTestCase):
+
+    def setUp(self):
+        self.setUpDB()
 
     def test_recipe_model(self):
         self.create_recipes()
@@ -20,11 +23,14 @@ class TestRecipeModels(BaseTempDBTestCase):
         self.create_recipe_ingredients()
         self.assertNotEqual(len(IngredientRecipe.query.all()), 0)
 
+    def tearDown(self):
+        self.tearDownDB()
 
-class TestRecipeControllers(BaseTempDBTestCase):
+
+class TestRecipeControllers(TestCase, BaseTempDBTestCase):
 
     def setUp(self):
-        super().setUp()
+        self.setUpDB()
         self.create_recipes()
         self.create_ingredients()
         self.create_recipe_ingredients()
@@ -64,17 +70,22 @@ class TestRecipeControllers(BaseTempDBTestCase):
                                        token)
         self.assertNotEqual(resp.status_code, 200)
 
-    def test_business_batch_search(self):
-        # TODO later, not a priority
-        pass
+    # def test_business_batch_search(self):
+    #     # TODO later, not a priority
+    #     pass
 
     def test_top_ingredients_search(self):
-        # TODO implement test
-        pass
+        test_regular_user = self.create_regular_user()
+        token, _ = self.get_jwt_token(test_regular_user)
+        resp = self.app.post("/recipe/top-ingredients",
+                             content_type='application/json',
+                             headers={"Authorization": "Bearer {0}".format(token)})
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotEqual(json.loads(resp.data.decode('utf-8'))["ingredients"], 0)
 
-    def test_related_ingredients_search(self):
-        # TODO implement test
-        pass
+    # def test_related_ingredients_search(self):
+    #     # TODO implement test
+    #     pass
 
     def search_ingredients(self, ingredients, endpoint, token):
         return self.app.post(endpoint,
@@ -90,6 +101,9 @@ class TestRecipeControllers(BaseTempDBTestCase):
     def assert_search_result_length_equal(self, resp, length):
         recipes = json.loads(resp.data.decode('utf-8'))
         self.assertEqual(len(recipes["recipes"]), length)
+
+    def tearDown(self):
+        self.tearDownDB()
 
 
 if __name__ == '__main__':

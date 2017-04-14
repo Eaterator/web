@@ -2,10 +2,26 @@
     {{ include_raw('/admin/nginx_report.html') }}
 </div>
 <style>
+    .show {
+        display: table-row !important;
+    }
+
+    body {
+        border: none;
+    }
+
+    #layout {
+        padding-left: 50px !important;
+    }
     .admin-container {
+        border: 20px solid #9DC209;
+        padding: 0;
+        box-sizing: border-box;
         position: absolute;
         overflow: auto;
-        width: calc(100% - 260px);
+        width: calc(100% - 260px + 10px);
+        margin-top: -50px;
+        margin-left: 0px;
     }
 
     @media (max-width:767px) {

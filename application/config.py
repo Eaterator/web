@@ -20,7 +20,8 @@ SQLALCHEMY_MAX_OVERFLOW = 10
 LOG_DIR = os.environ['LOGGING_DIR'] if 'LOGGING_DIR' in os.environ else os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'logging' 
 )
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.ERROR
+GEVENT_REQUEST_LOGGING = False
 
 ##########################################
 #           Flask Configuration          #
@@ -35,6 +36,11 @@ DEV_STATIC_FILE_DIRECTORY = os.path.join(
 PROD_STATIC_FILE_DIRECTORY = os.environ['PROD_STATIC_FILES_DIR'] if os.environ.get('PROD_STATIC_FILES_DIR') else ''
 
 ##########################################
+#            PYPY Settings               #
+USE_PYPY = False
+
+##########################################
+
 #         Gevent/uWSGI Settings          #
 USE_GEVENT = True  # Set to True if windows environment to avoid gevent use
 GEVENT_PORT = 80

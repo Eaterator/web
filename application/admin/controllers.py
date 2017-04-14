@@ -22,7 +22,7 @@ admin_blueprint = Blueprint('admin', __name__,
 
 @admin_blueprint.route("/<page>", methods=["GET"])
 @jwt_required
-@JWTUtilities.user_role_required(ADMIN_ROLE_TYPE)
+@JWTUtilities.user_role_required([ADMIN_ROLE_TYPE])
 # @cache.cached(timeout=int(60*60/2), key_prefix=RedisUtilities.cache_by_static_page)
 def admin_dashboard(page):
     try:

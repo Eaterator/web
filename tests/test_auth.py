@@ -1,4 +1,4 @@
-from unittest import main as run_tests
+from unittest import TestCase, main as run_tests
 from datetime import datetime
 from copy import copy
 import json
@@ -8,10 +8,10 @@ from application.auth.models import User, Role
 from application.auth.auth_utilities import PasswordUtilities
 
 
-class TestAuthModels(BaseTempDBTestCase):
+class TestAuthModels(TestCase, BaseTempDBTestCase):
 
     def setUp(self):
-        super().setUp()
+        self.setUpDB()
 
     def test_create_role(self):
         test_role = Role(name="admin", type_='admin', is_admin=True)
@@ -51,11 +51,14 @@ class TestAuthModels(BaseTempDBTestCase):
         self.assertEqual(users[0].role, test_role.pk)
         self.assertEqual(users[0].Role, test_role)
 
+    def tearDown(self):
+        self.tearDownDB()
 
-class TestAuthRoutes(BaseTempDBTestCase):
+
+class TestAuthRoutes(TestCase, BaseTempDBTestCase):
 
     def setUp(self):
-        super().setUp()
+        self.setUpDB()
         self.create_roles()
 
     def test_register_user(self):
@@ -127,15 +130,18 @@ class TestAuthRoutes(BaseTempDBTestCase):
     def test_jwt_required_admin(self):
         self.create_user(TEST_ADMIN_USER, self.roles["admin"])
         token, _ = self.get_jwt_token(TEST_ADMIN_USER)
-        resp = self.app.get('/admin/',
+        resp = self.app.get('/admin/dashboard.html',
                             headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 200)
 
         self.create_user(TEST_REGULAR_USER, self.roles["regular"])
         token, _ = self.get_jwt_token(TEST_REGULAR_USER)
-        resp = self.app.get('/admin/',
+        resp = self.app.get('/admin/dashboard.html',
                             headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 403)
+
+    def tearDown(self):
+        self.tearDownDB()
 
 
 if __name__ == '__main__':
