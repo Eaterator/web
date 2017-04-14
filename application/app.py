@@ -12,8 +12,10 @@ from application.auth.auth_utilities import JWTUtilities
 app = Flask(__name__)
 app.config.from_pyfile(config.CONFIG_FILE)
 db = SQLAlchemy(app, session_options={'expire_on_commit': False})
-if not config.USE_REDIS:
+if not config.USE_REDIS and config.USE_CACHE:
     cache = Cache(config={'CACHE_TYPE': 'simple'})
+if not config.USE_CACHE:
+    cache = Cache(config={'CACHE_TYPE': 'null'})
 else:
     cache = Cache(config=config.REDIS_CONFIG)
 cache.init_app(app)

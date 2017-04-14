@@ -52,8 +52,6 @@ class IngredientParserPipeline:
                 try:
                     if not recipe_data['url'] or recipe_data['url'].lower() in current_recipes:
                         continue
-                    if not recipe_data['ingredients']:
-                        continue
                     current_recipes.add(recipe_data['url'].lower())
                     recipe = self._insert_if_new_recipe(recipe_data)
                     ingredients = []

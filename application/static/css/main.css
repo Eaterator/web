@@ -488,14 +488,95 @@ label.star:before {
     pointer-events:none;
 }
 
-/*
-.bootstrap-overrides .activee:after{
-    content: '';
-    height: 0;
-    clear: both;
-}
-*/
 .bootstrap-overrides .ingredient-caption{
 	margin: 0 !important;
     padding-top: 20px;
+}
+
+.bootstrap-overrides .login-wrapper .row{
+	padding-bottom: 60px;
+    margin-top: 20px;
+}
+
+.bootstrap-overrides .login-form{
+    text-align: center;	
+}
+
+.bootstrap-overrides .login-form h3{
+    padding-bottom: 40px;
+}
+ 
+.bootstrap-overrides .register-form{
+	margin-top: 30px;
+}
+
+.bootstrap-overrides .register-form .form-group{
+	 padding-top: 30px;
+}
+
+.bootstrap-overrides .register-form .register-buttons{
+	padding-top: 40px;
+}
+
+.bootstrap-overrides .register-form .register-buttons .btn-cancel{
+    background-color: #666;
+    color: #fff;
+}
+
+
+/*
+ * Social Buttons for Bootstrap
+ *
+ * Copyright 2013-2016 Panayiotis Lipiridis
+ * Licensed under the MIT License
+ *
+ * https://github.com/lipis/bootstrap-social
+ */
+
+.login-form .btn-social{position:relative;padding-left:44px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.login-form .btn-social>:first-child{position:absolute;left:0;top:0;bottom:0;width:32px;line-height:34px;font-size:1.6em;text-align:center;border-right:1px solid rgba(0,0,0,0.2)}
+.login-form .btn-social .btn-lg{padding-left:61px}
+.login-form .btn-social .btn-lg>:first-child{line-height:45px;width:45px;font-size:1.8em}
+.login-form .btn-social.btn-sm{padding-left:38px}
+.login-form .btn-social .btn-sm>:first-child{line-height:28px;width:28px;font-size:1.4em}
+.login-form .btn-social.btn-xs{padding-left:30px}
+.login-form .btn-social .btn-xs>:first-child{line-height:20px;width:20px;font-size:1.2em}
+.login-form .btn-social-icon{position:relative;padding-left:44px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:34px;width:34px;padding:0}
+.login-form .btn-social-icon>:first-child{position:absolute;left:0;top:0;bottom:0;width:32px;line-height:34px;font-size:1.6em;text-align:center;border-right:1px solid rgba(0,0,0,0.2)}
+.login-form .btn-social-icon .btn-lg{padding-left:61px}
+.login-form .btn-social-icon .btn-lg>:first-child{line-height:45px;width:45px;font-size:1.8em}
+.login-form .btn-social-icon .btn-sm{padding-left:38px}
+.login-form .btn-social-icon .btn-sm>:first-child{line-height:28px;width:28px;font-size:1.4em}
+.login-form .btn-social-icon .btn-xs{padding-left:30px}
+.login-form .btn-social-icon.btn-xs>:first-child{line-height:20px;width:20px;font-size:1.2em}
+.login-form .btn-social-icon>:first-child{border:none;text-align:center;width:100% !important}
+.login-form .btn-social-icon .btn-lg{height:45px;width:45px;padding-left:0;padding-right:0}
+.login-form .btn-social-icon .btn-sm{height:30px;width:30px;padding-left:0;padding-right:0}
+.login-form .btn-social-icon .btn-xs{height:22px;width:22px;padding-left:0;padding-right:0}
+
+.bootstrap-overrides .login-form .btn-facebook{color:#fff;background-color:#3b5998;border-color:rgba(0,0,0,0.2);margin: 0 auto}
+.bootstrap-overrides .login-form .btn-facebook:focus,.btn-facebook.focus{color:#fff;background-color:#2d4373;border-color:rgba(0,0,0,0.2)}
+.bootstrap-overrides .login-form .btn-facebook:hover{color:#fff;background-color:#2d4373;border-color:rgba(0,0,0,0.2)}
+.bootstrap-overrides .login-form .btn-facebook:active,.btn-facebook.active,.open>.dropdown-toggle.btn-facebook{color:#fff;background-color:#2d4373;border-color:rgba(0,0,0,0.2)}
+.login-form .btn-facebook:active:hover,.btn-facebook.active:hover,.open>.dropdown-toggle.btn-facebook:hover,.btn-facebook:active:focus,.btn-facebook.active:focus,.open>.dropdown-toggle.btn-facebook:focus,.btn-facebook:active.focus,.btn-facebook.active.focus,.open>.dropdown-toggle.btn-facebook.focus{color:#fff;background-color:#23345a;border-color:rgba(0,0,0,0.2)}
+.login-form .btn-facebook:active,.btn-facebook.active,.open>.dropdown-toggle.btn-facebook{background-image:none}
+.login-form .btn-facebook.disabled:hover,.btn-facebook[disabled]:hover,fieldset[disabled] .btn-facebook:hover,.btn-facebook.disabled:focus,.btn-facebook[disabled]:focus,fieldset[disabled] .btn-facebook:focus,.btn-facebook.disabled.focus,.btn-facebook[disabled].focus,fieldset[disabled] .btn-facebook.focus{background-color:#3b5998;border-color:rgba(0,0,0,0.2)}
+.btn-facebook .badge{color:#3b5998;background-color:#fff}
+
+
+.bootstrap-overrides .about{
+	padding: 25px;
+}
+.bootstrap-overrides .about a{
+    color: #666;
+}
+.bootstrap-overrides .contact{
+	padding: 25px;
+}
+.bootstrap-overrides .contact-form .control-label{
+    text-align: left;
+}
+.bootstrap-overrides .contact-form #message{
+/*	max-width: 70%;*/
+/*    margin-left: 30%;*/
 }

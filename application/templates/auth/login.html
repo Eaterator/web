@@ -1,41 +1,129 @@
-{% include 'home.html' %}
+<body class="bootstrap-overrides">
+{% include 'head.html' %}
 {% raw %}
-    <h1>Welcome to Eaterator</h1>
-    <p>Please sign in or register to continue</p>
+    <h2 class="text-center">Welcome to Eaterator</h2>
+    <hr>
+    <div class="color-line center"></div>
+    <h3 class="text-center">Please sign in or register to continue</h3>
     <!-- Login form remains hidden until the user wants to log into the site -->
-    <div class="login-wrapper">
-       <div class="login-form" ng-hide="isRegistering">
-           <h3>Social Login</h3>
-           <ul>
-               <li>
-                   <a ng-click="socialLogin('facebook')">
-                       <button>Login/Register with Facebook</button>
-                   </a>
-               </li>
-           </ul>
-           <h3>Account Login</h3>
-           <p>Username: <input ng-model="username"/></p>
-           <p>Password: <input type="password" ng-model="password"></p>
-           <p>{{ errors.login }}</p>
-           <button style="backgroud-color: blue; height: 250px; width: 250px;" ng-click="login()">Login</button>
-           <button ng-click="startRegistering()">Register</button>
-       </div>
-       <div ng-hide="!isRegistering" class="register-form">
-           <h3>Make an Account</h3>
-           <p>Username (Email): <input ng-model="registerData.username"></p>
-           <p>{{ errors.register.username }}</p>
-           <p>Password: <input type="password" ng-model="registerData.password"></p>
-           <p>{{ errors.register.password }}</p>
-           <p>Confirm Password: <input type="password" ng-model="registerData.confirm"></p>
-           <p>{{ errors.register.confirm }}</p>
-           <p>Date of Birth: <input ng-model="registerData.date_of_birth"></p>
-           <p>{{ errors.register.date_of_birth }}</p>
-           <p>First Name: <input ng-model="registerData.first_name"></p>
-           <p>{{ errors.register.first_name }}</p>
-           <p>Last Name: <input ng-model="registerData.last_name"></p>
-           <p>{{ errors.register.last_name }}</p>
-           <button ng-click="register()">Register</button>
-           <button ng-click="stopRegistering()">Cancel</button>
+    <div class="container login-wrapper panel-body">
+      <div class="row">
+          <form id="loginform" class="form-horizontal col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2" role="form">
+                     
+             <div style="margin-bottom: 25px" class="input-group">
+                         <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                         <input id="login-username" type="text" class="form-control" name="username" value="" placeholder="username or email">                                        
+                     </div>
+                 
+             <div style="margin-bottom: 25px" class="input-group">
+                         <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                         <input id="login-password" type="password" class="form-control" name="password" placeholder="password" ng-model="password">
+                     </div>
+
+                 <div style="margin-top:10px" class="form-group">
+                     <!-- Button -->
+
+                     <div class="col-sm-12 controls">
+                       <a id="btn-login" href="#" class="btn btn-success" ng-click="login()">Login</a>
+                       <a id="btn-fblogin" href="#" class="btn btn-primary" ng-click="socialLogin('facebook')">Login with Facebook</a>
+
+                     </div>
+                 </div>
+                 <div class="form-group">
+                     <div class="col-md-12 control">
+                         <div style="border-top: 1px solid#888; padding-top:15px; font-size:85%" >
+                             Don't have an account! 
+                         <a href="#" ng-click="startRegistering()">
+                             Sign Up Here
+                         </a>
+                         </div>
+                     </div>
+                 </div>    
+             </form> 
+<!--           <form class="login-form" ng-hide="isRegistering">-->
+<!--              <div class="social-login col-md-6">-->
+<!--               <h3>Social Login</h3>-->
+<!--                   <button class="btn btn-social btn-facebook" ng-click="socialLogin('facebook')">-->
+<!--                       <span class="fa fa-facebook"></span>-->
+<!--                       Login/Register with Facebook-->
+<!--                   </button>-->
+<!--               </div>-->
+<!--               <div class="account-login col-md-6">-->
+<!--                   <h3>Account Login</h3>-->
+<!--                   <p>Username: <input ng-model="username"/></p>-->
+<!--                   <p>Password: <input type="password" ng-model="password"></p>-->
+<!--                   <p>{{ errors.login }}</p>-->
+<!--                   <button ng-click="login()">Login</button>-->
+<!--                   <button ng-click="startRegistering()">Register</button>-->
+<!--               </div>-->
+<!--           </form>-->
+           <form ng-hide="!isRegistering" class="register-form col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+                <div class="form-group">
+                     <label for="email" class="col-md-3 control-label">Email</label>
+                     <div class="col-md-9">
+                         <input type="text" class="form-control" name="email" placeholder="Email Address"
+                         ng-model="registerData.username">
+                     </div>
+                 </div>
+                     
+                 <div class="form-group">
+                     <label for="firstname" class="col-md-3 control-label">First Name</label>
+                     <div class="col-md-9">
+                         <input type="text" class="form-control" name="firstname" placeholder="First Name"
+                         ng-model="registerData.first_name">
+                     </div>
+                 </div>
+                 
+                 <div class="form-group">
+                     <label for="lastname" class="col-md-3 control-label">Last Name</label>
+                     <div class="col-md-9">
+                         <input type="text" class="form-control" name="lastname" placeholder="Last Name"
+                         ng-model="registerData.last_name">
+                     </div>
+                 </div>
+                 
+                 <div class="form-group">
+                     <label for="password" class="col-md-3 control-label">Password</label>
+                     <div class="col-md-9">
+                         <input type="password" class="form-control" name="passwd" placeholder="Password"
+                         ng-model="registerData.password">
+                     </div>
+                 </div>
+                 
+                 <div class="form-group">
+                     <label for="password" class="col-md-3 control-label">Confirm Password</label>
+                     <div class="col-md-9">
+                         <input type="password" class="form-control" name="passwd" placeholder="Confirm Password" ng-model="registerData.confirm">
+                     </div>
+                 </div>
+
+                 <div class="form-group register-buttons">
+                     <!-- Button -->                                        
+                     <div class="col-md-9">
+                         <button id="btn-signup" type="button" class="btn btn-success" ng-click="register()">
+                         <i class="icon-hand-right"></i> &nbsp Sign Up</button>
+                         <button id="btn-signup" type="button" class="btn btn-cancel" ng-click="stopRegistering()">
+                         Cancel
+                         </button>
+                     </div>
+                 </div>
+<!--            Account</h3>-->
+<!--               <p>Username (Email): <input ng-model="registerData.username"></p>-->
+<!--               <p>{{ errors.register.username }}</p>-->
+<!--               <p>Password: <input type="password" ng-model="registerData.password"></p>-->
+<!--               <p>{{ errors.register.password }}</p>-->
+<!--               <p>Confirm Password: <input type="password" ng-model="registerData.confirm"></p>-->
+<!--               <p>{{ errors.register.confirm }}</p>-->
+<!--               <p>Date of Birth: <input ng-model="registerData.date_of_birth"></p>-->
+<!--               <p>{{ errors.register.date_of_birth }}</p>-->
+<!--               <p>First Name: <input ng-model="registerData.first_name"></p>-->
+<!--               <p>{{ errors.register.first_name }}</p>-->
+<!--               <p>Last Name: <input ng-model="registerData.last_name"></p>-->
+<!--               <p>{{ errors.register.last_name }}</p>-->
+<!--               <button ng-click="register()">Register</button>-->
+<!--               <button ng-click="stopRegistering()">Cancel</button>-->
+       </form>
        </div>
     </div><!-- end of login form -->
 {% endraw %}
+</body>

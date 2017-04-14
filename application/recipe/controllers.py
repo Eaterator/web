@@ -34,19 +34,6 @@ INCLUDES_INGREDIENT = 0.5
 INCLUDES_TITLE = 1
 INCLUDES_MODIFIER = 0.75
 FULLTEXT_INDEX_CONFIG = 'english'
-FALLBACK_SEARCH_ORDER = lambda ingredients: (
-    desc(
-        func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
-                func.to_tsquery('english', '|'.join(ingredients)),
-                2
-            ) +
-        func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery('english', '|'.join(ingredients))
-        )
-    )
-)
 
 recipe_blueprint = Blueprint('recipe', __name__,
                              template_folder=os.path.join('templates', 'recipe'),
@@ -132,15 +119,12 @@ def fulltext_search_recipe(limit=None):
     try:
         payload = request.get_json()
         raw_search = set(payload["ingredients"])
+        # ingredients, modifiers = parse_ingredients_with_modifiers(payload)
     except (TypeError, ValueError):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     try:
         register_user_search(user_pk, payload)
-        ingredients = [i.strip() for i in raw_search]
-        recipes = create_fulltext_ingredient_search(ingredients, limit=limit, op=and_)
-        if len(recipes) == 0:
-            recipes = create_fulltext_ingredient_search(ingredients, limit=limit, op=or_,
-                                                        order_by=FALLBACK_SEARCH_ORDER(ingredients))
+        recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search], limit=limit)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
@@ -249,7 +233,7 @@ def _apply_dynamic_filters(ingredients):
     return dynamic_filters
 
 
-def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE, op=and_, order_by=func.count(Ingredient.pk)):
+def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE):
     """
     Function to create a fulltext query to filter out all recipes not containing <min_ingredients> ingredients. Ranks by
     recipe that contains the most ingredients, and then ranks by match of ingredients list to the title. This could
@@ -257,7 +241,6 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     create_fulltext_search_query.
     :param ingredients: List<string> ["onion", "chicken", "peppers"]
     :param limit: number of recipes to return
-    :param op: the operation (and_ or or_ from which filter from subqueries on the searches.
     :return: List<Recipe>
     """
     ingredients = _clean_and_stringify_ingredients_query(ingredients)
@@ -265,7 +248,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         join(IngredientRecipe). \
         join(Ingredient). \
         filter(
-            op(
+            and_(
                 *_apply_dynamic_fulltext_filers(ingredients)
             )
         ). \
@@ -274,7 +257,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
             func.count(IngredientRecipe.pk) >= len(ingredients)
         ). \
         order_by(
-            order_by
+            func.count(IngredientRecipe.pk)
         ). \
         order_by(desc(
             func.ts_rank(

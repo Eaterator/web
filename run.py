@@ -1,10 +1,5 @@
 import os
 from application import config
-
-if config.USE_PYPY:
-    from psycopg2cffi import compat
-    compat.register()
-
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
     from gevent.pywsgi import WSGIServer
@@ -13,12 +8,12 @@ if config.USE_GEVENT:
     # patch database driver to be non blocking
     import psycogreen.gevent
     psycogreen.gevent.patch_psycopg()
-
-
-# modify db for gevent
-from application.app import app, db
-db.engine.pool._use_threadlocal = True
-db.engine.pool.use_threadlocal = True
+    # modify db for gevent
+    from application.app import app, db
+    db.engine.pool._use_threadlocal = True
+    db.engine.pool.use_threadlocal = True
+else:
+    from application.app import app, db
 
 # development and testing
 if __name__ == '__main__':
@@ -29,7 +24,22 @@ if __name__ == '__main__':
         server.serve_forever()
     elif config.DEBUG or not config.USE_GEVENT:
         print("Running flask development server")
-        app.run(debug=True)
+        db.app.config.update(
+            SQLALCHEMY_MAX_OVERFLOW=None,
+            SQLALCHEMY_POOL_SIZE=None
+        )
+        from application.app import TEMPLATE_DIR
+        extra_dirs = [TEMPLATE_DIR]
+        print("watching template dirs: {0}".format(extra_dirs))
+        extra_files = extra_dirs[:]
+        for extra_dir in extra_dirs:
+            for dirname, dirs, files in os.walk(extra_dir):
+                for filename in files:
+                    filename = os.path.join(dirname, filename)
+                    if os.path.isfile(filename):
+                        extra_files.append(filename)
+        # extra_files.append('C:/Maryne ... /static/css/main.css')
+        app.run(debug=True, extra_files=extra_files)
 
 # production
 # may need to revist this

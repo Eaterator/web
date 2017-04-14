@@ -60,15 +60,3 @@ The following commands are needed to insert data and make the API functional. Re
     (virtual-env)$ python manage.py insert_recipe_data  # inserts recipe data
     (virtual-env)$ python manage.py update_fulltext_fields  # populates fulltext fields for fulltext search API
     (virtual-env)$ python manage.py create_indexes  # creates indexes for to expedite fulltext search API
-
-
-## Look into PyPy
-Biggest thing to overcome is porting psycopg2 to psycopg2cffi. It looks like there is a hook here:
-
-https://pypi.python.org/pypi/psycopg2cffi
-
-and a small example here that seems to avoid psycopg2cffi in the actual application but install psycopg2 to the
-virtual env.
-
- https://github.com/lvella/pypy-gevent-psycopg2-pool-sample
-

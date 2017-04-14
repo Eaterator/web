@@ -58,8 +58,12 @@ angular.module('eateratorApp')
     }
 ])
 .controller('RecipeCtrl',
-    ['$scope', 'authenticationService', 'userFactory', 'recipesFactory', '$http', '$window', '$filter',
-    function($scope, authenticationService, userFactory, recipesFactory, $http, $window, $filter){
+    ['$scope', 'authenticationService', 'userFactory', 'recipesFactory', '$http', '$window', '$filter', '$state', '$templateCache',
+    function($scope, authenticationService, userFactory, recipesFactory, $http, $window, $filter, $state, $templateCache){
+        // Debug remove, for quick template reloading
+        // $templateCache.remove('/search.html');
+        // $state.reload();
+        // Cache remove debug -> get rid of in production
         // Controller setup
         $scope.showDetails = false;
         $scope.showDescription = false;
@@ -145,8 +149,12 @@ angular.module('eateratorApp')
     }
 ])
 .controller('AuthCtrl',
-    ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state', '$stateParams',
-    function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams){
+    ['$scope', 'authenticationService', 'recipesFactory', '$http', '$window', '$state', '$stateParams', '$templateCache',
+    function($scope, authenticationService, recipesFactory, $http, $window, $state, $stateParams, $templateCache){
+        // Debug cache remove delete in production
+        // $templateCache.remove('/login.html');
+        // $state.reload();
+        // Debug cache, remove in production
         if ($scope.accessToken != ''){
             $state.go('login');
         }
@@ -206,9 +214,12 @@ angular.module('eateratorApp')
     }
 ])
 .controller('UserCtrl',
-    ['$scope', 'userFactory', 'recipesFactory', '$http', '$window',
-    function ($scope, userFactory, recipesFactory, $http, $window) {
-
+    ['$scope', 'userFactory', 'recipesFactory', '$http', '$window', '$templateCache', '$state',
+    function ($scope, userFactory, recipesFactory, $http, $window, $templateCache, $state) {
+        // Debug cache remove delete in production
+        // $templateCache.remove('/user/dashboard.html');
+        // $state.reload();
+        // Debug cache, remove in production
         $scope.getUserRecentSearches = function(number) {
             number = number || 20;
             var request = userFactory.getUserRecentSearches(number);
@@ -287,9 +298,13 @@ angular.module('eateratorApp')
     }
 ])
 .controller('AdminCtrl',
-    ['$scope', 'authenticationService', 'adminFactory', '$http', '$window', '$filter',
-    function($scope, authenticationService, adminFactory, $http, $window, $filter){
-
+    ['$scope', 'authenticationService', 'adminFactory', '$http', '$window', '$filter', '$templateCache', '$state',
+    function($scope, authenticationService, adminFactory, $http, $window, $filter, $templateCache, $state){
+        // Debug cache remove delete in production
+        // $templateCache.remove('/admin/dashboard.html');
+        // $templateCache.remove('/admin/sidebar-nav-nginx.html');
+        // $state.reload();
+        // Debug cache, remove in production
         $scope.newUsers = [];
         $scope.newUsersCumulative = [];
         $scope.uniqueUserSearches = [];

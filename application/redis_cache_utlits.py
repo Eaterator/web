@@ -2,6 +2,7 @@ from flask import request
 from functools import reduce
 import string
 import re
+import functools
 
 
 def _primes_to(n):
@@ -31,5 +32,3 @@ class RedisUtilities:
     @staticmethod
     def cache_by_static_page(*args, **kwargs):
         return request.path.split('/')[-1]
-
-
