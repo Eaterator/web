@@ -22,6 +22,7 @@ class BaseTempDBTestCase:
         config.SQLALCHEMY_POOL_SIZE = None
         config.TESTING = True
         config.DATABASE_ENGINE = 'sqlite'
+        config.SQLALCHEMY_DATABASE_URI = "sqlite://"
         self.app = create_app(config=config)
         from application.base_models import db
         self.db = db

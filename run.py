@@ -1,5 +1,11 @@
 import os
 from application import config
+
+# using pypy requires psycopg2 patch
+if config.USE_PYPY:
+    from psycopg2cffi import compat
+    compat.register()
+
 if config.USE_GEVENT:
     # patch built-in modules for greenlets/async
     from gevent.pywsgi import WSGIServer
@@ -31,6 +37,9 @@ if __name__ == '__main__':
         #     SQLALCHEMY_POOL_SIZE=None
         # )
         from application.app import TEMPLATE_DIR
+        config.SQLALCHEMY_MAX_OVERFLOW = None
+        config.SQLALCHEMY_POOL_SIZE = None
+        app = create_app(config=config)
         extra_dirs = [TEMPLATE_DIR]
         print("watching template dirs: {0}".format(extra_dirs))
         extra_files = extra_dirs[:]

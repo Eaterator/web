@@ -76,6 +76,7 @@ ROLES = [ADMIN_ROLE_TYPE, BUSINESS_ROLE_TYPE, CONSUMER_ROLE_TYPE]
 
 ##########################################
 #             REDIS SETTING              #
+USE_CACHE = True
 USE_REDIS = True
 REDIS_CONFIG = {
     'CACHE_TYPE': 'redis',

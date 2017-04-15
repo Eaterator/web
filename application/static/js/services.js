@@ -37,7 +37,11 @@ angular.module('eateratorApp')
     return {
         getToken: function(){
             // getting token from url
-            return $http.post('/auth/', JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));
+            return $http({
+                url:  '/auth/',
+                method: "POST",
+                data: JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));
+            });
         },
         registerUser: function(registerPayload){
             return $http({
