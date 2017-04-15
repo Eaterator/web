@@ -187,6 +187,7 @@ def recipe_information(pk):
 
 
 def register_user_search(user_pk, json_data):
+    print("user pk: {0}".format(user_pk))
     new_user_search = UserSearchData(user=user_pk, search=json.dumps(json_data))
     db.session.add(new_user_search)
     db.session.commit()
