@@ -62,9 +62,9 @@ class TestUserControllers(TestCase, BaseTempDBTestCase):
         favourites = FavouriteRecipe.query.filter(FavouriteRecipe.user == user.pk).all()
         self.assertEqual(len(favourites), 5)
 
-        resp = self.app.get('/user/favourite-recipes',
-                            content_type='application/json',
-                            headers={"Authorization": "Bearer {0}".format(token)})
+        resp = self.test_client.get('/user/favourite-recipes',
+                                    content_type='application/json',
+                                    headers={"Authorization": "Bearer {0}".format(token)})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(json.loads(resp.data.decode('utf-8'))["recipes"]), 5)
 
@@ -79,24 +79,24 @@ class TestUserControllers(TestCase, BaseTempDBTestCase):
         user_searches = UserSearchData.query.filter(UserSearchData.user == user.pk).all()
         self.assertEqual(len(user_searches), len(search_terms))
 
-        resp = self.app.get('/user/recent-searches',
-                            content_type='application/json',
-                            headers={"Authorization": "Bearer {0}".format(token)})
+        resp = self.test_client.get('/user/recent-searches',
+                                    content_type='application/json',
+                                    headers={"Authorization": "Bearer {0}".format(token)})
         print(resp.data)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(json.loads(resp.data.decode('utf-8'))["searches"]), len(search_terms))
 
 
     def _post_favourite_recipe(self, recipe_id, token):
-        return self.app.post('/user/favourite-recipe/{0}'.format(recipe_id),
-                             content_type='application/json',
-                             headers={"Authorization": "Bearer {0}".format(token)})
+        return self.test_client.post('/user/favourite-recipe/{0}'.format(recipe_id),
+                                     content_type='application/json',
+                                     headers={"Authorization": "Bearer {0}".format(token)})
 
     def _post_user_search(self, ingredients, token):
-        return self.app.post('/recipe/search',
-                             data=json.dumps({"ingredients": ingredients}),
-                             content_type='application/json',
-                             headers={"Authorization": "Bearer {0}".format(token)})
+        return self.test_client.post('/recipe/search',
+                                     data=json.dumps({"ingredients": ingredients}),
+                                     content_type='application/json',
+                                     headers={"Authorization": "Bearer {0}".format(token)})
 
     def tearDown(self):
         self.tearDownDB()

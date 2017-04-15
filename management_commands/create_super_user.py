@@ -1,6 +1,6 @@
 from application.auth.models import User, Role
 from application.auth.controllers import PasswordUtilities, PasswordMismatchError
-from application.app import db
+from application.base_models import db
 from getpass import getpass
 
 

@@ -1,4 +1,4 @@
-from application.app import db
+from application.base_models import db
 from application.base_models import RequiredFields
 
 

@@ -25,7 +25,6 @@
 .user-search-container {
     position: relative;
     width: 100%;
-    /* align-content: center; */
     height: auto;
     height: 100%;
     overflow: auto;
@@ -45,7 +44,6 @@ body {
 .admin-chart {
     margin: 0 auto;
     overflow: auto;
-    /* display: inline-block; */
     min-width: 500px;
     width: 80%;
     height: auto;

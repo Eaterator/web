@@ -20,8 +20,8 @@ SQLALCHEMY_MAX_OVERFLOW = 10
 LOG_DIR = os.environ['LOGGING_DIR'] if 'LOGGING_DIR' in os.environ else os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'logging' 
 )
-LOG_LEVEL = logging.ERROR
-GEVENT_REQUEST_LOGGING = False
+LOG_LEVEL = logging.DEBUG
+GEVENT_REQUEST_LOGGING = True
 
 ##########################################
 #           Flask Configuration          #

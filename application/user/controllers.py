@@ -8,7 +8,7 @@ from application.recipe.models import Recipe
 from application.controllers import _parse_limit_parameter
 from application.recipe.utilities import RecipeIngredientFormatter
 from application.exceptions import InvalidAPIRequest, BAD_REQUEST_CODE, UNAUTHORIZED_CODE, NOT_FOUND_CODE
-from application.app import db
+from application.base_models import db
 
 DEFAULT_FAVOURITE_RECIPE_NUMBER = 25
 DEFAULT_FAVOURITE_RECIPE_ORDER = 'created_at'
