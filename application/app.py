@@ -85,7 +85,6 @@ def create_app(config=config_from_file):
             else:
                 app.logger.error("Unknown error: {0}. Stacktrace: {1}".format(str(error), get_traceback()))
 
-
         # Teardown to close/dremove db sessions after requests
         @app.teardown_appcontext
         def remove_session(exception=None):
