@@ -1,20 +1,28 @@
 {% raw %}
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
-            <div class="row">
+<!--            <div class="row">-->
 
-                <div class="col-md-3">
-                  <div class="logo">
-                    <a href="#">
-        <!--		                <img src="../static/images/eaterator-icon.png" alt="">-->
-                    </a>
+                  <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed toggle-btn" data-toggle="collapse" data-target="#menu" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
                   </div>
-                </div>
+<!--                  <div class="col-md-3">-->
+<!--                  <div class="logo">-->
+<!--                    <a href="#">-->
+<!--        		                <img src="../static/images/eaterator-icon.png" alt="">-->
+<!--                    </a>-->
+<!--                  </div>-->
+<!--                </div>-->
 
-                <div class="col-md-9">
-                    <div id="menu">
-                          <button id="open-trigger">Open Menu</button>
-                            <ul id="inner-menu">
+<!--                <div class="col-md-9">-->
+                    <div id="menu" class="collapse navbar-collapse">
+<!--                          <button id="open-trigger">Open Menu</button>-->
+                            <ul id="inner-menu" class="nav navbar-nav">
                                 <li id="current"><a ui-sref="search">Search</a></li>
                                 <li><a ui-sref="about">About Us</a></li>
                                 <li><a ui-sref="contact">Contact</a></li>
@@ -24,8 +32,8 @@
                                 <li ng-hide="!isAdmin()"><a ui-sref="admin">Admin</a></li>
                             </ul>
                     </div><!-- end #menu -->
-                </div>
-            </div><!-- end .row-->
+<!--                </div>-->
+<!--            </div> end .row-->
         </div><!-- end .container-->
     </nav> <!-- end nav-->
 {% endraw %}

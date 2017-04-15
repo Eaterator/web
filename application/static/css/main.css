@@ -9,6 +9,9 @@
     margin: 0;
     border: 0;
 }
+.bootstrap-overrides nav .toggle-btn{
+	background-color: #fff;
+}
 .bootstrap-overrides nav .logo img {
 	width: 50px;
     height: 50px;
@@ -383,7 +386,7 @@
     padding-bottom: 5px;
     cursor: pointer;
 }
-.bootstrap-overrides .in{
+.bootstrap-overrides .recipe-list .in{
     display: inline-block;
     vertical-align: middle;
     -webkit-transform: perspective(1px) translateZ(0);
@@ -392,7 +395,7 @@
     -webkit-transition-duration: 0.5s;
     transition-duration: 0.5s;
 }
-.bootstrap-overrides .in {
+.bootstrap-overrides .recipe-list .in {
   display: inline-block;
   vertical-align: middle;
   -webkit-transform: perspective(1px) translateZ(0);
@@ -401,7 +404,7 @@
   -webkit-transition-duration: 0.5s;
   transition-duration: 0.5s;
 }
-.bootstrap-overrides .in:hover, .in:focus, .in:active {
+.bootstrap-overrides .recipe-list .in:hover,.bootstrap-overrides .recipe-list .in:focus,.bootstrap-overrides .recipe-list .in:active {
   -webkit-transform: scale(1.2);
   transform: scale(1.2);
   -webkit-transition-timing-function: cubic-bezier(0.47, 2.02, 0.31, -0.36);
@@ -573,10 +576,21 @@ label.star:before {
 .bootstrap-overrides .contact{
 	padding: 25px;
 }
+.bootstrap-overrides .contact-form{
+    padding-bottom: 100px;
+}
 .bootstrap-overrides .contact-form .control-label{
     text-align: left;
 }
 .bootstrap-overrides .contact-form #message{
 /*	max-width: 70%;*/
 /*    margin-left: 30%;*/
+}
+@media (max-width: 768px){
+    .bootstrap-overrides #menu ul li{
+	    width: 100%;
+    }
+    .bootstrap-overrides .carousel-inner img{
+	    height: 100%;
+    }
 }
