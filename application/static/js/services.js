@@ -40,7 +40,7 @@ angular.module('eateratorApp')
             return $http({
                 url:  '/auth/',
                 method: "POST",
-                data: JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"}));
+                data: JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"})
             });
         },
         registerUser: function(registerPayload){
