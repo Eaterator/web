@@ -31,6 +31,7 @@ def update_flickr_images(data):
     app = create_app()
     from application.base_models import db
     with app.app_context():
+        app.logger.debug("FLICKR UPDATE | got here")
         try:
             data['pk'] = int(data[b'pk'].decode('utf-8'))
             data['default'] = int(data[b'default'].decode('utf-8'))
