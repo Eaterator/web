@@ -299,27 +299,38 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
     max_ingredients = 50
     if backup_search:
         max_ingredients = 10
-        ingredients = ['|'.join(i) for i in combinations(ingredients, 3)]
+        ingredients = ['|'.join(i) for i in combinations(ingredients, 3)] \
+            if len(ingredients) >= 3 else ['|'.join(ingredients)]
         print(ingredients)
     for ingredient in ingredients:
         dynamic_filters.append(
-            IngredientRecipe.recipe.in_(
-                db.session.query(IngredientRecipe.recipe).filter(
-                    IngredientRecipe.ingredient.in_(
-                        db.session.query(Ingredient.pk).filter(
-                            func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
-                                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
-                            )
-                        ).\
-                        order_by(
-                            desc(
-                                func.ts_rank(
-                                    func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
-                                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient)
+            or_(
+                IngredientRecipe.recipe.in_(
+                    db.session.query(IngredientRecipe.recipe).filter(
+                        IngredientRecipe.ingredient.in_(
+                            db.session.query(Ingredient.pk).filter(
+                                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
+                                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
+                                    )
+                            ). \
+                            order_by(
+                                desc(
+                                    func.ts_rank(
+                                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
+                                        func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient)
+                                    )
                                 )
-                            )
-                        ).limit(max_ingredients)
-                    )
+                            ).limit(max_ingredients)
+                        )
+                    ),
+                ),
+                IngredientRecipe.recipe.in_(
+                    db.session.query(Recipe.pk).filter(
+                        func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
+                            func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title)
+                        )
+                    ).\
+                    limit(50)
                 )
             )
         )
