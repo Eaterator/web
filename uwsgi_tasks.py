@@ -6,7 +6,7 @@ from itertools import combinations
 from uwsgidecorators import cron
 from fuzzywuzzy import fuzz
 from sqlalchemy import func, not_, or_
-from application.app import app, db
+from application.app import create_app
 from application.recipe.models import Recipe, RecipeImage
 from application.config import FLICKR_API_KEY
 from string import punctuation
@@ -28,6 +28,8 @@ CRON_FREQUENCY = 60 * 60  # 1 hour
 
 # how to setup ini: http://wp.hthieu.com/?p=296
 def update_flickr_images(data):
+    app = create_app()
+    from application.base_models import db
     try:
         data['pk'] = int(data[b'pk'].decode('utf-8'))
         data['default'] = int(data[b'default'].decode('utf-8'))
@@ -117,8 +119,10 @@ def update_flickr_images(data):
 
 
 # run every hour at *:30
-# @cron(-1, -1, -1, -1, -1)
+@cron(-1, -1, -1, -1, -1)
 def get_recipes_without_images(*args):
+    app = create_app()
+    from application.base_models import db
     default = -1
     recipes = Recipe.query.\
         filter(
@@ -147,6 +151,7 @@ def get_recipes_without_images(*args):
                 b'default': str(default).encode('utf-8')
             })
     db.session.close()
+    db.session.remove()
     return
 
 uwsgi.spooler = update_flickr_images
