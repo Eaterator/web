@@ -7,7 +7,7 @@ from sqlalchemy.exc import DataError
 import traceback
 try:
     from recipe_scraper.tools.data_loader import DataLoader
-    from recipe_parser.ingredient_parser import IngredientParser
+    from recipe_parser.ingredient_parser import IngredientParser, BadIngredientException
     from recipe_parser.amount_conversions import AmountPercentConverter
 except ImportError as e:
     warnings.warn("Dependency packages not setup (scraper and parser). "
@@ -43,11 +43,12 @@ class IngredientParserPipeline:
         """
         print("Getting recipe url list")
         current_recipes = {i[0] for i in db.session.query(Recipe.url).all()}
-        # current_recipes = {r.url.lower(): 1 for r in Recipe.query.all() if r.url}
+        count = 0
         print("Loaded in recipe dictionary, starting pipeline")
         for data_chunk in self.data_loader.iter_json_data():
             for recipe_data in data_chunk:
-                self._clean_recipe_ingredients(recipe_data)
+                count += 1
+                recipe_data['ingredients'] = self._clean_recipe_ingredients(recipe_data)
                 try:
                     if not recipe_data['url'] or recipe_data['url'].lower() in current_recipes:
                         continue
@@ -56,18 +57,25 @@ class IngredientParserPipeline:
                     ingredients = []
                     parsed_ingredients = []
                     for ingredient in recipe_data['ingredients']:
-                        parsed_ingredient = self.parser(ingredient)
-                        if (parsed_ingredient and
-                           parsed_ingredient.ingredient and
-                           parsed_ingredient.ingredient.primary):
+                        try:
+                            parsed_ingredient = self.parser(ingredient)
+                            if (parsed_ingredient and
+                               parsed_ingredient.ingredient and
+                               parsed_ingredient.ingredient.primary):
 
-                            parsed_ingredients.append(parsed_ingredient)
-                            ingredients.append(
-                                self._insert_if_new_ingredient(parsed_ingredient)
-                            )
+                                parsed_ingredients.append(parsed_ingredient)
+                                ingredients.append(
+                                    self._insert_if_new_ingredient(parsed_ingredient)
+                                )
+                        except BadIngredientException:
+                            pass
                     self._insert_ingredient_recipe(recipe, ingredients, parsed_ingredients)
                 except DuplicateRecipeException:
                     pass
+                if count % 500 == 0:
+                    db.session.close()
+                    db.session.remove()
+                    db.session.close_all()
 
     @staticmethod
     def _find_base_url(url):
@@ -88,8 +96,7 @@ class IngredientParserPipeline:
         if not recipe:
             source = Source.query.filter(Source.base_url == self._find_base_url(data['url'])).first()
             if not source:
-                print("Error with url: {0}".format(data['url']))
-                return
+                source = Source.query.filter(Source.name == 'Other').first()
             ratings_data = self._get_recipe_ratings(data)
             ratings_data.update(dict(
                 url=data['url'],
@@ -186,10 +193,6 @@ class IngredientParserPipeline:
         ingredient_pks = []
         for ingredient, parsed_ingredient in zip(ingredients, parsed_ingredients):
             if not ingredient or ingredient.pk in ingredient_pks:
-                # also skips duplicated ingredients in a recipe to ensure ingredient_recipe
-                # table can have a unique index
-                # how to fix:
-                # http://stackoverflow.com/questions/24993111/remove-duplicate-rows-on-many-to-many-table-mysql
                 continue
             ingredient_pks.append(ingredient.pk)
             modifier = self._insert_if_new_ingredient_modifier(parsed_ingredient.ingredient.modifier)
@@ -225,6 +228,7 @@ class IngredientParserPipeline:
                 new_ingredients.extend(ingredient.split(matches[0]))
             elif 'or' in ingredient:
                 new_ingredients.extend(ingredient.split('or'))
+        return new_ingredients
 
     @staticmethod
     def _clean_ingredient_text(text):

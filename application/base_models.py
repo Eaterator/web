@@ -1,6 +1,5 @@
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
-import sqlalchemy.orm as orm
 from flask_sqlalchemy import _BoundDeclarativeMeta, Model as BaseModel, _QueryProperty
 from inspect import getmembers
 from application import config

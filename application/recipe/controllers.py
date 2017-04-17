@@ -187,7 +187,6 @@ def recipe_information(pk):
 
 
 def register_user_search(user_pk, json_data):
-    print("user pk: {0}".format(user_pk))
     new_user_search = UserSearchData(user=user_pk, search=json.dumps(json_data))
     db.session.add(new_user_search)
     db.session.commit()
@@ -252,7 +251,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         join(Ingredient). \
         filter(
             and_(
-                *_apply_dynamic_fulltext_filers(ingredients)
+                *_apply_dynamic_fulltext_filters(ingredients)
             )
         ). \
         group_by(Recipe.pk). \
@@ -282,7 +281,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
         )).limit(limit).all()
 
 
-def _apply_dynamic_fulltext_filers(ingredients, backup_search=False):
+def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
     """
     Applies full text filters similar to v1 but uses full text search approach for lexemes and speed up with
     index usage. N.B. that spaces in ingredient names will be replaced with '&'
@@ -304,6 +303,22 @@ def _apply_dynamic_fulltext_filers(ingredients, backup_search=False):
                 )
             )
         )
+
+    # subquery = db.session.query(IngredientRecipe.recipe)
+    # for ingredient in ingredients:
+    #     subquery.filter(
+    #         db.session.query(IngredientRecipe.recipe).filter(
+    #             IngredientRecipe.ingredient.in_(
+    #                 db.session.query(Ingredient.pk).filter(
+    #                     func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
+    #                         func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
+    #                     )
+    #                 )
+    #             )
+    #         )
+    #     )
+    # print(str(subquery))
+    # return subquery
     return dynamic_filters
 
 

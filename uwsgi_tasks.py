@@ -66,9 +66,12 @@ def update_flickr_images(data):
                     db.session.add(new_recipe_image)
                     db.session.commit()
                     db.session.close()
+                    db.session.remove()
                     return uwsgi.SPOOL_OK
+
                 search_text = ' '.join(possible_searches.pop())
                 sleep(1)
+
             resp = requests.get(
                 FLICKR_URL_FORMATTER.format(
                     FLICKR_SEARCH_METHOD, FLICKR_API_KEY, search_text, FLICKR_RESPONSE_TYPE
@@ -104,13 +107,12 @@ def update_flickr_images(data):
             db.session.add(new_recipe_image)
         db.session.commit()
         db.session.close()
+        db.session.remove()
         return uwsgi.SPOOL_OK
     except:
         app.logger.error("FLICKR | Unknown error, exited spooler: {0}".format(traceback.format_exc()))
-        try:
-            db.session.close()
-        except:
-            db.session.close()
+        db.session.close()
+        db.session.remove()
         return uwsgi.SPOOL_OK
 
 

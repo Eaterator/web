@@ -47,12 +47,52 @@ def insert_source_data():
         {
             'base_url': 'allrecipes.com',
             'name': 'All Recipes',
+        },
+        {
+            'base_url': 'bonappetit.com',
+            'name': 'Bon Appetit'
+        },
+        {
+            'base_url': 'food.com',
+            'name': 'Food'
+        },
+        {
+            'base_url': 'simplyrecipes.com',
+            'name': 'Simply Recipes'
+        },
+        {
+            'base_url': 'bbcgoodfood.com',
+            'name': 'BBC Good Food'
+        },
+        {
+            'base_url': 'williams-sonoma.com',
+            'name': 'Williams Sonoma'
+        },
+        {
+            'base_url': 'finedininglovers.com',
+            'name': 'Fine Dining Lovers'
+        },
+        {
+            'base_url': 'thekitchn.com',
+            'name': 'The Kitchn'
+        },
+        {
+            'base_url': 'chowhound.com',
+            'name': 'Chow'
+        },
+        {
+            'base_url': 'myrecipes.com',
+            'name': 'My Recipes'
+        },
+        {
+            'base_url': '',
+            'name': 'Other'
         }
     ]
 
-    if len(Source.query.all()) > 0:
-        return
     for source in sources:
-        new_source = Source(**source)
-        db.session.add(new_source)
+        exists = Source.query.filter(Source.name == source['name']).all()
+        if len(exists) <= 0:
+            new_source = Source(**source)
+            db.session.add(new_source)
     db.session.commit()
