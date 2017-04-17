@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import random
 from itertools import combinations
 from jinja2 import TemplateNotFound
 from flask import Blueprint, request, jsonify, render_template, abort, current_app
@@ -16,6 +17,8 @@ from application.redis_cache_utlits import RedisUtilities, _clean_and_stringify_
 from application.auth.auth_utilities import JWTUtilities
 from application.recipe.utilities import RecipeIngredientFormatter
 from recipe_parser.ingredient_parser import IngredientParser
+
+random.seed(100)
 
 PARSER = IngredientParser.get_parser()
 TAG_WORD_DELIMITER = '-'
@@ -126,8 +129,11 @@ def fulltext_search_recipe(limit=None):
         raise InvalidAPIRequest("Could not parse request", status_code=BAD_REQUEST_CODE)
     try:
         register_user_search(user_pk, payload)
-        recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search], limit=limit)
-        if len(recipes) <= 0:
+        ingredients = [i.strip() for i in raw_search]
+        recipes = []
+        if len(ingredients) <= 4:
+            recipes = create_fulltext_ingredient_search(ingredients, limit=limit)
+        if len(recipes) <= 0 or len(ingredients) > 4:
             recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search],
                                                         limit=limit, op=or_, backup_search=True)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
@@ -250,7 +256,6 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     :return: List<Recipe>
     """
     ingredients = _clean_and_stringify_ingredients_query(ingredients)
-    min_ingredients = len(ingredients) if not backup_search else len(ingredients)/2 + 1
     return db.session.query(Recipe). \
         join(IngredientRecipe). \
         join(Ingredient). \
@@ -260,28 +265,25 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
             )
         ). \
         group_by(Recipe.pk). \
-        having(
-            func.count(IngredientRecipe.pk) >= min_ingredients
-        ). \
         order_by(desc(
             func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Recipe.title)),
                 func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
                 32
             ) * RECIPE_TITLE_WEIGHT +
             func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),# Ingredient.name),
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Recipe.recipe_ingredients_text)),# Ingredient.name),
                 func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
                 32
             ) * RECIPE_INGREDIENTS_WEIGHT +
             func.sum(
                 func.ts_rank(
-                    func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
+                    func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Ingredient.name)),
                     func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients))
                 )
             ) * INGREDIENTS_WEIGHT +
             func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Recipe.recipe_ingredients_text)),
                 func.to_tsquery(FULLTEXT_INDEX_CONFIG, '&'.join(i for i in ingredients)),
                 32
             ) * RECIPE_MODIFIERS_WEIGHT
@@ -296,12 +298,24 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
     :return:
     """
     dynamic_filters = []
-    max_ingredients = 50
+    max_ingredients = 5 if backup_search else 50 # limits the amount of match ingredients; necessary in large or backup search
+    title_subquery = lambda _: IngredientRecipe.recipe.in_([-1])  # function t add title checking fo backup query
     if backup_search:
         max_ingredients = 10
         ingredients = ['|'.join(i) for i in combinations(ingredients, 3)] \
             if len(ingredients) >= 3 else ['|'.join(ingredients)]
-        print(ingredients)
+        # print(len(ingredients))
+        random.shuffle(ingredients)
+        ingredients = ingredients[:5]
+        title_subquery = lambda ingredient: (IngredientRecipe.recipe.in_(
+                db.session.query(Recipe.pk).filter(
+                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
+                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Recipe.title))
+                    )
+                ).limit(50)
+            )
+        )
+        # print(ingredients)
     for ingredient in ingredients:
         dynamic_filters.append(
             or_(
@@ -309,14 +323,14 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
                     db.session.query(IngredientRecipe.recipe).filter(
                         IngredientRecipe.ingredient.in_(
                             db.session.query(Ingredient.pk).filter(
-                                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
-                                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
+                                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, func.coalesce(ingredient)).op('@@')(
+                                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Ingredient.name))
                                     )
                             ). \
                             order_by(
                                 desc(
                                     func.ts_rank(
-                                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
+                                        func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Ingredient.name)),
                                         func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient)
                                     )
                                 )
@@ -324,14 +338,7 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
                         )
                     ),
                 ),
-                IngredientRecipe.recipe.in_(
-                    db.session.query(Recipe.pk).filter(
-                        func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
-                            func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title)
-                        )
-                    ).\
-                    limit(50)
-                )
+                title_subquery(ingredient)
             )
         )
     return dynamic_filters

@@ -58,4 +58,4 @@ class RequiredFields(Model):
 
     @staticmethod
     def create_tsvector(col):
-        return sqlalchemy.func.to_tsvector('english', col)
+        return sqlalchemy.func.to_tsvector('english', sqlalchemy.func.coalesce(col))
