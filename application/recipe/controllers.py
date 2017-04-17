@@ -31,9 +31,10 @@ MAX_RELATED_INGREDIENTS = 15
 DEFAULT_RELATED_INGREDIENTS = 10
 # Full text search weights
 ALL_MATCHING_INGREDIENTS = 2
-INCLUDES_INGREDIENT = 0.5
-INCLUDES_TITLE = 1
-INCLUDES_MODIFIER = 0.75
+RECIPE_INGREDIENTS_WEIGHT = 1
+RECIPE_TITLE_WEIGHT = 1
+RECIPE_MODIFIERS_WEIGHT = 0.75
+INGREDIENTS_WEIGHT = 0.5
 FULLTEXT_INDEX_CONFIG = 'english'
 
 recipe_blueprint = Blueprint('recipe', __name__,
@@ -126,6 +127,9 @@ def fulltext_search_recipe(limit=None):
     try:
         register_user_search(user_pk, payload)
         recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search], limit=limit)
+        if len(recipes) <= 0:
+            recipes = create_fulltext_ingredient_search([i.strip() for i in raw_search],
+                                                        limit=limit, op=or_, backup_search=True)
         return jsonify(RecipeIngredientFormatter.recipes_to_dict(recipes))
     except Exception as e:
         raise InvalidAPIRequest(str(e), status_code=500)
@@ -234,7 +238,7 @@ def _apply_dynamic_filters(ingredients):
     return dynamic_filters
 
 
-def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE, op = None, order_by=func.count(Ingredient.pk)):
+def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE, op=and_, backup_search=False):
     """
     Function to create a fulltext query to filter out all recipes not containing <min_ingredients> ingredients. Ranks by
     recipe that contains the most ingredients, and then ranks by match of ingredients list to the title. This could
@@ -246,38 +250,41 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
     :return: List<Recipe>
     """
     ingredients = _clean_and_stringify_ingredients_query(ingredients)
+    min_ingredients = len(ingredients) if not backup_search else len(ingredients)/2 + 1
     return db.session.query(Recipe). \
         join(IngredientRecipe). \
         join(Ingredient). \
         filter(
-            and_(
-                *_apply_dynamic_fulltext_filters(ingredients)
+            op(
+                *_apply_dynamic_fulltext_filters(ingredients, backup_search=backup_search)
             )
         ). \
         group_by(Recipe.pk). \
         having(
-            func.count(IngredientRecipe.pk) >= len(ingredients)
-        ). \
-        order_by(
-            func.count(IngredientRecipe.pk)
+            func.count(IngredientRecipe.pk) >= min_ingredients
         ). \
         order_by(desc(
-            func.ts_rank(
+            func.ts_rank_cd(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.title),
-                func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients))
-            ) * INCLUDES_TITLE +
+                func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
+                32
+            ) * RECIPE_TITLE_WEIGHT +
+            func.ts_rank_cd(
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),# Ingredient.name),
+                func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
+                32
+            ) * RECIPE_INGREDIENTS_WEIGHT +
             func.sum(
                 func.ts_rank(
                     func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
-                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
-                    2
-                ) * IngredientRecipe.percent_amount
-            ) +
-            func.ts_rank(
+                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients))
+                )
+            ) * INGREDIENTS_WEIGHT +
+            func.ts_rank_cd(
                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Recipe.recipe_ingredients_text),
                 func.to_tsquery(FULLTEXT_INDEX_CONFIG, '&'.join(i for i in ingredients)),
-                2
-            )
+                32
+            ) * RECIPE_MODIFIERS_WEIGHT
         )).limit(limit).all()
 
 
@@ -289,6 +296,11 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
     :return:
     """
     dynamic_filters = []
+    max_ingredients = 50
+    if backup_search:
+        max_ingredients = 10
+        ingredients = ['|'.join(i) for i in combinations(ingredients, 3)]
+        print(ingredients)
     for ingredient in ingredients:
         dynamic_filters.append(
             IngredientRecipe.recipe.in_(
@@ -298,27 +310,19 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
                             func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
                                 func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
                             )
-                        )
+                        ).\
+                        order_by(
+                            desc(
+                                func.ts_rank(
+                                    func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name),
+                                    func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient)
+                                )
+                            )
+                        ).limit(max_ingredients)
                     )
                 )
             )
         )
-
-    # subquery = db.session.query(IngredientRecipe.recipe)
-    # for ingredient in ingredients:
-    #     subquery.filter(
-    #         db.session.query(IngredientRecipe.recipe).filter(
-    #             IngredientRecipe.ingredient.in_(
-    #                 db.session.query(Ingredient.pk).filter(
-    #                     func.to_tsquery(FULLTEXT_INDEX_CONFIG, ingredient).op('@@')(
-    #                         func.to_tsvector(FULLTEXT_INDEX_CONFIG, Ingredient.name)
-    #                     )
-    #                 )
-    #             )
-    #         )
-    #     )
-    # print(str(subquery))
-    # return subquery
     return dynamic_filters
 
 
