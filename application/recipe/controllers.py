@@ -299,9 +299,10 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
     """
     dynamic_filters = []
     max_ingredients = 5 if backup_search else 50 # limits the amount of match ingredients; necessary in large or backup search
-    title_subquery = lambda _: IngredientRecipe.recipe.in_([-1])  # function t add title checking fo backup query
+    title_subquery = lambda _: IngredientRecipe.recipe.in_([-1])  # function to add title checking fo backup query
     if backup_search:
         max_ingredients = 10
+        # searches for some combination of ingredients instead of individual ingredients in the backup search
         ingredients = ['|'.join(i) for i in combinations(ingredients, 3)] \
             if len(ingredients) >= 3 else ['|'.join(ingredients)]
         # print(len(ingredients))
@@ -326,7 +327,7 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
                                     func.to_tsquery(FULLTEXT_INDEX_CONFIG, func.coalesce(ingredient)).op('@@')(
                                         func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Ingredient.name))
                                     )
-                            ). \
+                            ).\
                             order_by(
                                 desc(
                                     func.ts_rank(

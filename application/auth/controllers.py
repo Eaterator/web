@@ -32,9 +32,11 @@ def get_login_template(path):
 @auth_blueprint.route("/", methods=["POST"])
 def auth_authenticate():
     payload = MultiDict(request.get_json())
+    print(payload)
     login_form = StandardLoginForm(payload)
     if not login_form.validate():
         raise InvalidAPIRequest("No data submitted", status_code=BAD_REQUEST_CODE)
+
     user = User.query.filter(User.username == login_form.username.data).first()
     if not user or not PasswordUtilities.authenticate(user, login_form.password.data):
         raise InvalidAPIRequest("Username and/or password is incorrect", status_code=UNAUTHORIZED_CODE)

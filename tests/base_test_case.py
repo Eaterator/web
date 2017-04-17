@@ -17,13 +17,10 @@ class BaseTempDBTestCase:
     """
 
     def setUpDB(self):
+        from tests.tsting_config import SQLALCHEMY_DATABASE_URI
         from application import config
-        config.SQLALCHEMY_MAX_OVERFLOW = None
-        config.SQLALCHEMY_POOL_SIZE = None
-        config.TESTING = True
-        config.DATABASE_ENGINE = 'sqlite'
-        config.SQLALCHEMY_DATABASE_URI = "sqlite://"
-        self.app = create_app(config=config)
+        config.SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI
+        self.app = create_app(app_config=config)
         from application.base_models import db
         self.db = db
         with self.app.app_context():
@@ -36,11 +33,12 @@ class BaseTempDBTestCase:
 
     def create_recipes(self):
         self.recipes = []
-        for recipe in RECIPES:
-            new_recipe = Recipe(**recipe)
-            self.db.session.add(new_recipe)
-            self.recipes.append(new_recipe)
-        self.db.session.commit()
+        with self.app.app_context():
+            for recipe in RECIPES:
+                new_recipe = Recipe(**recipe)
+                self.db.session.add(new_recipe)
+                self.recipes.append(new_recipe)
+            self.db.session.commit()
 
     def create_ingredients(self):
         with self.app.app_context():

@@ -43,15 +43,15 @@ class TestAuthModels(TestCase, BaseTempDBTestCase):
             self.db.session.commit()
             users = User.query.all()
 
-        self.assertEqual(len(users), 1)
-        self.assertEqual(users[0].username, 'test_user')
-        self.assertEqual(users[0].social_id, None)
-        self.assertTrue(PasswordUtilities.authenticate(test_user, 'TestUser123!'))
-        self.assertEqual(users[0].first_name, 'test')
-        self.assertEqual(users[0].last_name, 'user')
-        self.assertEqual(users[0].date_of_birth, datetime(1991, 10, 10).date())
-        self.assertEqual(users[0].role, test_role.pk)
-        self.assertEqual(users[0].Role, test_role)
+            self.assertEqual(len(users), 1)
+            self.assertEqual(users[0].username, 'test_user')
+            self.assertEqual(users[0].social_id, None)
+            self.assertTrue(PasswordUtilities.authenticate(test_user, 'TestUser123!'))
+            self.assertEqual(users[0].first_name, 'test')
+            self.assertEqual(users[0].last_name, 'user')
+            self.assertEqual(users[0].date_of_birth, datetime(1991, 10, 10).date())
+            self.assertEqual(users[0].role, test_role.pk)
+            self.assertEqual(users[0].Role, test_role)
 
     def tearDown(self):
         self.tearDownDB()
@@ -74,8 +74,9 @@ class TestAuthRoutes(TestCase, BaseTempDBTestCase):
                                      data=json.dumps(test_user),
                                      content_type='application/json')
         self.assertTrue(resp.status_code == 200)
-        user = User.query.filter(User.username == TEST_REGISTER_USER_PAYLOAD["username"]).all()
-        self.assertEqual(len(user), 1)
+        with self.app.app_context():
+            user = User.query.filter(User.username == TEST_REGISTER_USER_PAYLOAD["username"]).all()
+            self.assertEqual(len(user), 1)
 
     def test_authenticate(self):
         """

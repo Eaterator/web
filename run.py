@@ -39,7 +39,7 @@ if __name__ == '__main__':
         from application.app import TEMPLATE_DIR
         config.SQLALCHEMY_MAX_OVERFLOW = None
         config.SQLALCHEMY_POOL_SIZE = None
-        app = create_app(config=config)
+        app = create_app(app_config=config)
         extra_dirs = [TEMPLATE_DIR]
         print("watching template dirs: {0}".format(extra_dirs))
         extra_files = extra_dirs[:]

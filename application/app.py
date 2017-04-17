@@ -1,34 +1,42 @@
 import os
+from inspect import getmembers
 from jinja2 import Markup
 from flask import Flask, jsonify, render_template
 from flask_jwt_extended import JWTManager
 from flask_cache import Cache
-from application import config as config_from_file
-from application.exceptions import InvalidAPIRequest, get_traceback
-from application.auth.auth_utilities import JWTUtilities
+from application import config
 
 TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__))
-if not config_from_file.USE_REDIS:
+if not config.USE_REDIS:
     cache = Cache(config={'CACHE_TYPE': 'simple'})
-if not config_from_file.USE_CACHE:
+if not config.USE_CACHE:
     cache = Cache(config={'CACHE_TYPE': 'null'})
 else:
-    cache = Cache(config=config_from_file.REDIS_CONFIG)
+    cache = Cache(config=config.REDIS_CONFIG)
 
 
 # Bundle app creation in a function for use with testing and easier config
-def create_app(config=config_from_file):
+def create_app(app_config=None):
     global cache
-    if not config:
-        config = config_from_file
+    if app_config:
+        for member in getmembers(app_config):
+            setattr(config, member[0], member[1])
     # Initialize application, DB, and cache
     app = Flask(__name__)
     app.config.from_object(config)
 
     with app.app_context():
+        # Initialize DB
+        from application.base_models import db
+        db.init_app(app)
+        if config.USE_GEVENT:
+            db.engine.pool._use_threadlocal = True
+            db.engine.pool.use_threadlocal = True
         # register the cache to the app
         cache.init_app(app)
 
+        from application.exceptions import InvalidAPIRequest, get_traceback
+        from application.auth.auth_utilities import JWTUtilities
         # Initialize JWT handler
         jwt = JWTManager(app)
 
@@ -39,13 +47,6 @@ def create_app(config=config_from_file):
         @jwt.user_identity_loader
         def get_user_identity(user):
             return JWTUtilities.get_user_identity(user)
-
-        # Initialize DB
-        from application.base_models import db
-        db.init_app(app)
-        if config.USE_GEVENT:
-            db.engine.pool._use_threadlocal = True
-            db.engine.pool.use_threadlocal = True
 
         # Initializing Routes/Modules
         from application.controllers import home_blueprint
