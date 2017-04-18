@@ -51,10 +51,13 @@ class BaseTempDBTestCase:
 
     def create_recipe_ingredients(self):
         with self.app.app_context():
+            num_ingredients = 0
             for recipe in self.recipes:
-                for i in range(4):
+                if num_ingredients < 5:
+                    num_ingredients += 1
+                for ingredient in random.sample(self.ingredients, num_ingredients):
                     new_ingredient_recipe = IngredientRecipe(
-                        ingredient=random.choice(self.ingredients).pk,
+                        ingredient=ingredient.pk,
                         recipe=recipe.pk
                     )
                     self.db.session.add(new_ingredient_recipe)
@@ -114,7 +117,7 @@ class BaseTempDBTestCase:
             self.db.drop_all()
 
 
-INGREDIENTS = ["chicken", "potato", "pepper", "onion"]
+INGREDIENTS = ["chicken", "potato", "pepper", "onion", "carrot", "celery", "beef", "pork"]
 RECIPES = [
     {"title": "chicken with onions"},
     {"title": "chicken with peppers"},

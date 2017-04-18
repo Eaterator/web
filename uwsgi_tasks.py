@@ -12,6 +12,7 @@ from application.config import FLICKR_API_KEY
 from string import punctuation
 from recipe_parser import GRAMMAR
 from recipe_parser.ingredient_parser import IngredientParser
+from application.base_models import db
 
 INGREDIENT_PARSER = IngredientParser(GRAMMAR)
 PUNCTUATION_TRANSLATOR = str.maketrans('', '', punctuation)
@@ -29,7 +30,6 @@ CRON_FREQUENCY = 60 * 60  # 1 hour
 # how to setup ini: http://wp.hthieu.com/?p=296
 def update_flickr_images(data):
     app = create_app()
-    from application.base_models import db
     with app.app_context():
         app.logger.debug("FLICKR UPDATE | got here")
         try:
@@ -38,10 +38,14 @@ def update_flickr_images(data):
             data['title'] = data[b'title'].decode('utf-8').lower().replace('epicurious', "").replace('.com', '').\
                 translate(PUNCTUATION_TRANSLATOR).strip()
             if not data['title']:
+                db.session.close_all()
+                db.session.remove()
                 return uwsgi.SPOOL_OK
             check_no_images = RecipeImage.query.filter(
                 RecipeImage.recipe == data['pk'], RecipeImage.secret != 'default').all()
             if len(check_no_images) > 3:
+                db.session.close_all()
+                db.session.remove()
                 return uwsgi.SPOOL_OK
             tagged_sentence = INGREDIENT_PARSER._parse_sentence_tree(data["title"])
             words = [j[0] for sublist in
@@ -124,7 +128,9 @@ def update_flickr_images(data):
 @cron(-1, -1, -1, -1, -1)
 def get_recipes_without_images(*args):
     app = create_app()
-    from application.base_models import db
+    import os
+    if os.listdir('/home/ubuntu/eaterator/spool') > 300:
+        return
     with app.app_context():
         default = -1
         recipes = Recipe.query.\

@@ -10,18 +10,21 @@ class TestRecipeModels(TestCase, BaseTempDBTestCase):
         self.setUpDB()
 
     def test_recipe_model(self):
-        self.create_recipes()
-        self.assertNotEqual(len(Recipe.query.all()), 0)
+        with self.app.app_context():
+            self.create_recipes()
+            self.assertNotEqual(len(Recipe.query.all()), 0)
 
     def test_ingredient_model(self):
-        self.create_ingredients()
-        self.assertNotEquals(len(Ingredient.query.all()), 0)
+        with self.app.app_context():
+            self.create_ingredients()
+            self.assertNotEquals(len(Ingredient.query.all()), 0)
 
     def test_ingredient_recipe_model(self):
         self.create_recipes()
         self.create_ingredients()
         self.create_recipe_ingredients()
-        self.assertNotEqual(len(IngredientRecipe.query.all()), 0)
+        with self.app.app_context():
+            self.assertNotEqual(len(IngredientRecipe.query.all()), 0)
 
     def tearDown(self):
         self.tearDownDB()
@@ -44,15 +47,22 @@ class TestRecipeControllers(TestCase, BaseTempDBTestCase):
         test_regular_user = self.create_regular_user()
         token, _ = self.get_jwt_token(test_regular_user)
         resp = self.search_ingredients(["potato", "onion", "pepper"],
-                                       '/recipe/search',
+                                       '/recipe/v2/search',
                                        token)
         self.assertEqual(resp.status_code, 200)
         self.assert_search_not_empty(resp)
+
         resp = self.search_ingredients(["chicken", "potato", "onion"],
-                                       '/recipe/search/2',
+                                       '/recipe/v2/search/2',
                                        token)
         self.assertEqual(resp.status_code, 200)
         self.assert_search_result_length_equal(resp, 2)
+
+        resp = self.search_ingredients(["chicken", "potato", "onion", "pepper", "carrot"],
+                                       '/recipe/v2/search',
+                                       token)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_search_not_empty(resp)
 
     def test_business_search(self):
         test_business_user = self.create_business_user()
