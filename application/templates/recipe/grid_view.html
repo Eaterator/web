@@ -33,6 +33,8 @@
                    </p><br>
                </div>
     <!--                           </div>-->
+          <a ng-click="showIframe = !showIframe" class="ingredient-url">{{recipe.url}}</a>
+                   <iframe ng-src="{{recipe.url}}" width="400" height="500" ng-if="showIframe"></iframe>
            </div>
         </div>
     </div>
