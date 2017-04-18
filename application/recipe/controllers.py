@@ -4,7 +4,7 @@ import re
 import random
 from itertools import combinations
 from jinja2 import TemplateNotFound
-from flask import Blueprint, request, jsonify, render_template, abort, current_app
+from flask import Blueprint, request, jsonify, render_template, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import func, or_, desc, not_, and_
 from application.controllers import _parse_limit_parameter
@@ -219,8 +219,6 @@ def parse_ingredients_with_modifiers(payload):
 
 
 def create_recipe_search_query(ingredients, limit=DEFAULT_SEARCH_RESULT_SIZE):
-    # if len(ingredients) < 3:
-    #    raise InvalidAPIRequest("Please search by at least 3 ingredients", status_code=BAD_REQUEST_CODE)
     return db.session.query(Recipe).\
         join(IngredientRecipe).\
         join(Ingredient).\
@@ -272,7 +270,7 @@ def create_fulltext_ingredient_search(ingredients, limit=DEFAULT_SEARCH_RESULT_S
                 32
             ) * RECIPE_TITLE_WEIGHT +
             func.ts_rank_cd(
-                func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Recipe.recipe_ingredients_text)),# Ingredient.name),
+                func.to_tsvector(FULLTEXT_INDEX_CONFIG, func.coalesce(Recipe.recipe_ingredients_text)),
                 func.to_tsquery(FULLTEXT_INDEX_CONFIG, '|'.join(i for i in ingredients)),
                 32
             ) * RECIPE_INGREDIENTS_WEIGHT +
