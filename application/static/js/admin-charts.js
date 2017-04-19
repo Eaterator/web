@@ -234,7 +234,7 @@ d3.custom.lineChart = function module() {
                 .y0(chartH)
                 .y1(function(d) {
                     return y(d.value);
-                })
+                });
 
             svg.append('svg:path')
                 .attr('d', line(_data))
