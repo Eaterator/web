@@ -32,7 +32,7 @@ d3.custom.barChart = function module() {
 
             var y = d3.scale.ordinal()
                 .domain(_data.map(function(d){
-                    return d.name;;
+                    return d.name;
                 }))
                 .rangePoints([chartH, 0]);
 
@@ -189,7 +189,7 @@ d3.custom.lineChart = function module() {
                 container.append('g').classed('chart-group', true);
                 container.append('g').classed('x-axis-group axis', true);
                 container.append('g').classed('y-axis-group axis', true);
-            }
+            };
 
             svg.transition().duration(duration).attr({width: width, height: height});
             svg.select('.container-group')

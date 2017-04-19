@@ -60,11 +60,6 @@ angular.module('eateratorApp')
 .controller('RecipeCtrl',
     ['$scope', 'authenticationService', 'userFactory', 'recipesFactory', '$http', '$window', '$filter', '$state', '$templateCache',
     function($scope, authenticationService, userFactory, recipesFactory, $http, $window, $filter, $state, $templateCache){
-        // Debug remove, for quick template reloading
-        // $templateCache.remove('/search.html');
-        // $state.reload();
-        // Cache remove debug -> get rid of in production
-        // Controller setup
         $scope.showDetails = false;
         $scope.showDescription = false;
         $scope.ingredients = [];
@@ -92,7 +87,6 @@ angular.module('eateratorApp')
        $scope.getDetailedRecipe = function(pk){
            var requestDetails = recipesFactory.getDetailedRecipe(pk);
             requestDetails.then(function(response){
-                console.log(response.data.recipe.ingredients);
                 return $scope.searchedDetails = response.data.recipe.ingredients || [],
                     $scope.detailPk = response.data.recipe.recipe.pk;
             })
@@ -216,23 +210,15 @@ angular.module('eateratorApp')
 .controller('UserCtrl',
     ['$scope', 'userFactory', 'recipesFactory', '$http', '$window', '$templateCache', '$state',
     function ($scope, userFactory, recipesFactory, $http, $window, $templateCache, $state) {
-        // Debug cache remove delete in production
-        // $templateCache.remove('/user/dashboard.html');
-        // $state.reload();
-        // Debug cache, remove in production
         $scope.getUserRecentSearches = function(number) {
             number = number || 20;
             var request = userFactory.getUserRecentSearches(number);
             request.then(function (response){
                 $scope.userSearches = response.data;
-                console.log($scope.userSearches.searches[1]);
-                console.log(JSON.parse($scope.userSearches.searches[1]));
                 $scope.userSearchIngredients = [];
                 for (var i = 0; i < $scope.userSearches.searches.length; i++){
                     var tmp = JSON.parse($scope.userSearches.searches[i]);
-                    //if (tmp.length > 0) { 
-                        $scope.userSearchIngredients.push(tmp.ingredients);
-//                    }
+                    $scope.userSearchIngredients.push(tmp.ingredients);
                 }
                 console.log($scope.userSearchIngredients);
             }).catch(function() {

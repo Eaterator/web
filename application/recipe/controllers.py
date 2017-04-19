@@ -130,6 +130,8 @@ def fulltext_search_recipe(limit=None):
     try:
         register_user_search(user_pk, payload)
         ingredients = [i.strip() for i in raw_search]
+        if len(ingredients) < 1:
+            raise InvalidAPIRequest("Please enter at least one ingredient", status_code=BAD_REQUEST_CODE)
         recipes = []
         if len(ingredients) <= 4:
             recipes = create_fulltext_ingredient_search(ingredients, limit=limit)
