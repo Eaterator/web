@@ -296,7 +296,7 @@ def _apply_dynamic_fulltext_filters(ingredients, backup_search=False):
     :return:
     """
     dynamic_filters = []
-    max_ingredients = 5 if backup_search else 250 # limits the amount of match ingredients; necessary in large or backup search
+    max_ingredients = 500 if len(ingredients) > 2 else 25 # 5 if backup_search else 250 # limits the amount of match ingredients; necessary in large or backup search
     title_subquery = lambda _: IngredientRecipe.recipe.in_([-1])  # function to add title checking fo backup query
     if backup_search:
         max_ingredients = 10
