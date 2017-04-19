@@ -1,14 +1,24 @@
-{% raw %}
-    <h2>My Searches</h2>
+<body class="bootstrap-overrides">
+   {% raw %}
+    <h2 class="text-center">My Searches</h2>
+    <hr>
+    <div class="color-line center user-searches"></div>
     <div class="user-searches">
         <div ng-repeat="search in userSearches">
             <ul>
-                <li ng-repeat="ingredient in search">{{ ingredient }}</li>
+                <li class="fav-list" ng-repeat="search in userSearchIngredients">
+                   <ul>
+                       <li ng-repeat="ingredient in search">{{ ingredient }}</li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
 {% endraw %}
-<h2>My Favourites</h2>
+<h2 class="text-center">My Favourites</h2>
+<hr>
+<div class="color-line center"></div>
 <div class="user-favourites">
     {% include 'recipe/grid_view.html' %}
 </div>
+</body>

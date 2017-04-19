@@ -25,7 +25,7 @@ class RecipeIngredientFormatter:
 
     @staticmethod
     @replace_none_with_string
-    def recipes_to_dict(recipes, attr=['pk', 'title', 'average_rating', 'thumbnail', 'medium_img']):
+    def recipes_to_dict(recipes, attr=['pk', 'title', 'average_rating', 'thumbnail', 'medium_img', 'url']):
         if isinstance(recipes, Recipe):
             recipes = list(recipes)
         return {

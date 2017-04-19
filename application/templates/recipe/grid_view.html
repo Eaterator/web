@@ -7,8 +7,8 @@
                <a ng-click="toggleDetails(); doClick($event); getDetailedRecipe(recipe.pk)" class="show-detail">
                    <h3 class="recipe-title">{{ recipe.title }}</h3>
                </a>
-               <button ng-click="addFavourite($index, recipe)" ng-hide="recipe.favourite">Favourite</button>
-               <button ng-click="removeFavourite($index, recipe)" ng-hide="!recipe.favourite">Unfavourite</button>
+               <button ng-click="addFavourite($index, recipe)" ng-hide="recipe.favourite" class="btn lg-btn btn-warning">Favourite</button>
+               <button ng-click="removeFavourite($index, recipe)" ng-hide="!recipe.favourite" class="btn lg-btn btn-warning">Unfavourite</button>
                <p class="recipe-rating">{{ recipe.average_rating }} </p>
                <div class="stars">
                   <form action="" class="rating-form">
@@ -27,12 +27,15 @@
                <!-- invisible details block -->
     <!--                           <div class="recipe-detail-wrapper">-->
                <p ng-if="recipe.pk == detailPk && showDetails" class="ingredient-caption">ingredients</p>
-               <div class="recipe-detail" ng-repeat="ingredient in searchedDetails" ng-if="recipe.pk == detailPk && showDetails">
-                   <p class="ingredient-description">
+               <ul class="recipe-detail" ng-repeat="ingredient in searchedDetails" ng-if="recipe.pk == detailPk && showDetails">
+                   <li class="ingredient-description">
                        {{ ingredient | ingredientFormatter }}
-                   </p><br>
-               </div>
+                   </li><br>
+               </ul>
+               <a ng-href="{{recipe.url}}" class="original-site" ng-if="recipe.pk == detailPk && showDetails">Go to original site</a>
     <!--                           </div>-->
+<!--          <a ng-click="showIframe = !showIframe" class="ingredient-url">{{recipe.url}}</a>-->
+<!--                   <iframe ng-src="{{recipe.url}}" width="400" height="500" ng-if="showIframe"></iframe>-->
            </div>
         </div>
     </div>

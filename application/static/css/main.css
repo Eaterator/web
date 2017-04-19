@@ -9,6 +9,9 @@
     margin: 0;
     border: 0;
 }
+.bootstrap-overrides nav .toggle-btn{
+	background-color: #fff;
+}
 .bootstrap-overrides nav .logo img {
 	width: 50px;
     height: 50px;
@@ -383,7 +386,7 @@
     padding-bottom: 5px;
     cursor: pointer;
 }
-.bootstrap-overrides .in{
+.bootstrap-overrides .recipe-list .in{
     display: inline-block;
     vertical-align: middle;
     -webkit-transform: perspective(1px) translateZ(0);
@@ -392,7 +395,7 @@
     -webkit-transition-duration: 0.5s;
     transition-duration: 0.5s;
 }
-.bootstrap-overrides .in {
+.bootstrap-overrides .recipe-list .in {
   display: inline-block;
   vertical-align: middle;
   -webkit-transform: perspective(1px) translateZ(0);
@@ -401,7 +404,7 @@
   -webkit-transition-duration: 0.5s;
   transition-duration: 0.5s;
 }
-.bootstrap-overrides .in:hover, .in:focus, .in:active {
+.bootstrap-overrides .recipe-list .in:hover,.bootstrap-overrides .recipe-list .in:focus,.bootstrap-overrides .recipe-list .in:active {
   -webkit-transform: scale(1.2);
   transform: scale(1.2);
   -webkit-transition-timing-function: cubic-bezier(0.47, 2.02, 0.31, -0.36);
@@ -419,7 +422,7 @@ div.stars {
   height: 75px;
 }
 
-div.starts:after{
+div.stars:after{
   content:'';
   height: 0;
   clear: both;
@@ -435,11 +438,12 @@ label.star {
 }
 
 label.star:before {
-    content: "\f006";
+    content: "\f005";
     font-family: FontAwesome;
+    color: #252f38;
 }
 .filled-star:before {
-    color: #FD4;
+    color: #FD4 !important;
     content: "\f005" !important;
     font-family: FontAwesome;
 }
@@ -491,6 +495,8 @@ label.star:before {
 .bootstrap-overrides .ingredient-caption{
 	margin: 0 !important;
     padding-top: 20px;
+    text-transform: uppercase;
+    padding-bottom: 10px;
 }
 
 .bootstrap-overrides .login-wrapper .row{
@@ -573,10 +579,71 @@ label.star:before {
 .bootstrap-overrides .contact{
 	padding: 25px;
 }
+.bootstrap-overrides .contact-form{
+    padding-bottom: 100px;
+}
 .bootstrap-overrides .contact-form .control-label{
     text-align: left;
 }
 .bootstrap-overrides .contact-form #message{
 /*	max-width: 70%;*/
 /*    margin-left: 30%;*/
+}
+.bootstrap-overrides .tags, .bootstrap-overrides .host{
+	border: none;
+    box-shadow: none;
+    height: inherit;
+    margin-top: 0;
+}
+
+.bootstrap-overrides .tags-input{
+    border: none;
+    width: 92%;
+    box-shadow: none;
+}
+
+.bootstrap-overrides .input-lg{
+	height: 100%;
+}
+
+.bootstrap-overrides .btn-search{
+	border: none !important;
+    float: right;
+}
+
+.bootstrap-overrides .tags-input .tags .tag-item{
+    background: none;
+    background-color: #252f38;
+}
+
+.bootstrap-overrides .user-searches{
+	margin-bottom: 20px;
+}
+
+.bootstrap-overrides .fav-list{
+	text-decoration: none;
+    list-style: none;
+    margin-top: 20px;
+}
+
+.bootstrap-overrides .original-site{
+    text-decoration: none;
+    color: #9DC209;
+    text-transform: uppercase;
+    text-align: left;
+    padding-top: 10px;
+}
+
+.bootstrap-overrides  .ingredient-description{
+	text-align: left;
+}
+
+
+@media (max-width: 768px){
+    .bootstrap-overrides #menu ul li{
+	    width: 100%;
+    }
+    .bootstrap-overrides .carousel-inner img{
+	    height: 100%;
+    }
 }

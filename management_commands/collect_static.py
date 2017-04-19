@@ -32,6 +32,7 @@ JS_BUNDLES = {
         ['js', 'controllers.js'],
         ['js', 'directives.js'],
         ['js', 'services.js'],
+        ['js', 'main.js'],
         ['bower_components', 'ng-tags-input', 'ng-tags-input.min.js']
     ]
 }
