@@ -47,9 +47,10 @@ $(function() {
                         $(this).next().find('.rating-form').find('label.star-1, label.star-2, label.star-3,label.star-4, label.star-5').addClass('filled-star');
                     }
                 })
-            }, 100);
+            }, 1000);
         }
     );
+    
     //div appear near clicked area
     //$('.show-detail').bind('click', function () {
     //    $(".activee").css( {position:"absolute", top:event.pageY});

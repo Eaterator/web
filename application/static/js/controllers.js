@@ -225,6 +225,16 @@ angular.module('eateratorApp')
             var request = userFactory.getUserRecentSearches(number);
             request.then(function (response){
                 $scope.userSearches = response.data;
+                console.log($scope.userSearches.searches[1]);
+                console.log(JSON.parse($scope.userSearches.searches[1]));
+                $scope.userSearchIngredients = [];
+                for (var i = 0; i < $scope.userSearches.searches.length; i++){
+                    var tmp = JSON.parse($scope.userSearches.searches[i]);
+                    //if (tmp.length > 0) { 
+                        $scope.userSearchIngredients.push(tmp.ingredients);
+//                    }
+                }
+                console.log($scope.userSearchIngredients);
             }).catch(function() {
                 $scope.userSearches = [];
             });
