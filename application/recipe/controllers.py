@@ -58,18 +58,36 @@ def get_static_pages(page):
 @jwt_required
 @cache.cached(timeout=60*60*24)
 def get_top_ingredients(limit=None):
-    limit = _parse_limit_parameter(limit, DEFAULT_TOP_INGREDIENTS, MAX_TOP_INGREDIENTS)
-    ingredients = db.session.query(Ingredient.pk, Ingredient.name).\
-        join(IngredientRecipe).\
-        group_by(Ingredient.pk, Ingredient.name).\
-        order_by(desc(
-            func.avg(IngredientRecipe.percent_amount) *
-            func.count(IngredientRecipe.ingredient)
-        )).\
-        limit(limit).all()
-    return jsonify(RecipeIngredientFormatter.ingredients_to_dict(
-        ingredients, attr=["pk", "name"])
-    )
+    # limit = _parse_limit_parameter(limit, DEFAULT_TOP_INGREDIENTS, MAX_TOP_INGREDIENTS)
+    # ingredients = db.session.query(Ingredient.pk, Ingredient.name).\
+    #     join(IngredientRecipe).\
+    #     group_by(Ingredient.pk, Ingredient.name).\
+    #     order_by(desc(
+    #         func.avg(IngredientRecipe.percent_amount) *
+    #         func.count(IngredientRecipe.ingredient)
+    #     )).\
+    #     limit(limit).all()
+    # return jsonify(RecipeIngredientFormatter.ingredients_to_dict(
+    #     ingredients, attr=["pk", "name"])
+    # )
+    return jsonify({
+        "ingredients": [
+            {"pk": 0, "name": "chicken"},
+            {"pk": 0, "name": "beef"},
+            {"pk": 0, "name": "pork"},
+            {"pk": 0, "name": "butter"},
+            {"pk": 0, "name": "sausage"},
+            {"pk": 0, "name": "pasta"},
+            {"pk": 0, "name": "mushroom"},
+            {"pk": 0, "name": "tomato"},
+            {"pk": 0, "name": "corn"},
+            {"pk": 0, "name": "onion"},
+            {"pk": 0, "name": "carrot"},
+            {"pk": 0, "name": "celery"},
+            {"pk": 0, "name": "turkey"},
+            {"pk": 0, "name": "steak"},
+        ]
+    })
 
 
 @recipe_blueprint.route('/related-ingredients/<ingredient>', methods=["POST"])
@@ -117,7 +135,7 @@ def search_recipe(limit=None):
 @recipe_blueprint.route('/v2/search/<limit>', methods=["POST"])
 @jwt_required
 @JWTUtilities.user_role_required(['consumer', 'admin'])
-# @cache.cached(timeout=60*60, key_prefix=RedisUtilities.make_search_cache_key)
+@cache.cached(timeout=60*60*12, key_prefix=RedisUtilities.make_search_cache_key)
 def fulltext_search_recipe(limit=None):
     limit = _parse_limit_parameter(limit, DEFAULT_SEARCH_RESULT_SIZE, REGULAR_MAX_SEARCH_SIZE)
     user_pk = get_jwt_identity()
