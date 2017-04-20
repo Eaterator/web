@@ -13,17 +13,18 @@ $(function() {
     });
 	
     // smooth transition
-	function scrollNav() {
-		$('.carousel-caption > a').click(function() {  
+//	function scrollNav() {
+    
+		$(document).on("click", '.carousel-caption > a', function() {  
 			$('html, body').stop().animate({
 				scrollTop: $( $(this).attr('href') ).offset().top - 150
 			}, 400);
 			return false;
 		});
 		$('#custom-search-input a').scrollTop();
-	}
 	
-	scrollNav();
+	
+//	scrollNav();
     
 	// evaluate rating
     $(document).on("mouseup", ".btn-search",

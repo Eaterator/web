@@ -671,4 +671,7 @@ label.star:before {
     .bootstrap-overrides .carousel-indicators{
 	    display: none;
     }
+    .bootstrap-overrides .logo {
+	    display: none;
+}
 }
