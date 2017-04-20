@@ -1,24 +1,21 @@
 <body class="bootstrap-overrides">
+<h2 class="text-center">My Favourites</h2>
+<div class="color-line center"></div>
+<div class="user-favourites">
+    {% include 'recipe/grid_view.html' %}
+</div>
    {% raw %}
     <h2 class="text-center">My Searches</h2>
     <hr>
     <div class="color-line center user-searches"></div>
     <div class="user-searches">
-        <div ng-repeat="search in userSearches">
-            <ul>
-                <li class="fav-list" ng-repeat="search in userSearchIngredients">
-                   <ul>
-                       <li ng-repeat="ingredient in search">{{ ingredient }}</li>
-                    </ul>
+        <div style="width: 50%; margin: 0 auto;" ng-repeat="search in userSearches">
+            <ol class="list-group" ng-repeat="search in userSearchIngredients">
+                <li class="list-group-item list-group-item-success" style="clear: both;">
+                    <span style="padding: 5px;" ng-repeat="ingredient in search track by $index">{{ ingredient }}</span>
                 </li>
-            </ul>
+            </ol>
         </div>
     </div>
-{% endraw %}
-<h2 class="text-center">My Favourites</h2>
-<hr>
-<div class="color-line center"></div>
-<div class="user-favourites">
-    {% include 'recipe/grid_view.html' %}
-</div>
+    {% endraw %}
 </body>

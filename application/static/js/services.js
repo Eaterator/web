@@ -4,7 +4,6 @@
 angular.module('eateratorApp')
 
 .factory('authenticationService', function ($http, $window){
-    var clientId = '647922095392507';
 
     var decodeJWT = function(token) {
         // decodes from base 64 string
@@ -35,12 +34,14 @@ angular.module('eateratorApp')
     };
 
     return {
-        getToken: function(){
+        getToken: function(username, password){
             // getting token from url
+            var user = username || "msalii@ukr.net";
+            var pass = password || "mSalii123!";
             return $http({
                 url:  '/auth/',
                 method: "POST",
-                data: JSON.stringify({ username: "msalii@ukr.net", password: "mSalii123!"})
+                data: JSON.stringify({ username: user, password: pass})
             });
         },
         registerUser: function(registerPayload){

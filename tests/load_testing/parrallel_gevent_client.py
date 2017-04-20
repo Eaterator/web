@@ -19,10 +19,10 @@ TIMES = defaultdict(lambda: [])
 FAILED_REQUESTS = defaultdict(lambda: 0)
 TOTAL_REQUESTS = 0
 # 2500 makes this baby run hot! maybe stay with 1000 with no cache!!
-REQUEST_NUM = 1000
+REQUEST_NUM = 2000
 # TAILING_NUM = [1000, 750, 500, 100]
 # TAILING_NUM = [t if t < REQUEST_NUM else REQUEST_NUM for t in TAILING_NUM]
-PARALLEL_REQUESTS = 10
+PARALLEL_REQUESTS = 1
 
 
 def submit_search(jwt_token):

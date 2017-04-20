@@ -244,7 +244,8 @@ d3.custom.lineChart = function module() {
 
             svg.append('svg:path')
                 .attr("class", "area")
-                .attr("d", area(_data));
+                .attr("d", area(_data))
+                .attr('stroke-width', 0);
 
             // add title
             svg.append("text")

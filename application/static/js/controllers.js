@@ -6,9 +6,7 @@ angular.module('eateratorApp')
     function($scope, authenticationService, $http, $window, $state, $stateParams){
         $scope.token = $window.localStorage.getItem("id_token") || '';
         console.log("AppCtrl initiated");
-        console.log($state.current.name);
         if ($scope.token == '') {
-            console.log($state.params);
             $scope.token = $state.params.access_token || '';
             if ($scope.token != '') {
                 $window.localStorage.setItem('id_token', $scope.token);
@@ -16,7 +14,7 @@ angular.module('eateratorApp')
             }
         };
         $scope.isLoggedIn = function() {
-            return !($scope.token === '' || $scope.token === null) || $scope.token === undefined;
+            return !($scope.token === '' || $scope.token === null || $scope.token === undefined || $scope.token === 'undefined');
         };
         $scope.isAdmin = function() {
             if ($scope.isLoggedIn()){
@@ -159,7 +157,7 @@ angular.module('eateratorApp')
         $scope.password = '';
 
         $scope.login = function() {
-            var request = authenticationService.getToken();
+            var request = authenticationService.getToken($scope.username, $scope.password);
             request.then( function(response) {
                 $scope.token = response.data.access_token;
                 $window.localStorage.setItem('id_token', $scope.token);
@@ -200,8 +198,9 @@ angular.module('eateratorApp')
             request.then(function(response){
                 $scope.token = response.access_token;
                 $window.localStorage.setItem("id_token", $scope.token);
-                $state.go('home');
+                $state.go('search');
             }).catch(function(response){
+                console.log(response.data);
                 $scope.errors.register = response.data;
             });
         }
@@ -217,6 +216,8 @@ angular.module('eateratorApp')
                 $scope.userSearches = response.data;
                 $scope.userSearchIngredients = [];
                 for (var i = 0; i < $scope.userSearches.searches.length; i++){
+                    // var tmp = $scope.userSearches.searches[i];
+                    // console.log(tmp);
                     var tmp = JSON.parse($scope.userSearches.searches[i]);
                     $scope.userSearchIngredients.push(tmp.ingredients);
                 }
