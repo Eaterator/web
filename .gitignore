@@ -1,6 +1,7 @@
 # Project files
 cover/
-tsting_config.py
+docs/
+tests/tsting_config.py
 *_report.html
 *.save
 erd_diagrams/
