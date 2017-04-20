@@ -193,7 +193,6 @@ angular.module('eateratorApp')
         };
 
         $scope.register = function() {
-            console.log($scope.registerData);
             var request = authenticationService.registerUser($scope.registerData);
             request.then(function(response){
                 $scope.token = response.access_token;
