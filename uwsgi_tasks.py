@@ -129,7 +129,7 @@ def update_flickr_images(data):
 def get_recipes_without_images(*args):
     app = create_app()
     import os
-    if os.listdir('/home/ubuntu/eaterator/spool') > 300:
+    if len(os.listdir('/home/ubuntu/eaterator/spool')) > 300:
         return
     with app.app_context():
         default = -1
