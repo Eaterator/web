@@ -571,13 +571,14 @@ label.star:before {
 
 
 .bootstrap-overrides .about{
-	padding: 25px;
+	padding-top: 25px;
+    padding-bottom: 40px;
 }
 .bootstrap-overrides .about a{
     color: #666;
 }
 .bootstrap-overrides .contact{
-	padding: 25px;
+	padding-top: 25px;
 }
 .bootstrap-overrides .contact-form{
     padding-bottom: 100px;
