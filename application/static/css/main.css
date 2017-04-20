@@ -254,7 +254,7 @@
 }
 
 .bootstrap-overrides #custom-search-input button{
-    margin: 2px 0 0 0;
+    margin: 7px 0 0 0;
     background: none;
     box-shadow: none;
     border: 0;
@@ -276,8 +276,8 @@
 /*footer*/
 .bootstrap-overrides footer {
 	background-color: #000;
-    padding: 30px 0 80px 0;
-    height: 200px;
+    padding: 30px 0 40px 0;
+/*    height: 200px;*/
     width: 100%;
 }
 .bootstrap-overrides footer p{
@@ -646,4 +646,32 @@ label.star:before {
     .bootstrap-overrides .carousel-inner img{
 	    height: 100%;
     }
+    .bootstrap-overrides .carousel-inner .carousel-caption{
+        font-size: 16px;
+    }
+    .bootstrap-overrides .carousel-inner .carousel-caption h1{
+        font-size: inherit;
+    }
+    .bootstrap-overrides #social{
+	    display: none;
+    }
+    .bootstrap-overrides .input-group{
+        width: 100%;
+    }
+    .bootstrap-overrides .glyphicon-search{
+/*	    top: -20px;*/
+    }
+    .bootstrap-overrides .tags-input{
+	    width: 85%;
+    }
+    .bootstrap-overrides .glyphicon-chevron-left:before,
+    .bootstrap-overrides .glyphicon-chevron-right:before{
+	    top: 9px;
+    }
+    .bootstrap-overrides .carousel-indicators{
+	    display: none;
+    }
+    .bootstrap-overrides .logo {
+	    display: none;
+}
 }
