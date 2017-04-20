@@ -32,7 +32,7 @@
                        {{ ingredient | ingredientFormatter }}
                    </li><br>
                </ul>
-               <a ng-href="{{recipe.url}}" class="original-site" ng-if="recipe.pk == detailPk && showDetails">Go to original site</a>
+               <a ng-href="{{recipe.url}}" class="original-site" ng-if="recipe.pk == detailPk && showDetails" target="_blank">View Full Recipe</a>
     <!--                           </div>-->
 <!--          <a ng-click="showIframe = !showIframe" class="ingredient-url">{{recipe.url}}</a>-->
 <!--                   <iframe ng-src="{{recipe.url}}" width="400" height="500" ng-if="showIframe"></iframe>-->
