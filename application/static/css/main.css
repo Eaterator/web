@@ -674,5 +674,8 @@ label.star:before {
     }
     .bootstrap-overrides .logo {
 	    display: none;
-}
+    }
+    .bootstrap-overrides .activee {
+        width: 90%;
+    }
 }

@@ -101,7 +101,7 @@ angular.module('eateratorApp')
             numberOfRecipes = numberOfRecipes || 20;
             return $http({
                 method: 'POST',
-                url: '/recipe/v2/search/' + numberOfRecipes,
+                url: '/recipe/search/' + numberOfRecipes,
                 data: ingredientsPayload
              });
         },

@@ -3,7 +3,7 @@
         <div class="row">
            <div class="recipe-snippet col-md-4 col-sm-4" ng-repeat="recipe in searchedRecipes" ng-class="{'activee': recipe.pk == detailPk && showDetails}"
                      ng-style="{'top': recipe.pk == detailPk && showDetails? offsetY : 0}">
-              <img class="recipe-img in" ng-src="{{ recipe.medium_img }}" alt="recipe-pic">
+              <img class="recipe-img in img-responsive" ng-src="{{ recipe.medium_img }}" alt="recipe-pic">
                <a ng-click="toggleDetails(); doClick($event); getDetailedRecipe(recipe.pk)" class="show-detail">
                    <h3 class="recipe-title">{{ recipe.title }}</h3>
                </a>
