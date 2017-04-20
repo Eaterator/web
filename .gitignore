@@ -1,6 +1,5 @@
 # Project files
 cover/
-docs/
 tests/tsting_config.py
 *_report.html
 *.save
