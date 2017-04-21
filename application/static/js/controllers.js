@@ -26,7 +26,7 @@ angular.module('eateratorApp')
                 var token = $window.localStorage.getItem('id_token');
                 if (!authenticationService.tokenNeedsRefresh(token)){
                     return;
-                }
+                };
                 var request = authenticationService.refreshToken();
                 request.then(function(response){
                     $scope.token = response.data.access_token;
