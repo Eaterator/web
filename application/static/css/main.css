@@ -23,7 +23,7 @@
     -o-transform: rotate(360deg);
     -ms-transform: rotate(360deg);
     transform: rotate(360deg);
-    transition: all 0.4s ease-out 0s;
+    transition: all 0.4s ease-out;
 }
 .bootstrap-overrides #menu { 
     float: right; 
@@ -674,5 +674,8 @@ label.star:before {
     }
     .bootstrap-overrides .logo {
 	    display: none;
-}
+    }
+    .bootstrap-overrides .activee {
+        width: 90%;
+    }
 }

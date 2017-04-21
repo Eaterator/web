@@ -12,27 +12,27 @@
                         </button>
                   </div>
                   <div class="col-md-3 col-xs-2">
-               <div class="logo">
-                 <a href="#">
-     		                <img src="../static/images/icon.png" alt="icon">
-                 </a>
-               </div>
-                </div>
+                       <div class="logo">
+                         <a href="#">
+     		                        <img src="/static/images/icon.png" alt="icon">
+                         </a>
+                       </div>
+                  </div>
 
-                <div class="col-md-9">
-                    <div id="menu" class="collapse navbar-collapse">
-<!--                          <button id="open-trigger">Open Menu</button>-->
-                            <ul id="inner-menu" class="nav navbar-nav">
-                                <li id="current"><a ui-sref="search">Search</a></li>
-                                <li><a ui-sref="about">About Us</a></li>
-                                <li><a ui-sref="contact">Contact</a></li>
-                                <li><a ui-sref="user">My Recipes</a></li>
-                                <li ng-hide="isLoggedIn()"><a ui-sref="login">Login</a></li>
-                                <li ng-hide="!isLoggedIn()"><a ng-click="logout()">Logout </a></li>
-                                <li ng-hide="!isAdmin()"><a ui-sref="admin">Admin</a></li>
-                            </ul>
-                    </div><!-- end #menu -->
-                </div>
+                  <div class="col-md-9">
+                      <div id="menu" class="collapse navbar-collapse">
+<!--                            <button id="open-trigger">Open Menu</button>-->
+                              <ul id="inner-menu" class="nav navbar-nav">
+                                  <li id="current"><a ui-sref="search">Search</a></li>
+                                  <li><a ui-sref="about">About Us</a></li>
+                                  <li><a ui-sref="contact">Contact</a></li>
+                                  <li><a ui-sref="user">My Recipes</a></li>
+                                  <li ng-hide="isLoggedIn()"><a ui-sref="login">Login</a></li>
+                                  <li ng-hide="!isLoggedIn()"><a ng-click="logout()">Logout </a></li>
+                                  <li ng-hide="!isAdmin()"><a ui-sref="admin">Admin</a></li>
+                              </ul>
+                      </div><!-- end #menu -->
+                  </div>
          </div> <!--   end .row-->
         </div><!-- end .container-->
     </nav> <!-- end nav-->

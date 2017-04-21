@@ -17,6 +17,7 @@ UI_ROUTER_VIEWS = [
     'user/dashboard.html',
     # 'admin/dashboard.html',
     '404.html',
+    'index.html',
     #'dashboard.html'
 ]
 
@@ -39,12 +40,12 @@ JS_BUNDLES = {
 
 CSS_BUNDLES = {
     'app-bundle.min.css': [
+        ['css', 'normalize.css'],
         ['bower_components', 'bootstrap', 'dist', 'css', 'bootstrap.min.css'],
         ['bower_components', 'bootstrap', 'dist', 'css', 'bootstrap.min.css'],
         ['bower_components', 'font-awesome', 'css', 'font-awesome.min.css'],
         ['css', 'ng-tags-input.bootstrap.min.css'],
         ['css', 'ng-tags-input.min.css'],
-        ['css', 'normalize.css'],
         ['css', 'main.css'],
     ]
 }
