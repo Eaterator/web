@@ -192,7 +192,7 @@ angular.module('eateratorApp')
             $scope.isRegistering = false;
         };
 
-        $scope.register = function() {eat
+        $scope.register = function() {
             var request = authenticationService.registerUser($scope.registerData);
             request.then(function(response){
                 $scope.token = response.access_token;
