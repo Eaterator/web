@@ -1,6 +1,6 @@
 //'use strict';
 //
-var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput'])
+var app = angular.module('eateratorApp', ['ui.router', 'ngTagsInput', 'cgBusy'])
 .filter('ingredientFormatter', function() {
     return function(ingredient) {
         var displayString = '';

@@ -639,6 +639,33 @@ label.star:before {
 	text-align: left;
 }
 
+.bootstrap-overrides .loading-egg{
+  position: relative !important;
+  width: 80px;
+  height: 80px;
+  right: -50% !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+  -webkit-animation-name: rotate;
+  -webkit-animation-duration:2s;
+  -webkit-animation-iteration-count:infinite;
+  -webkit-animation-timing-function:linear;
+  -moz-animation-name: rotate;
+  -moz-animation-duration:2s;
+  -moz-animation-iteration-count:infinite;
+  -moz-animation-timing-function:linear;
+}
+
+@-webkit-keyframes rotate {
+  from {-webkit-transform:rotate(0deg);}
+  to {  -webkit-transform:rotate(360deg);}
+}
+
+@-moz-keyframes rotate {
+  from {-moz-transform:rotate(0deg);}
+  to {  -moz-transform:rotate(360deg);}
+}
 
 @media (max-width: 768px){
     .bootstrap-overrides #menu ul li{
@@ -652,6 +679,7 @@ label.star:before {
     }
     .bootstrap-overrides .carousel-inner .carousel-caption h1{
         font-size: inherit;
+        margin: inherit;
     }
     .bootstrap-overrides #social{
 	    display: none;

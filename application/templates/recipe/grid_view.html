@@ -1,5 +1,5 @@
 {% raw %}
-    <div class="container recipe-list">
+    <div class="container recipe-list" cg-busy="{promise:searching, message:'Loading..',templateUrl:'mycustomtemplate.html'}">
         <div class="row">
            <div class="recipe-snippet col-md-4 col-sm-4" ng-repeat="recipe in searchedRecipes" ng-class="{'activee': recipe.pk == detailPk && showDetails}"
                      ng-style="{'top': recipe.pk == detailPk && showDetails? offsetY : 0}">

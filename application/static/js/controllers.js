@@ -2,7 +2,7 @@
 
 angular.module('eateratorApp')
 .controller('AppCtrl',
-    ['$scope', 'authenticationService', '$http', '$window', '$state', '$stateParams',
+    ['$scope', 'authenticationService', '$http', '$window', '$state', '$stateParams', 
     function($scope, authenticationService, $http, $window, $state, $stateParams){
         $scope.token = $window.localStorage.getItem("id_token") || '';
         console.log("AppCtrl initiated");
@@ -72,8 +72,8 @@ angular.module('eateratorApp')
                 'ingredients': payload
             };
             console.log($scope.ingredientsPayload);
-            var request = recipesFactory.searchRecipes($scope.ingredientsPayload);
-            request.then(function(response) {
+            $scope.searching = recipesFactory.searchRecipes($scope.ingredientsPayload);
+            $scope.searching.then(function(response) {
                 // response.data is already parsed into a JSON object, contains recipe format from documentation
                 var searchedRecipes = response.data.recipes || [];
                 searchedRecipes = recipesFactory.setDefaultImageIfEmpty(searchedRecipes);
